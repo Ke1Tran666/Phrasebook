@@ -39,6 +39,10 @@ import {
   type Lesson,
   type Status,
 } from '@/db';
+import SearchInput from './components/SearchInput';
+import FilterSelect from './components/FilterSelect';
+import StatCard from './components/StatCard';
+import WorkspaceFooter from './components/WorkspaceFooter';
 
 const App = () => {
   const [dbError, setDbError] = useState('');
@@ -264,44 +268,36 @@ const App = () => {
                 </button>
               </div>
               <div className="stats">
-                <button
+                <StatCard
+                  label="Tổng bài học"
+                  value={all.length}
+                  icon={Layers}
+                  color="green"
+                  description="Trong sổ của bạn"
                   onClick={() => {
                     setStatus('all');
                     setKind('all');
                     setTopic('all');
                   }}
-                >
-                  <span className="stat-icon green">
-                    <Layers size={21} />
-                  </span>
-                  <div>
-                    <span>Tổng bài học</span>
-                    <strong>{all.length.toString().padStart(2, '0')}</strong>
-                  </div>
-                  <small>Trong sổ của bạn</small>
-                </button>
-                <button onClick={() => setStatus('review')}>
-                  <span className="stat-icon amber">
-                    <Bookmark size={21} />
-                  </span>
-                  <div>
-                    <span>Cần ôn tập</span>
-                    <strong>{counts.review.toString().padStart(2, '0')}</strong>
-                  </div>
-                  <small>Thêm một lần để nhớ</small>
-                </button>
-                <button onClick={() => setStatus('learned')}>
-                  <span className="stat-icon blue">
-                    <CheckCheck size={21} />
-                  </span>
-                  <div>
-                    <span>Đã ghi nhớ</span>
-                    <strong>
-                      {counts.learned.toString().padStart(2, '0')}
-                    </strong>
-                  </div>
-                  <small>Từng chút tiến bộ</small>
-                </button>
+                />
+
+                <StatCard
+                  label="Cần ôn tập"
+                  value={counts.review}
+                  icon={Bookmark}
+                  color="amber"
+                  description="Thêm một lần để nhớ"
+                  onClick={() => setStatus('review')}
+                />
+
+                <StatCard
+                  label="Đã ghi nhớ"
+                  value={counts.learned}
+                  icon={CheckCheck}
+                  color="blue"
+                  description="Từng chút tiến bộ"
+                  onClick={() => setStatus('learned')}
+                />
               </div>
               <div className="library-toolbar">
                 <div
@@ -334,54 +330,39 @@ const App = () => {
                 </button>
               </div>
               <div className="filters">
-                <div className="search-field">
-                  <Search size={19} />
-                  <input
-                    placeholder="Tìm cụm từ, nghĩa hoặc ghi chú…"
-                    aria-label="Tìm bài học"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />
-                  {query && (
-                    <button
-                      className="icon-button"
-                      onClick={() => setQuery('')}
-                      aria-label="Xóa tìm kiếm"
-                    >
-                      <X size={15} />
-                    </button>
-                  )}
-                </div>
-                <select
-                  aria-label="Lọc chủ đề"
+                <SearchInput value={query} onChange={setQuery} />
+                <FilterSelect
+                  label="Lọc chủ đề"
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                >
-                  <option value="all">Tất cả chủ đề</option>
-                  {topics.map((t) => (
-                    <option key={t}>{t}</option>
-                  ))}
-                </select>
-                <select
-                  aria-label="Lọc trạng thái"
+                  onChange={setTopic}
+                  options={[
+                    { value: 'all', label: 'Tất cả chủ đề' },
+                    ...topics.map((topic) => ({ value: topic, label: topic })),
+                  ]}
+                />
+
+                <FilterSelect
+                  label="Lọc trạng thái"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="all">Mọi trạng thái</option>
-                  {Object.entries(statusText).map(([v, t]) => (
-                    <option key={v} value={v}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  aria-label="Sắp xếp"
+                  onChange={setStatus}
+                  options={[
+                    { value: 'all', label: 'Mọi trạng thái' },
+                    ...Object.entries(statusText).map(([value, label]) => ({
+                      value,
+                      label,
+                    })),
+                  ]}
+                />
+
+                <FilterSelect
+                  label="Sắp xếp"
                   value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                >
-                  <option value="latest">Mới cập nhật</option>
-                  <option value="az">Tiếng Anh A–Z</option>
-                </select>
+                  onChange={setSort}
+                  options={[
+                    { value: 'latest', label: 'Mới cập nhật' },
+                    { value: 'az', label: 'Tiếng Anh A–Z' },
+                  ]}
+                />
               </div>
               {!lessons ? (
                 <div className="empty">
@@ -485,12 +466,7 @@ const App = () => {
                   </button>
                 </div>
               )}
-              <div className="workspace-foot">
-                <span>
-                  <BookOpen size={15} /> Mỗi câu bạn lưu là một bước tiến.
-                </span>
-                <span>Phrasebook · Sổ tiếng Anh cá nhân</span>
-              </div>
+              <WorkspaceFooter />
             </>
           )}
           {view === 'review' && (
