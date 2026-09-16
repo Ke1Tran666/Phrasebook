@@ -1,3 +1,4 @@
+import Logo from '@/components/Logo';
 import {
   BookOpen,
   ChevronRight,
@@ -30,19 +31,7 @@ const Sidebar = ({
 }) => {
   return (
     <aside className="sidebar">
-      <a
-        className="brand"
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          nav('library');
-        }}
-      >
-        <span className="brand-icon">
-          <BookOpen size={23} />
-        </span>
-        phrasebook<span className="brand-period">.</span>
-      </a>
+      <Logo onClick={() => nav('library')} />
       <span className="sidebar-caption">GÓC HỌC CỦA BẠN</span>
       <nav aria-label="Điều hướng chính">
         <button

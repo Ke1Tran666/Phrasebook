@@ -313,6 +313,7 @@ const App = () => {
                     ['all', 'Tất cả'],
                     ['phrase', 'Cụm từ / câu'],
                     ['passage', 'Đoạn văn'],
+                    ['structure', 'Cấu trúc câu'],
                   ].map(([v, label]) => (
                     <button
                       key={v}
@@ -596,7 +597,11 @@ const App = () => {
                       </h2>
                       {flipped ? (
                         <div className="answer">
-                          <span className="eyebrow">NGHĨA TIẾNG VIỆT</span>
+                          <span className="eyebrow">
+                            {current.type === 'structure'
+                              ? 'CÁCH DÙNG / Ý NGHĨA'
+                              : 'NGHĨA TIẾNG VIỆT'}
+                          </span>
                           <p>
                             {current.meaning || 'Bài học chưa có bản dịch.'}
                           </p>
@@ -763,7 +768,11 @@ const App = () => {
             <div className="modal-heading">
               <div>
                 <span className="eyebrow">
-                  {detail.type === 'phrase' ? 'CỤM TỪ / CÂU' : 'ĐOẠN VĂN'}
+                  {detail.type === 'structure'
+                    ? 'CẤU TRÚC CÂU'
+                    : detail.type === 'phrase'
+                      ? 'CỤM TỪ / CÂU'
+                      : 'ĐOẠN VĂN'}
                 </span>
                 <span className="detail-topic">
                   {detail.topic || 'Chưa phân loại'}
@@ -781,7 +790,9 @@ const App = () => {
               <h2 className="detail-english">
                 <English lesson={detail} />
               </h2>
-              <StructureSuggestions english={detail.english} />
+              {detail.type !== 'structure' && (
+                <StructureSuggestions english={detail.english} />
+              )}
               <div className="detail-section">
                 <span className="eyebrow">NGHĨA TIẾNG VIỆT</span>
                 <p>

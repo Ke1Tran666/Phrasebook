@@ -8,7 +8,7 @@ export type Highlight = {
 };
 export type Lesson = {
   id: string;
-  type: 'phrase' | 'passage';
+  type: 'phrase' | 'passage' | 'structure';
   english: string;
   meaning: string;
   notes: string;
@@ -54,7 +54,7 @@ export const validateLesson = (value: unknown): Lesson => {
   )
     throw Error('Nội dung trống hoặc quá dài.');
   if (
-    !['phrase', 'passage'].includes(String(x.type)) ||
+    !['phrase', 'passage', 'structure'].includes(String(x.type)) ||
     !['new', 'review', 'learned'].includes(String(x.status))
   )
     throw Error('Loại bài học hoặc trạng thái không hợp lệ.');

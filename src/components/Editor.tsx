@@ -1,8 +1,9 @@
-import StructureEditor from '@/components/StructureEditor';
+import HelpDialog from '@/components/HelpDialog';
 import StructureSuggestions from '@/components/StructureSuggestions';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Bookmark,
+  CircleHelp,
   Check,
   FileText,
   HardDrive,
@@ -24,6 +25,7 @@ const Editor = ({
   onSaved: (l: Lesson) => void;
   notify: (m: string) => void;
 }) => {
+  const [helpOpen, setHelpOpen] = useState(false);
   const [english, setEnglish] = useState(lesson?.english ?? '');
   const [meaning, setMeaning] = useState(lesson?.meaning ?? '');
   const [notes, setNotes] = useState(lesson?.notes ?? '');
@@ -55,7 +57,7 @@ const Editor = ({
         notes: notes.trim(),
         topic: topic.trim(),
         status: lesson?.status ?? 'new',
-        highlights,
+        highlights: type === 'structure' ? [] : highlights,
         createdAt: lesson?.createdAt ?? now,
         updatedAt: now,
       };
@@ -83,192 +85,225 @@ const Editor = ({
     setError('');
   };
   return (
-    <form onSubmit={submit}>
-      <div className="modal-heading">
-        <div>
-          <span className="eyebrow">SỔ TAY CỦA BẠN</span>
-          <h2>{lesson ? 'Chỉnh sửa bài học' : 'Thêm một điều vừa học'}</h2>
-        </div>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onClose}
-          aria-label="Đóng"
-        >
-          <X />
-        </button>
-      </div>
-      <div className="editor-body">
-        <div className="segmented">
+    <>
+      <form onSubmit={submit}>
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">SỔ TAY CỦA BẠN</span>
+            <h2>{lesson ? 'Chỉnh sửa bài học' : 'Thêm một điều vừa học'}</h2>
+          </div>
           <button
             type="button"
-            className={type === 'phrase' ? 'active' : ''}
-            onClick={() => setType('phrase')}
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Đóng"
           >
-            <Bookmark size={17} /> Cụm từ / câu
-          </button>
-          <button
-            type="button"
-            className={type === 'passage' ? 'active' : ''}
-            onClick={() => setType('passage')}
-          >
-            <FileText size={17} /> Đoạn văn
+            <X />
           </button>
         </div>
-        <label>
-          Nội dung tiếng Anh <span className="required">*</span>
-          <textarea
-            ref={area}
-            autoFocus
-            required
-            maxLength={50000}
-            rows={type === 'passage' ? 6 : 3}
-            className="english-input"
-            placeholder={
-              type === 'phrase'
-                ? 'Ví dụ: I’m going to go home.'
-                : 'Dán hoặc viết đoạn tiếng Anh bạn muốn học…'
-            }
-            value={english}
-            onChange={(e) => {
-              setEnglish(e.target.value);
-              setHighlights([]);
-              setSelection(null);
-            }}
-            onSelect={() => {
-              const el = area.current;
-              if (el && el.selectionEnd > el.selectionStart)
-                setSelection({
-                  start: el.selectionStart,
-                  end: el.selectionEnd,
-                });
-              else setSelection(null);
-            }}
-          />
-        </label>
-        <StructureSuggestions
-          english={english}
-          notes={notes}
-          onAdd={(text) =>
-            setNotes((current) =>
-              current
-                ? `${current}
+        <div className="editor-body">
+          <div className="flex items-start justify-between gap-3">
+            <div className="segmented">
+              <button
+                type="button"
+                className={type === 'phrase' ? 'active' : ''}
+                onClick={() => setType('phrase')}
+              >
+                <Bookmark size={17} /> Cụm từ / câu
+              </button>
+              <button
+                type="button"
+                className={type === 'passage' ? 'active' : ''}
+                onClick={() => setType('passage')}
+              >
+                <FileText size={17} /> Đoạn văn
+              </button>
+              <button
+                type="button"
+                className={type === 'structure' ? 'active' : ''}
+                onClick={() => setType('structure')}
+              >
+                <FileText size={17} /> Cấu trúc câu
+              </button>
+            </div>
+            <button
+              type="button"
+              className="icon-button shrink-0"
+              aria-label="Hướng dẫn thêm, sửa, xóa bài học"
+              title="Hướng dẫn sử dụng"
+              aria-haspopup="dialog"
+              onClick={() => setHelpOpen(true)}
+            >
+              <CircleHelp size={22} />
+            </button>
+          </div>
+          <label>
+            {type === 'structure' ? 'Mẫu cấu trúc' : 'Nội dung tiếng Anh'}{' '}
+            <span className="required">*</span>
+            <textarea
+              ref={area}
+              autoFocus
+              required
+              maxLength={50000}
+              rows={type === 'passage' ? 6 : 3}
+              className="english-input"
+              placeholder={
+                type === 'structure'
+                  ? 'Ví dụ: S + be going to + V'
+                  : type === 'phrase'
+                    ? 'Ví dụ: I’m going to go home.'
+                    : 'Dán hoặc viết đoạn tiếng Anh bạn muốn học…'
+              }
+              value={english}
+              onChange={(e) => {
+                setEnglish(e.target.value);
+                setHighlights([]);
+                setSelection(null);
+              }}
+              onSelect={() => {
+                const el = area.current;
+                if (el && el.selectionEnd > el.selectionStart)
+                  setSelection({
+                    start: el.selectionStart,
+                    end: el.selectionEnd,
+                  });
+                else setSelection(null);
+              }}
+            />
+          </label>
+          {type !== 'structure' && (
+            <StructureSuggestions
+              english={english}
+              notes={notes}
+              onAdd={(text) =>
+                setNotes((current) =>
+                  current
+                    ? `${current}
 
 ${text}`
-                : text,
-            )
-          }
-        />
-        <StructureEditor notes={notes} onChange={setNotes} />
-        <div className="selection-hint">
+                    : text,
+                )
+              }
+            />
+          )}
+
+          {type !== 'structure' && (
+            <div className="selection-hint">
+              <span>
+                Bôi chọn trong nội dung để lưu cụm từ. Sửa nội dung sẽ xóa các
+                đánh dấu.
+              </span>
+              <button
+                type="button"
+                className="text-button"
+                disabled={!selection}
+                onClick={addHighlight}
+              >
+                <Highlighter size={16} /> Lưu cụm từ
+              </button>
+            </div>
+          )}
+          {type !== 'structure' && highlights.length > 0 && (
+            <div className="highlights-editor">
+              {highlights.map((h, i) => (
+                <div key={i}>
+                  <strong>{h.text}</strong>
+                  <input
+                    aria-label={'Nghĩa của ' + h.text}
+                    placeholder="Nghĩa / cách dùng của cụm từ"
+                    maxLength={10000}
+                    value={h.meaning}
+                    onChange={(e) =>
+                      setHighlights(
+                        highlights.map((a, j) =>
+                          i === j ? { ...a, meaning: e.target.value } : a,
+                        ),
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={'Bỏ đánh dấu ' + h.text}
+                    onClick={() =>
+                      setHighlights(highlights.filter((_, j) => j !== i))
+                    }
+                  >
+                    <X size={17} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label>
+            {type === 'structure' ? 'Cách dùng / ý nghĩa' : 'Nghĩa tiếng Việt'}
+            <textarea
+              rows={3}
+              maxLength={50000}
+              placeholder="Viết cách hiểu của bạn…"
+              value={meaning}
+              onChange={(e) => setMeaning(e.target.value)}
+            />
+          </label>
+          <label>
+            Chủ đề
+            <input
+              list="topics"
+              maxLength={100}
+              placeholder="Ví dụ: Cuộc sống, Công việc, Giao tiếp"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+            />
+            <datalist id="topics">
+              {topics.filter(Boolean).map((t) => (
+                <option key={String(t)} value={String(t)} />
+              ))}
+            </datalist>
+          </label>
+          <label>
+            {type === 'structure' ? 'Ví dụ & ghi chú' : 'Ghi chú & ví dụ'}
+            <textarea
+              rows={4}
+              maxLength={50000}
+              placeholder="Cấu trúc, cách dùng hoặc một câu bạn tự đặt…"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </label>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
+        <footer className="modal-footer">
           <span>
-            Bôi chọn trong nội dung để lưu cụm từ. Sửa nội dung sẽ xóa các đánh
-            dấu.
+            <HardDrive size={15} /> Lưu trên trình duyệt này
           </span>
-          <button
-            type="button"
-            className="text-button"
-            disabled={!selection}
-            onClick={addHighlight}
-          >
-            <Highlighter size={16} /> Lưu cụm từ
-          </button>
-        </div>
-        {highlights.length > 0 && (
-          <div className="highlights-editor">
-            {highlights.map((h, i) => (
-              <div key={i}>
-                <strong>{h.text}</strong>
-                <input
-                  aria-label={'Nghĩa của ' + h.text}
-                  placeholder="Nghĩa / cách dùng của cụm từ"
-                  maxLength={10000}
-                  value={h.meaning}
-                  onChange={(e) =>
-                    setHighlights(
-                      highlights.map((a, j) =>
-                        i === j ? { ...a, meaning: e.target.value } : a,
-                      ),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  className="icon-button"
-                  aria-label={'Bỏ đánh dấu ' + h.text}
-                  onClick={() =>
-                    setHighlights(highlights.filter((_, j) => j !== i))
-                  }
-                >
-                  <X size={17} />
-                </button>
-              </div>
-            ))}
+          <div>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button
+              className="button primary"
+              disabled={saving || !english.trim()}
+            >
+              {saving ? (
+                <LoaderCircle className="spin" size={17} />
+              ) : (
+                <Check size={17} />
+              )}{' '}
+              Lưu bài học
+            </button>
           </div>
-        )}
-        <label>
-          Nghĩa tiếng Việt
-          <textarea
-            rows={3}
-            maxLength={50000}
-            placeholder="Viết cách hiểu của bạn…"
-            value={meaning}
-            onChange={(e) => setMeaning(e.target.value)}
-          />
-        </label>
-        <label>
-          Chủ đề
-          <input
-            list="topics"
-            maxLength={100}
-            placeholder="Ví dụ: Cuộc sống, Công việc, Giao tiếp"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-          />
-          <datalist id="topics">
-            {topics.filter(Boolean).map((t) => (
-              <option key={String(t)} value={String(t)} />
-            ))}
-          </datalist>
-        </label>
-        <label>
-          Ghi chú & ví dụ
-          <textarea
-            rows={4}
-            maxLength={50000}
-            placeholder="Cấu trúc, cách dùng hoặc một câu bạn tự đặt…"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </label>
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-      </div>
-      <footer className="modal-footer">
-        <span>
-          <HardDrive size={15} /> Lưu trên trình duyệt này
-        </span>
-        <div>
-          <button type="button" className="button secondary" onClick={onClose}>
-            Hủy
-          </button>
-          <button
-            className="button primary"
-            disabled={saving || !english.trim()}
-          >
-            {saving ? (
-              <LoaderCircle className="spin" size={17} />
-            ) : (
-              <Check size={17} />
-            )}{' '}
-            Lưu bài học
-          </button>
-        </div>
-      </footer>
-    </form>
+        </footer>
+      </form>
+      <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 };
 

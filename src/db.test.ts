@@ -344,3 +344,18 @@ describe('IndexedDB persistence and imports', { concurrency: false }, () => {
     assert.deepEqual(await db.lessons.toArray(), [original]);
   });
 });
+
+describe('sentence structure lessons', () => {
+  it('validates and round-trips a structure independently of phrase lessons', () => {
+    const structure = lesson({
+      type: 'structure',
+      english: 'S + be going to + V',
+      meaning: 'Diễn tả dự định',
+      notes: 'I am going to study.',
+      highlights: [],
+    });
+    assert.deepEqual(validateLesson(structure), structure);
+    assert.deepEqual(parseBackup(serializeBackup([structure])), [structure]);
+    assert.notEqual(keyOf(structure), keyOf({ ...structure, type: 'phrase' }));
+  });
+});

@@ -24,7 +24,11 @@ const LessonCard = ({
           ) : (
             <FileText size={15} />
           )}{' '}
-          {l.type === 'phrase' ? 'Cụm từ / câu' : 'Đoạn văn'}
+          {l.type === 'structure'
+            ? 'Cấu trúc câu'
+            : l.type === 'phrase'
+              ? 'Cụm từ / câu'
+              : 'Đoạn văn'}
         </span>
         <MoreHorizontal size={20} />
       </div>

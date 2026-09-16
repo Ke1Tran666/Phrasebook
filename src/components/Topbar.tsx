@@ -14,9 +14,11 @@ const Topbar = ({ view }: { view: 'library' | 'review' | 'backup' }) => {
               : 'Sao lưu dữ liệu'}
         </strong>
       </div>
-      <span className="local-label">
-        <HardDrive size={15} /> Lưu cục bộ
-      </span>
+      <div>
+        <span className="local-label">
+          <HardDrive size={15} /> Lưu cục bộ
+        </span>
+      </div>
     </header>
   );
 };
