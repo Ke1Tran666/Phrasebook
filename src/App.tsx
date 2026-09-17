@@ -1,3 +1,5 @@
+import GoogleDriveBackup from '@/components/GoogleDriveBackup';
+import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { ui } from '@/styles/ui';
 import StructureSuggestions from '@/components/StructureSuggestions';
 import { statusText } from '@/lesson-status';
@@ -44,8 +46,14 @@ import SearchInput from './components/SearchInput';
 import FilterSelect from './components/FilterSelect';
 import StatCard from './components/StatCard';
 import WorkspaceFooter from './components/WorkspaceFooter';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 const App = () => {
+  if (window.location.pathname === '/privacy') {
+    return <PrivacyPolicyPage />;
+  }
+
+  const drive = useGoogleDrive();
   const [dbError, setDbError] = useState('');
   const lessons = useLiveQuery(
     () =>
@@ -647,6 +655,11 @@ const App = () => {
                   <p>Mang theo những gì bạn học, theo cách của bạn.</p>
                 </div>
               </div>
+              <GoogleDriveBackup
+                drive={drive}
+                onRestore={setPendingImport}
+                disabled={busy || !!dbError || !lessons}
+              />
               <div className={ui('backup-banner')}>
                 <ShieldCheck size={28} />
                 <div>
