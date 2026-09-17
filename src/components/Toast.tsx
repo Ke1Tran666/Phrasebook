@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
@@ -29,7 +30,7 @@ const Toast = ({ message, onMessageChange, duration = 5000 }: ToastProps) => {
   if (!message) return null;
 
   return (
-    <div className="toast">
+    <div className={ui('toast')}>
       <span role="status" aria-atomic="true">
         {message}
       </span>
@@ -70,7 +71,7 @@ const Toast = ({ message, onMessageChange, duration = 5000 }: ToastProps) => {
       </span>
       <button
         type="button"
-        className="icon-button"
+        className={ui('icon-button')}
         aria-label="Đóng thông báo"
         onClick={() => onMessageChange('')}
       >

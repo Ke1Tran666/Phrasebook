@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
@@ -74,7 +75,7 @@ const StructureEditor = ({ notes, onChange }: Props) => {
       </label>
       <button
         type="button"
-        className="button secondary"
+        className={ui('button secondary')}
         disabled={!pattern.trim() || duplicate || tooLong}
         onClick={addStructure}
       >
@@ -86,7 +87,7 @@ const StructureEditor = ({ notes, onChange }: Props) => {
         </p>
       )}
       {tooLong && (
-        <p className="error" role="alert">
+        <p className={ui('error')} role="alert">
           Ghi chú vượt quá 50.000 ký tự. Hãy rút gọn nội dung trước khi thêm.
         </p>
       )}

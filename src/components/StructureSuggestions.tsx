@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { useMemo } from 'react';
 import { detectStructures, type StructureSuggestion } from '@/structures';
 
@@ -35,7 +36,7 @@ const StructureSuggestions = ({ english, onAdd, notes = '' }: Props) => {
               {onAdd && (
                 <button
                   type="button"
-                  className="text-button"
+                  className={ui('text-button')}
                   disabled={
                     notes.includes(noteFor(item)) ||
                     notes.length + noteFor(item).length + 2 > 50000

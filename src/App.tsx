@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import StructureSuggestions from '@/components/StructureSuggestions';
 import { statusText } from '@/lesson-status';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -227,7 +228,7 @@ const App = () => {
     setDetailId(null);
   };
   return (
-    <div className="app-shell">
+    <div className={ui('app-shell')}>
       <Sidebar
         view={view}
         nav={nav}
@@ -239,19 +240,19 @@ const App = () => {
         setStatus={setStatus}
         setKind={setKind}
       />
-      <main>
+      <main className={ui('main-content')}>
         <Topbar view={view} />
-        <div className="workspace">
+        <div className={ui('workspace')}>
           {dbError && (
-            <div className="error" role="alert">
+            <div className={ui('error')} role="alert">
               {dbError}
             </div>
           )}
           {view === 'library' && (
             <>
-              <div className="page-heading">
+              <div className={ui('page-heading')}>
                 <div>
-                  <span className="eyebrow">YOUR WORDS, YOUR WORLD</span>
+                  <span className={ui('eyebrow')}>YOUR WORDS, YOUR WORLD</span>
                   <h1>
                     Sổ bài học<span>.</span>
                   </h1>
@@ -260,14 +261,14 @@ const App = () => {
                   </p>
                 </div>
                 <button
-                  className="button primary"
+                  className={ui('button primary')}
                   onClick={() => setEditing(null)}
                   disabled={!lessons || !!dbError}
                 >
                   <Plus size={19} /> Thêm bài học
                 </button>
               </div>
-              <div className="stats">
+              <div className={ui('stats')}>
                 <StatCard
                   label="Tổng bài học"
                   value={all.length}
@@ -299,9 +300,9 @@ const App = () => {
                   onClick={() => setStatus('learned')}
                 />
               </div>
-              <div className="library-toolbar">
+              <div className={ui('library-toolbar')}>
                 <div
-                  className="tab-group"
+                  className={ui('tab-group')}
                   role="group"
                   aria-label="Loại bài học"
                 >
@@ -313,7 +314,7 @@ const App = () => {
                   ].map(([v, label]) => (
                     <button
                       key={v}
-                      className={kind === v ? 'active' : ''}
+                      className={ui(kind === v ? 'active' : '')}
                       onClick={() => setKind(v)}
                     >
                       {label}
@@ -322,15 +323,17 @@ const App = () => {
                   ))}
                 </div>
                 <button
-                  className="text-button"
+                  className={ui('text-button')}
                   onClick={() => inputFile.current?.click()}
                   disabled={busy}
                 >
                   <ArrowUpFromLine size={16} /> Nhập file
                 </button>
               </div>
-              <div className="filters">
-                <SearchInput value={query} onChange={setQuery} />
+              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
+                <div className="min-w-0 sm:col-span-3 xl:col-span-1">
+                  <SearchInput value={query} onChange={setQuery} />
+                </div>
                 <FilterSelect
                   label="Lọc chủ đề"
                   value={topic}
@@ -365,14 +368,16 @@ const App = () => {
                 />
               </div>
               {!lessons ? (
-                <div className="empty">
-                  <LoaderCircle className="spin" />
+                <div className={ui('empty')}>
+                  <LoaderCircle className={ui('spin')} />
                   Đang mở sổ bài học…
                 </div>
               ) : all.length === 0 || showIntroduction ? (
-                <div className="first-lesson">
-                  <div className="first-copy">
-                    <span className="eyebrow">TRANG ĐẦU TIÊN CỦA BẠN</span>
+                <div className={ui('first-lesson')}>
+                  <div className={ui('first-copy')}>
+                    <span className={ui('eyebrow')}>
+                      TRANG ĐẦU TIÊN CỦA BẠN
+                    </span>
                     <h2>
                       Một câu mới.
                       <br />
@@ -383,7 +388,7 @@ const App = () => {
                       yêu thích hoặc một đoạn văn muốn hiểu rõ hơn.
                     </p>
                     <button
-                      className="button primary"
+                      className={ui('button primary')}
                       onClick={() => setEditing(null)}
                     >
                       <Plus size={18} />{' '}
@@ -392,7 +397,7 @@ const App = () => {
                         : 'Viết bài học đầu tiên'}
                     </button>
                     <button
-                      className="text-button examples-button"
+                      className={ui('text-button examples-button')}
                       onClick={() =>
                         act(async () => {
                           await importLessons(exampleLessons());
@@ -403,31 +408,31 @@ const App = () => {
                       <Sparkles size={16} /> Hoặc thử với 3 bài mẫu
                     </button>
                   </div>
-                  <div className="sample-note">
-                    <div className="sample-label">
+                  <div className={ui('sample-note')}>
+                    <div className={ui('sample-label')}>
                       <Bookmark size={16} /> VÍ DỤ MỘT BÀI HỌC
                     </div>
-                    <p className="sample-english">
+                    <p className={ui('sample-english')}>
                       I’m going to
                       <br />
                       <mark>go home.</mark>
                     </p>
-                    <p className="sample-meaning">Tôi định về nhà.</p>
-                    <div className="sample-rule">
+                    <p className={ui('sample-meaning')}>Tôi định về nhà.</p>
+                    <div className={ui('sample-rule')}>
                       <span>CẤU TRÚC</span>
                       <strong>be going to + V nguyên mẫu</strong>
                       <p>Nói về một dự định.</p>
                     </div>
-                    <span className="topic-chip">Cuộc sống</span>
+                    <span className={ui('topic-chip')}>Cuộc sống</span>
                   </div>
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="empty">
+                <div className={ui('empty')}>
                   <Search size={32} />
                   <h2>Chưa tìm thấy bài học</h2>
                   <p>Thử từ khóa khác hoặc bỏ bớt bộ lọc.</p>
                   <button
-                    className="button secondary"
+                    className={ui('button secondary')}
                     onClick={() => {
                       setQuery('');
                       setKind('all');
@@ -440,11 +445,11 @@ const App = () => {
                 </div>
               ) : (
                 <>
-                  <div className="results-caption">
+                  <div className={ui('results-caption')}>
                     {filtered.length} bài học{' '}
                     <span>Bấm vào bài để xem và ghi chú</span>
                   </div>
-                  <div className="lesson-grid">
+                  <div className={ui('lesson-grid')}>
                     {filtered.map((l) => (
                       <LessonCard
                         key={l.id}
@@ -459,7 +464,7 @@ const App = () => {
                 <div className="mt-5 flex justify-center">
                   <button
                     type="button"
-                    className="text-button"
+                    className={ui('text-button')}
                     onClick={() => setShowIntroduction(true)}
                   >
                     <Sparkles size={16} /> Xem lại giới thiệu
@@ -471,9 +476,11 @@ const App = () => {
           )}
           {view === 'review' && (
             <>
-              <div className="page-heading">
+              <div className={ui('page-heading')}>
                 <div>
-                  <span className="eyebrow">A LITTLE PRACTICE, EVERY DAY</span>
+                  <span className={ui('eyebrow')}>
+                    A LITTLE PRACTICE, EVERY DAY
+                  </span>
                   <h1>
                     Ôn tập<span>.</span>
                   </h1>
@@ -481,8 +488,8 @@ const App = () => {
                 </div>
               </div>
               {reviewIds === null ? (
-                <div className="review-start">
-                  <span className="review-symbol">
+                <div className={ui('review-start')}>
+                  <span className={ui('review-symbol')}>
                     <GraduationCap size={42} />
                   </span>
                   <h2>Một lần gặp lại, nhớ lâu hơn.</h2>
@@ -490,7 +497,7 @@ const App = () => {
                     Bạn có <strong>{reviewPool.length} bài học</strong> trong
                     lượt ôn này.
                   </p>
-                  <label className="checkbox-label">
+                  <label className={ui('checkbox-label')}>
                     <input
                       type="checkbox"
                       checked={reviewAll}
@@ -499,7 +506,7 @@ const App = () => {
                     Bao gồm cả bài đã nhớ
                   </label>
                   <button
-                    className="button primary"
+                    className={ui('button primary')}
                     disabled={!reviewPool.length}
                     onClick={() => {
                       setReviewIds(
@@ -519,7 +526,7 @@ const App = () => {
                   </button>
                   {!all.length && (
                     <button
-                      className="text-button"
+                      className={ui('text-button')}
                       onClick={() => {
                         nav('library');
                         setEditing(null);
@@ -530,20 +537,20 @@ const App = () => {
                   )}
                 </div>
               ) : finished ? (
-                <div className="review-start">
-                  <span className="review-symbol">
+                <div className={ui('review-start')}>
+                  <span className={ui('review-symbol')}>
                     <CheckCheck size={42} />
                   </span>
                   <h2>Bạn đã hoàn thành lượt ôn!</h2>
                   <p>Tiến độ đã được lưu. Hẹn gặp lại ở một lượt học mới.</p>
                   <button
-                    className="button primary"
+                    className={ui('button primary')}
                     onClick={() => setReviewIds(null)}
                   >
                     Về trang ôn tập
                   </button>
                   <button
-                    className="text-button"
+                    className={ui('text-button')}
                     onClick={() => nav('library')}
                   >
                     Mở sổ bài học <ArrowRight size={17} />
@@ -551,10 +558,10 @@ const App = () => {
                 </div>
               ) : (
                 current && (
-                  <div className="review-session">
-                    <div className="review-progress">
+                  <div className={ui('review-session')}>
+                    <div className={ui('review-progress')}>
                       <button
-                        className="text-button"
+                        className={ui('text-button')}
                         onClick={() => setReviewIds(null)}
                       >
                         <ArrowLeft size={17} /> Kết thúc lượt ôn
@@ -564,16 +571,16 @@ const App = () => {
                       </span>
                     </div>
                     <progress max={reviewIds.length} value={reviewIndex} />
-                    <div className="flashcard">
-                      <span className="topic-chip">
+                    <div className={ui('flashcard')}>
+                      <span className={ui('topic-chip')}>
                         {current.topic || 'Chưa phân loại'}
                       </span>
                       <h2>
                         <English lesson={current} />
                       </h2>
                       {flipped ? (
-                        <div className="answer">
-                          <span className="eyebrow">
+                        <div className={ui('answer')}>
+                          <span className={ui('eyebrow')}>
                             {current.type === 'structure'
                               ? 'CÁCH DÙNG / Ý NGHĨA'
                               : 'NGHĨA TIẾNG VIỆT'}
@@ -582,7 +589,9 @@ const App = () => {
                             {current.meaning || 'Bài học chưa có bản dịch.'}
                           </p>
                           {current.notes && (
-                            <div className="review-notes">{current.notes}</div>
+                            <div className={ui('review-notes')}>
+                              {current.notes}
+                            </div>
                           )}
                           {current.highlights.map((h, i) => (
                             <p className="review-phrase" key={i}>
@@ -592,22 +601,22 @@ const App = () => {
                           ))}
                         </div>
                       ) : (
-                        <p className="recall-hint">
+                        <p className={ui('recall-hint')}>
                           Bạn có nhớ nghĩa và cách dùng của câu này?
                         </p>
                       )}
                     </div>
                     {flipped ? (
-                      <div className="grade-buttons">
+                      <div className={ui('grade-buttons')}>
                         <button
-                          className="button secondary"
+                          className={ui('button secondary')}
                           disabled={busy}
                           onClick={() => grade('review')}
                         >
                           <Bookmark size={18} /> Cần ôn lại
                         </button>
                         <button
-                          className="button primary"
+                          className={ui('button primary')}
                           disabled={busy}
                           onClick={() => grade('learned')}
                         >
@@ -616,7 +625,7 @@ const App = () => {
                       </div>
                     ) : (
                       <button
-                        className="button primary reveal-button"
+                        className={ui('button primary reveal-button')}
                         onClick={() => setFlipped(true)}
                       >
                         Hiện đáp án <ArrowRight size={17} />
@@ -629,16 +638,16 @@ const App = () => {
           )}
           {view === 'backup' && (
             <>
-              <div className="page-heading">
+              <div className={ui('page-heading')}>
                 <div>
-                  <span className="eyebrow">KEEP YOUR WORDS SAFE</span>
+                  <span className={ui('eyebrow')}>KEEP YOUR WORDS SAFE</span>
                   <h1>
                     Sao lưu dữ liệu<span>.</span>
                   </h1>
                   <p>Mang theo những gì bạn học, theo cách của bạn.</p>
                 </div>
               </div>
-              <div className="backup-banner">
+              <div className={ui('backup-banner')}>
                 <ShieldCheck size={28} />
                 <div>
                   <strong>Dữ liệu đang nằm trên trình duyệt này</strong>
@@ -649,9 +658,9 @@ const App = () => {
                   </p>
                 </div>
               </div>
-              <div className="backup-grid">
-                <section className="backup-card">
-                  <span className="stat-icon green">
+              <div className={ui('backup-grid')}>
+                <section className={ui('backup-card')}>
+                  <span className={ui('stat-icon green')}>
                     <ArrowDownToLine size={25} />
                   </span>
                   <h2>Xuất bản sao lưu</h2>
@@ -659,19 +668,19 @@ const App = () => {
                     Lưu toàn bộ bài học, bản dịch, cụm từ, ghi chú và tiến độ
                     vào một file JSON.
                   </p>
-                  <div className="backup-count">
+                  <div className={ui('backup-count')}>
                     <strong>{all.length}</strong> bài học sẵn sàng để xuất
                   </div>
                   <button
-                    className="button primary"
+                    className={ui('button primary')}
                     onClick={exportFile}
                     disabled={!lessons || !!dbError}
                   >
                     <ArrowDownToLine size={17} /> Xuất file JSON
                   </button>
                 </section>
-                <section className="backup-card">
-                  <span className="stat-icon blue">
+                <section className={ui('backup-card')}>
+                  <span className={ui('stat-icon blue')}>
                     <ArrowUpFromLine size={25} />
                   </span>
                   <h2>Nhập bài học</h2>
@@ -680,7 +689,7 @@ const App = () => {
                     trước khi nhập.
                   </p>
                   <div
-                    className="import-drop"
+                    className={ui('import-drop')}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
@@ -692,7 +701,7 @@ const App = () => {
                     <small>Tối đa 10 MB</small>
                   </div>
                   <button
-                    className="button secondary"
+                    className={ui('button secondary')}
                     disabled={busy || !!dbError}
                     onClick={() => inputFile.current?.click()}
                   >
@@ -701,13 +710,13 @@ const App = () => {
                 </section>
               </div>
               {importResult && (
-                <div className="success-result">
+                <div className={ui('success-result')}>
                   <CheckCheck size={20} /> Lần nhập vừa rồi: thêm{' '}
                   {importResult.added} bài học, bỏ qua {importResult.skipped}{' '}
                   bài trùng.
                 </div>
               )}
-              <div className="backup-explanation">
+              <div className={ui('backup-explanation')}>
                 <h3>Bài trùng được xử lý thế nào?</h3>
                 <p>
                   Bài có cùng loại và nội dung tiếng Anh được xem là trùng,
@@ -741,46 +750,46 @@ const App = () => {
       >
         {detail && (
           <>
-            <div className="modal-heading">
+            <div className={ui('modal-heading')}>
               <div>
-                <span className="eyebrow">
+                <span className={ui('eyebrow')}>
                   {detail.type === 'structure'
                     ? 'CẤU TRÚC CÂU'
                     : detail.type === 'phrase'
                       ? 'CỤM TỪ / CÂU'
                       : 'ĐOẠN VĂN'}
                 </span>
-                <span className="detail-topic">
+                <span className={ui('detail-topic')}>
                   {detail.topic || 'Chưa phân loại'}
                 </span>
               </div>
               <button
-                className="icon-button"
+                className={ui('icon-button')}
                 aria-label="Đóng"
                 onClick={() => setDetailId(null)}
               >
                 <X />
               </button>
             </div>
-            <div className="detail-body">
-              <h2 className="detail-english">
+            <div className={ui('detail-body')}>
+              <h2 className={ui('detail-english')}>
                 <English lesson={detail} />
               </h2>
               {detail.type !== 'structure' && (
                 <StructureSuggestions english={detail.english} />
               )}
-              <div className="detail-section">
-                <span className="eyebrow">NGHĨA TIẾNG VIỆT</span>
+              <div className={ui('detail-section')}>
+                <span className={ui('eyebrow')}>NGHĨA TIẾNG VIỆT</span>
                 <p>
                   {detail.meaning ||
                     'Chưa có bản dịch. Chỉnh sửa bài để bổ sung.'}
                 </p>
               </div>
               {detail.highlights.length > 0 && (
-                <div className="detail-section">
-                  <span className="eyebrow">CỤM TỪ ĐÃ ĐÁNH DẤU</span>
+                <div className={ui('detail-section')}>
+                  <span className={ui('eyebrow')}>CỤM TỪ ĐÃ ĐÁNH DẤU</span>
                   {detail.highlights.map((h, i) => (
-                    <div className="phrase-row" key={i}>
+                    <div className={ui('phrase-row')} key={i}>
                       <strong>{h.text}</strong>
                       <p>{h.meaning || 'Chưa có ghi chú'}</p>
                     </div>
@@ -788,12 +797,12 @@ const App = () => {
                 </div>
               )}
               {detail.notes && (
-                <div className="detail-section notes-box">
-                  <span className="eyebrow">GHI CHÚ & VÍ DỤ</span>
+                <div className={ui('detail-section notes-box')}>
+                  <span className={ui('eyebrow')}>GHI CHÚ & VÍ DỤ</span>
                   <p>{detail.notes}</p>
                 </div>
               )}
-              <label className="status-select">
+              <label className={ui('status-select')}>
                 Trạng thái học
                 <select
                   value={detail.status}
@@ -814,9 +823,9 @@ const App = () => {
                 </select>
               </label>
             </div>
-            <footer className="modal-footer">
+            <footer className={ui('modal-footer')}>
               <button
-                className="text-button danger"
+                className={ui('text-button danger')}
                 onClick={() => {
                   setDeleting(detail);
                   setDetailId(null);
@@ -825,7 +834,7 @@ const App = () => {
                 <Trash2 size={17} /> Xóa bài học
               </button>
               <button
-                className="button primary"
+                className={ui('button primary')}
                 onClick={() => setEditing(detail)}
               >
                 <Pencil size={16} /> Chỉnh sửa
@@ -839,8 +848,8 @@ const App = () => {
         label="Xóa bài học"
         onClose={() => setDeleting(null)}
       >
-        <div className="confirm-content">
-          <span className="stat-icon red">
+        <div className={ui('confirm-content')}>
+          <span className={ui('stat-icon red')}>
             <Trash2 />
           </span>
           <h2>Xóa bài học này?</h2>
@@ -849,15 +858,15 @@ const App = () => {
             Bài học và ghi chú sẽ được xóa khỏi trình duyệt này. Bạn chỉ có thể
             khôi phục nếu đã xuất bản sao lưu.
           </p>
-          <div className="confirm-actions">
+          <div className={ui('confirm-actions')}>
             <button
-              className="button secondary"
+              className={ui('button secondary')}
               onClick={() => setDeleting(null)}
             >
               Giữ lại
             </button>
             <button
-              className="button danger-button"
+              className={ui('button danger-button')}
               onClick={() =>
                 act(async () => {
                   if (deleting) await db.lessons.delete(deleting.id);
@@ -877,8 +886,8 @@ const App = () => {
           if (!busy) setPendingImport(null);
         }}
       >
-        <div className="confirm-content">
-          <span className="stat-icon blue">
+        <div className={ui('confirm-content')}>
+          <span className={ui('stat-icon blue')}>
             <ArrowUpFromLine />
           </span>
           <h2>Nhập bài học từ file?</h2>
@@ -887,21 +896,21 @@ const App = () => {
             <strong>{pendingImport?.length ?? 0} bài học</strong>. Bài mới sẽ
             được thêm; bài trùng được bỏ qua và giữ nguyên dữ liệu hiện tại.
           </p>
-          <div className="confirm-actions">
+          <div className={ui('confirm-actions')}>
             <button
-              className="button secondary"
+              className={ui('button secondary')}
               disabled={busy}
               onClick={() => setPendingImport(null)}
             >
               Hủy
             </button>
             <button
-              className="button primary"
+              className={ui('button primary')}
               disabled={busy}
               onClick={confirmImport}
             >
               {busy ? (
-                <LoaderCircle className="spin" size={16} />
+                <LoaderCircle className={ui('spin')} size={16} />
               ) : (
                 <Check size={16} />
               )}{' '}

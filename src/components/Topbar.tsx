@@ -1,8 +1,9 @@
+import { ui } from '@/styles/ui';
 import { ChevronRight, HardDrive } from 'lucide-react';
 
 const Topbar = ({ view }: { view: 'library' | 'review' | 'backup' }) => {
   return (
-    <header className="topbar">
+    <header className={ui('topbar')}>
       <div>
         <span>Không gian cá nhân</span>
         <ChevronRight size={14} />
@@ -15,7 +16,7 @@ const Topbar = ({ view }: { view: 'library' | 'review' | 'backup' }) => {
         </strong>
       </div>
       <div>
-        <span className="local-label">
+        <span className={ui('local-label')}>
           <HardDrive size={15} /> Lưu cục bộ
         </span>
       </div>

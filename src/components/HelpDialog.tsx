@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { BookOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import Modal from '@/components/Modal';
 
@@ -8,14 +9,14 @@ type HelpDialogProps = {
 
 const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
   <Modal open={open} onClose={onClose} label="Hướng dẫn sử dụng" wide>
-    <div className="modal-heading">
+    <div className={ui('modal-heading')}>
       <div>
-        <span className="eyebrow">BẮT ĐẦU VỚI PHRASEBOOK</span>
+        <span className={ui('eyebrow')}>BẮT ĐẦU VỚI PHRASEBOOK</span>
         <h2>Hướng dẫn sử dụng</h2>
       </div>
       <button
         type="button"
-        className="icon-button"
+        className={ui('icon-button')}
         aria-label="Đóng hướng dẫn"
         onClick={onClose}
       >
@@ -177,10 +178,10 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
         </p>
       </section>
     </div>
-    <footer className="modal-footer">
+    <footer className={ui('modal-footer')}>
       <button
         type="button"
-        className="button primary ml-auto"
+        className={ui('button primary ml-auto')}
         onClick={onClose}
       >
         Đã hiểu
