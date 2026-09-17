@@ -4,3 +4,5 @@ dist/
 *.tsbuildinfo
 
 .early.coverage
+.env.local
+.env.*.local

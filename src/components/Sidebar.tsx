@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import Logo from '@/components/Logo';
 import {
   BookOpen,
@@ -30,12 +31,12 @@ const Sidebar = ({
   setKind: (value: string) => void;
 }) => {
   return (
-    <aside className="sidebar">
+    <aside className={ui('sidebar')}>
       <Logo onClick={() => nav('library')} />
-      <span className="sidebar-caption">GÓC HỌC CỦA BẠN</span>
+      <span className={ui('sidebar-caption')}>GÓC HỌC CỦA BẠN</span>
       <nav aria-label="Điều hướng chính">
         <button
-          className={view === 'library' ? 'nav-item selected' : 'nav-item'}
+          className={ui(view === 'library' ? 'nav-item selected' : 'nav-item')}
           onClick={() => {
             nav('library');
             setTopic('all');
@@ -44,28 +45,28 @@ const Sidebar = ({
           <BookOpen size={20} /> Sổ bài học <span>{all.length}</span>
         </button>
         <button
-          className={view === 'review' ? 'nav-item selected' : 'nav-item'}
+          className={ui(view === 'review' ? 'nav-item selected' : 'nav-item')}
           onClick={() => nav('review')}
         >
           <GraduationCap size={21} /> Ôn tập{' '}
           {counts.review > 0 && <span>{counts.review}</span>}
         </button>
         <button
-          className={view === 'backup' ? 'nav-item selected' : 'nav-item'}
+          className={ui(view === 'backup' ? 'nav-item selected' : 'nav-item')}
           onClick={() => nav('backup')}
         >
           <HardDrive size={20} /> Sao lưu dữ liệu
         </button>
       </nav>
-      <div className="sidebar-topics">
-        <span className="sidebar-caption">CHỦ ĐỀ</span>
+      <div className={ui('sidebar-topics')}>
+        <span className={ui('sidebar-caption')}>CHỦ ĐỀ</span>
         {topics.length ? (
           topics.map((t) => (
             <button
-              className={
+              className={ui(
                 'topic-nav ' +
-                (topic === t && view === 'library' ? 'chosen' : '')
-              }
+                  (topic === t && view === 'library' ? 'chosen' : ''),
+              )}
               key={t}
               onClick={() => {
                 setTopic(t);
@@ -74,17 +75,23 @@ const Sidebar = ({
                 nav('library');
               }}
             >
-              <span className="topic-dot" />
-              {t}
-              <span>{all.filter((l) => l.topic === t).length}</span>
+              <span className="size-2 shrink-0 rounded-full border border-[#94a78b]" />
+
+              <span className="min-w-0 flex-1 truncate" title={t}>
+                {t}
+              </span>
+
+              <span className="shrink-0 text-xs text-[#8b968f]">
+                {all.filter((lesson) => lesson.topic === t).length}
+              </span>
             </button>
           ))
         ) : (
           <p>Chủ đề xuất hiện khi bạn thêm bài học.</p>
         )}
       </div>
-      <div className="local-card">
-        <span className="local-icon">
+      <div className={ui('local-card')}>
+        <span className={ui('local-icon')}>
           <ShieldCheck size={21} />
         </span>
         <strong>Kiến thức của riêng bạn</strong>
@@ -96,8 +103,8 @@ const Sidebar = ({
           Quản lý bản sao lưu <ChevronRight size={15} />
         </button>
       </div>
-      <div className="sidebar-bottom">
-        <span className="avatar">K</span>
+      <div className={ui('sidebar-bottom')}>
+        <span className={ui('avatar')}>K</span>
         <div>
           Sổ tay cá nhân<small>Học một chút, mỗi ngày</small>
         </div>

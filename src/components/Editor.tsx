@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import HelpDialog from '@/components/HelpDialog';
 import StructureSuggestions from '@/components/StructureSuggestions';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -87,40 +88,40 @@ const Editor = ({
   return (
     <>
       <form onSubmit={submit}>
-        <div className="modal-heading">
+        <div className={ui('modal-heading')}>
           <div>
-            <span className="eyebrow">SỔ TAY CỦA BẠN</span>
+            <span className={ui('eyebrow')}>SỔ TAY CỦA BẠN</span>
             <h2>{lesson ? 'Chỉnh sửa bài học' : 'Thêm một điều vừa học'}</h2>
           </div>
           <button
             type="button"
-            className="icon-button"
+            className={ui('icon-button')}
             onClick={onClose}
             aria-label="Đóng"
           >
             <X />
           </button>
         </div>
-        <div className="editor-body">
+        <div className={ui('editor-body')}>
           <div className="flex items-start justify-between gap-3">
-            <div className="segmented">
+            <div className={ui('segmented')}>
               <button
                 type="button"
-                className={type === 'phrase' ? 'active' : ''}
+                className={ui(type === 'phrase' ? 'active' : '')}
                 onClick={() => setType('phrase')}
               >
                 <Bookmark size={17} /> Cụm từ / câu
               </button>
               <button
                 type="button"
-                className={type === 'passage' ? 'active' : ''}
+                className={ui(type === 'passage' ? 'active' : '')}
                 onClick={() => setType('passage')}
               >
                 <FileText size={17} /> Đoạn văn
               </button>
               <button
                 type="button"
-                className={type === 'structure' ? 'active' : ''}
+                className={ui(type === 'structure' ? 'active' : '')}
                 onClick={() => setType('structure')}
               >
                 <FileText size={17} /> Cấu trúc câu
@@ -128,7 +129,7 @@ const Editor = ({
             </div>
             <button
               type="button"
-              className="icon-button shrink-0"
+              className={ui('icon-button shrink-0')}
               aria-label="Hướng dẫn thêm, sửa, xóa bài học"
               title="Hướng dẫn sử dụng"
               aria-haspopup="dialog"
@@ -139,14 +140,14 @@ const Editor = ({
           </div>
           <label>
             {type === 'structure' ? 'Mẫu cấu trúc' : 'Nội dung tiếng Anh'}{' '}
-            <span className="required">*</span>
+            <span className={ui('required')}>*</span>
             <textarea
               ref={area}
               autoFocus
               required
               maxLength={50000}
               rows={type === 'passage' ? 6 : 3}
-              className="english-input"
+              className={ui('english-input')}
               placeholder={
                 type === 'structure'
                   ? 'Ví dụ: S + be going to + V'
@@ -188,14 +189,14 @@ ${text}`
           )}
 
           {type !== 'structure' && (
-            <div className="selection-hint">
+            <div className={ui('selection-hint')}>
               <span>
                 Bôi chọn trong nội dung để lưu cụm từ. Sửa nội dung sẽ xóa các
                 đánh dấu.
               </span>
               <button
                 type="button"
-                className="text-button"
+                className={ui('text-button')}
                 disabled={!selection}
                 onClick={addHighlight}
               >
@@ -204,7 +205,7 @@ ${text}`
             </div>
           )}
           {type !== 'structure' && highlights.length > 0 && (
-            <div className="highlights-editor">
+            <div className={ui('highlights-editor')}>
               {highlights.map((h, i) => (
                 <div key={i}>
                   <strong>{h.text}</strong>
@@ -223,7 +224,7 @@ ${text}`
                   />
                   <button
                     type="button"
-                    className="icon-button"
+                    className={ui('icon-button')}
                     aria-label={'Bỏ đánh dấu ' + h.text}
                     onClick={() =>
                       setHighlights(highlights.filter((_, j) => j !== i))
@@ -271,29 +272,29 @@ ${text}`
             />
           </label>
           {error && (
-            <p className="error" role="alert">
+            <p className={ui('error')} role="alert">
               {error}
             </p>
           )}
         </div>
-        <footer className="modal-footer">
+        <footer className={ui('modal-footer')}>
           <span>
             <HardDrive size={15} /> Lưu trên trình duyệt này
           </span>
           <div>
             <button
               type="button"
-              className="button secondary"
+              className={ui('button secondary')}
               onClick={onClose}
             >
               Hủy
             </button>
             <button
-              className="button primary"
+              className={ui('button primary')}
               disabled={saving || !english.trim()}
             >
               {saving ? (
-                <LoaderCircle className="spin" size={17} />
+                <LoaderCircle className={ui('spin')} size={17} />
               ) : (
                 <Check size={17} />
               )}{' '}

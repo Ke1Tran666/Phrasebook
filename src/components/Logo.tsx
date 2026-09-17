@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { BookOpen } from 'lucide-react';
 
 type LogoProps = {
@@ -6,7 +7,7 @@ type LogoProps = {
 
 const Logo = ({ onClick }: LogoProps) => (
   <a
-    className="brand"
+    className={ui('brand')}
     href="#"
     aria-label="Phrasebook — Sổ bài học"
     onClick={(event) => {
@@ -14,10 +15,10 @@ const Logo = ({ onClick }: LogoProps) => (
       onClick();
     }}
   >
-    <span className="brand-icon" aria-hidden="true">
+    <span className={ui('brand-icon')} aria-hidden="true">
       <BookOpen size={23} />
     </span>
-    phrasebook<span className="brand-period">.</span>
+    phrasebook<span className={ui('brand-period')}>.</span>
   </a>
 );
 

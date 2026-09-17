@@ -1,3 +1,4 @@
+import { ui } from '@/styles/ui';
 import { useEffect, useRef, type ReactNode } from 'react';
 
 const Modal = ({
@@ -21,7 +22,7 @@ const Modal = ({
   return (
     <dialog
       ref={ref}
-      className={wide ? 'modal wide' : 'modal'}
+      className={ui(wide ? 'modal wide' : 'modal')}
       aria-label={label}
       onCancel={(e) => {
         e.preventDefault();
@@ -31,7 +32,7 @@ const Modal = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal-content">{children}</div>
+      <div className={ui('modal-content')}>{children}</div>
     </dialog>
   );
 };

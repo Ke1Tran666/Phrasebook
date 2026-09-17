@@ -1,6 +1,6 @@
 # Phrasebook
 
-Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt; không có backend hoặc tài khoản ứng dụng.
+Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt; không có backend. Có thể kết nối tài khoản Google để sao lưu thủ công lên Google Drive.
 
 ## Chạy trên máy
 
@@ -53,3 +53,14 @@ Nếu trình duyệt hỗ trợ WebMCP, ứng dụng cung cấp công cụ chỉ
 ## Kiểm tra
 
 Build TypeScript/Vite và kiểm tra nghiệp vụ dữ liệu bằng IndexedDB mô phỏng đã chạy thành công. Chưa thực hiện kiểm tra trình duyệt trực tiếp. Không có môi trường WebMCP được phép sử dụng để xác minh công cụ chỉ đọc; đăng ký được bảo vệ bằng feature detection.
+
+## Giao diện Tailwind CSS
+
+- Component dùng utility Tailwind trực tiếp hoặc nhóm utility dùng chung từ `src/styles/ui.ts`. Hàm `ui()` giữ các class đánh dấu để các trạng thái và selector con hoạt động; không có CSS giao diện riêng cho các class đó.
+- `src/styles.css` chỉ giữ import Tailwind, font-face, theme và mặc định phần tử bằng `@apply` trong `@layer base`. Không thêm lại CSS ngoài layer để tránh ghi đè utility của component.
+- Các mốc responsive bố cục hiện tại: 760px, 1150px và 1550px; hàng bộ lọc dùng các mốc `sm` và `xl` của Tailwind.
+- Kiểm tra mã bằng `pnpm typecheck`, `pnpm test`, `pnpm build` và `pnpm format:check`.
+
+## Sao lưu Google Drive
+
+Vào **Sao lưu dữ liệu → Google Drive** để đăng nhập, tạo bản sao và nhập lại. Cần cấu hình OAuth Client ID trước khi sử dụng: xem [hướng dẫn Google Drive](docs/google-drive-setup.md).
