@@ -125,14 +125,39 @@ export const useGoogleDrive = () => {
     void run(
       async () => {
         const api = currentClient();
-        await api.uploadBackup(await db.lessons.toArray());
-        // Upload succeeded even if refreshing the list fails; do not invite a duplicate retry.
-        return api.listBackups().catch(() => null);
+
+        const result = await api.uploadBackup(
+          await db.lessons.toArray(),
+        );
+
+        if (!result.created) {
+          return {
+            created: false,
+            files: null,
+          };
+        }
+
+        const files = await api.listBackups().catch(() => null);
+
+        return {
+          created: true,
+          files,
+        };
       },
-      (files) => {
-        if (files) setBackups(files);
+      (result) => {
+        if (!result.created) {
+          setMessage(
+            'Dữ liệu hiện tại đã được sao lưu. Không cần tạo bản sao mới.',
+          );
+          return;
+        }
+
+        if (result.files) {
+          setBackups(result.files);
+        }
+
         setMessage(
-          files
+          result.files
             ? 'Đã tạo bản sao mới trên Google Drive.'
             : 'Đã sao lưu thành công, nhưng chưa cập nhật được danh sách. Bấm Làm mới để kiểm tra.',
         );

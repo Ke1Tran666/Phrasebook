@@ -73,31 +73,75 @@ export const createDriveClient = (
         typeof file.modifiedTime === 'string',
     );
   };
-  const uploadBackup = async (lessons: Lesson[]): Promise<void> => {
+  const uploadBackup = async (
+    lessons: Lesson[],
+  ): Promise<UploadBackupResult> => {
     const text = serializeBackup(lessons);
     parseBackup(text);
-    if (new Blob([text]).size > MAX_DRIVE_BYTES)
+
+    if (new Blob([text]).size > MAX_DRIVE_BYTES) {
       throw new Error(
         'Bản sao vượt quá 5 MB. Hãy dùng Xuất file JSON để sao lưu trên máy.',
       );
+    }
+
+    // Lấy các backup hiện có
+    const backups = await listBackups();
+
+    // Chỉ cần kiểm tra backup mới nhất
+    const latestBackup = backups[0];
+
+    if (latestBackup) {
+      const response = await request(
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
+          latestBackup.id,
+        )}?alt=media`,
+      );
+
+      const latestText = await response.text();
+
+      // Nội dung giống hoàn toàn → không cần upload
+      if (latestText === text) {
+        return {
+          created: false,
+        };
+      }
+    }
+
     const boundary = `phrasebook_${crypto.randomUUID()}`;
+
     const metadata = {
-      name: `phrasebook-${new Date().toISOString().replace(/[:.]/g, '-')}.json`,
+      name: `phrasebook-${new Date()
+        .toISOString()
+        .replace(/[:.]/g, '-')}.json`,
       mimeType: 'application/json',
       parents: ['appDataFolder'],
-      appProperties: { app: 'phrasebook' },
+      appProperties: {
+        app: 'phrasebook',
+      },
     };
+
     const body = new Blob(
       [
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${text}\r\n--${boundary}--`,
       ],
-      { type: `multipart/related; boundary=${boundary}` },
+      {
+        type: `multipart/related; boundary=${boundary}`,
+      },
     );
+
     await request(
       'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-      { method: 'POST', body },
+      {
+        method: 'POST',
+        body,
+      },
     );
+
+    return {
+      created: true,
+    };
   };
   const downloadBackup = async (file: DriveBackup): Promise<Lesson[]> => {
     if (Number(file.size) > MAX_DRIVE_BYTES)
@@ -136,4 +180,8 @@ export const createDriveClient = (
     return parseBackup(new TextDecoder().decode(buffer));
   };
   return { getAccount, listBackups, uploadBackup, downloadBackup };
+};
+
+export type UploadBackupResult = {
+  created: boolean;
 };
