@@ -1,7 +1,8 @@
+import type { AppView } from '@/navigation';
 import { ui } from '@/styles/ui';
 import { ChevronRight, HardDrive } from 'lucide-react';
 
-const Topbar = ({ view }: { view: 'library' | 'review' | 'backup' }) => {
+const Topbar = ({ view }: { view: AppView }) => {
   return (
     <header className={ui('topbar')}>
       <div>
@@ -12,7 +13,9 @@ const Topbar = ({ view }: { view: 'library' | 'review' | 'backup' }) => {
             ? 'Sổ bài học'
             : view === 'review'
               ? 'Ôn tập'
-              : 'Sao lưu dữ liệu'}
+              : view === 'profile'
+                ? 'Hồ sơ cá nhân'
+                : 'Sao lưu dữ liệu'}
         </strong>
       </div>
       <div>

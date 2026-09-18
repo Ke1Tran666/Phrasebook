@@ -1,3 +1,5 @@
+import ProfilePage from '@/pages/ProfilePage';
+import type { AppView } from '@/navigation';
 import GoogleDriveBackup from '@/components/GoogleDriveBackup';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { ui } from '@/styles/ui';
@@ -66,7 +68,7 @@ const App = () => {
     [],
   );
   const all = lessons ?? [];
-  const [view, setView] = useState<'library' | 'review' | 'backup'>('library');
+  const [view, setView] = useState<AppView>('library');
   const [showIntroduction, setShowIntroduction] = useState(false);
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState('all');
@@ -239,6 +241,7 @@ const App = () => {
     <div className={ui('app-shell')}>
       <Sidebar
         view={view}
+        account={drive.account}
         nav={nav}
         all={all}
         counts={counts}
@@ -643,6 +646,16 @@ const App = () => {
                 )
               )}
             </>
+          )}
+          {view === 'profile' && (
+            <ProfilePage
+              account={drive.account}
+              total={all.length}
+              review={counts.review}
+              learned={counts.learned}
+              onBack={() => nav('library')}
+              onBackup={() => nav('backup')}
+            />
           )}
           {view === 'backup' && (
             <>
