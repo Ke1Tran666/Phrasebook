@@ -126,9 +126,7 @@ export const useGoogleDrive = () => {
       async () => {
         const api = currentClient();
 
-        const result = await api.uploadBackup(
-          await db.lessons.toArray(),
-        );
+        const result = await api.uploadBackup(await db.lessons.toArray());
 
         if (!result.created) {
           return {
@@ -170,6 +168,7 @@ export const useGoogleDrive = () => {
     configured: !!clientId,
     ready,
     account: session?.account,
+    accessToken: session?.accessToken,
     backups,
     busy,
     error,
