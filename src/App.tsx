@@ -1,3 +1,4 @@
+import ListenButton from '@/components/ListenButton';
 import ProfilePage from '@/pages/ProfilePage';
 import type { AppView } from '@/navigation';
 import GoogleDriveBackup from '@/components/GoogleDriveBackup';
@@ -589,6 +590,11 @@ const App = () => {
                       <h2>
                         <English lesson={current} />
                       </h2>
+                      <ListenButton
+                        key={current.id}
+                        text={current.english}
+                        accessToken={drive.accessToken}
+                      />
                       {flipped ? (
                         <div className={ui('answer')}>
                           <span className={ui('eyebrow')}>
@@ -801,6 +807,11 @@ const App = () => {
               <h2 className={ui('detail-english')}>
                 <English lesson={detail} />
               </h2>
+              <ListenButton
+                key={detail.id}
+                text={detail.english}
+                accessToken={drive.accessToken}
+              />
               {detail.type !== 'structure' && (
                 <StructureSuggestions english={detail.english} />
               )}

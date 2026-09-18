@@ -1,6 +1,6 @@
 # Phrasebook
 
-Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt; không có backend. Có thể kết nối tài khoản Google để sao lưu thủ công lên Google Drive.
+Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt; backend tùy chọn phục vụ nghe phát âm Google Cloud Text-to-Speech. Có thể kết nối tài khoản Google để sao lưu thủ công lên Google Drive.
 
 ## Chạy trên máy
 
@@ -64,3 +64,7 @@ Build TypeScript/Vite và kiểm tra nghiệp vụ dữ liệu bằng IndexedDB 
 ## Sao lưu Google Drive
 
 Vào **Sao lưu dữ liệu → Google Drive** để đăng nhập, tạo bản sao và nhập lại. Cần cấu hình OAuth Client ID trước khi sử dụng: xem [hướng dẫn Google Drive](docs/google-drive-setup.md).
+
+## Nghe phát âm
+
+Nút nghe trong chi tiết bài học và ôn tập sử dụng Google Cloud Text-to-Speech qua backend có xác thực. Xem [hướng dẫn cài đặt](docs/google-tts-setup.md). Chạy `pnpm dev:tts` cùng `pnpm dev`; cần cấu hình Google Cloud trước khi nghe thật.
