@@ -1,3 +1,6 @@
+import ProfileButton from '@/components/ProfileButton';
+import type { AppView } from '@/navigation';
+import type { GoogleAccount } from '@/services/google-drive';
 import { ui } from '@/styles/ui';
 import Logo from '@/components/Logo';
 import {
@@ -11,6 +14,7 @@ import { type Lesson } from '@/db';
 
 const Sidebar = ({
   view,
+  account,
   nav,
   all,
   counts,
@@ -20,8 +24,9 @@ const Sidebar = ({
   setStatus,
   setKind,
 }: {
-  view: 'library' | 'review' | 'backup';
-  nav: (view: 'library' | 'review' | 'backup') => void;
+  view: AppView;
+  account?: GoogleAccount;
+  nav: (view: AppView) => void;
   all: Lesson[];
   counts: { review: number };
   topics: string[];
@@ -103,12 +108,11 @@ const Sidebar = ({
           Quản lý bản sao lưu <ChevronRight size={15} />
         </button>
       </div>
-      <div className={ui('sidebar-bottom')}>
-        <span className={ui('avatar')}>K</span>
-        <div>
-          Sổ tay cá nhân<small>Học một chút, mỗi ngày</small>
-        </div>
-      </div>
+      <ProfileButton
+        account={account}
+        active={view === 'profile'}
+        onClick={() => nav('profile')}
+      />
     </aside>
   );
 };
