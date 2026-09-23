@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { type Lesson, type Status } from '@/db';
+import LessonDates from '@/components/LessonDates';
 
 const LessonCard = ({
   lesson: l,
@@ -37,6 +38,7 @@ const LessonCard = ({
         {l.english}
       </h2>
       <p className={ui('card-meaning')}>{l.meaning || 'Chưa có bản dịch'}</p>
+      <LessonDates lesson={l} compact />
       {l.highlights.length > 0 && (
         <div className={ui('card-highlights')}>
           <Highlighter size={14} />

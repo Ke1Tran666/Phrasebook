@@ -1,58 +1,73 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { detectStructures } from '@/structures';
+import { detectStructures, type SavedStructure } from '@/structures';
 
-const ids = (text: string) => detectStructures(text).map((item) => item.id);
+const structure = (
+  english: string,
+  id = 'structure-1',
+  meaning = 'Cách dùng đã lưu.',
+): SavedStructure => ({ id, english, meaning });
 
-describe('local structure suggestions', () => {
-  for (const [sentence, expected] of [
-    ['I’m going to go home.', 'going-to'],
-    ["She's going to study tonight.", 'going-to'],
-    ['They are not going to travel.', 'going-to'],
-    ['I would like to learn English.', 'would-like'],
-    ["I'd like to learn English.", 'would-like'],
-    ['We used to live here.', 'used-to'],
-    ['She has to work today.', 'have-to'],
-    ['Could you give me a hand?', 'request'],
-    ['You should practice every day.', 'modal'],
-    ["I can't speak English.", 'modal'],
-    ["We'll visit tomorrow.", 'modal'],
-  ]) {
-    it(`recognizes: ${sentence}`, () =>
-      assert.deepEqual(ids(sentence), [expected]));
-  }
-  for (const sentence of [
-    '',
-    '   ',
-    'Hello world.',
-    'I am going to school.',
-    'She is going to London.',
-    'I am used to work.',
-    'I used to working here.',
-    'My going to go home.',
-    'Could you give me a hand.',
-    'I have two books.',
-  ]) {
-    it(`does not guess an unsupported structure: ${JSON.stringify(sentence)}`, () =>
-      assert.deepEqual(ids(sentence), []));
-  }
-  it('keeps the original sentence and deduplicates repeated patterns', () => {
-    const result = detectStructures(
-      'I’m going to go home. We are going to study. You should practice.',
-    );
+describe('saved structure suggestions', () => {
+  it('does not use built-in structures', () => {
+    assert.deepEqual(detectStructures("I'm going to drive to work."), []);
+    assert.deepEqual(detectStructures('She has finished her homework.'), []);
+    assert.deepEqual(detectStructures('Could you help me?'), []);
+  });
+
+  it('recognizes a structure added after the phrase', () => {
+    const phrase = 'He is very bad at English.';
+    assert.deepEqual(detectStructures(phrase), []);
+
+    const result = detectStructures(phrase, [
+      structure(
+        'To be good at/ bad at + N/ V-ing',
+        'good-at',
+        'Giỏi về hoặc kém về một việc.',
+      ),
+    ]);
     assert.deepEqual(
       result.map((item) => item.id),
-      ['going-to', 'modal'],
+      ['saved:good-at'],
     );
-    assert.equal(result[0].sentence, 'I’m going to go home.');
+    assert.equal(result[0].meaning, 'Giỏi về hoặc kém về một việc.');
   });
-  it('does not match across sentence boundaries', () => {
-    assert.deepEqual(ids('I am going to. Go home.'), []);
+
+  it('recognizes a saved pattern with grammar placeholders', () => {
+    assert.deepEqual(
+      detectStructures("I'm going to drive to work.", [
+        structure('S + be going to + V', 'going-to'),
+      ]).map((item) => item.id),
+      ['saved:going-to'],
+    );
   });
-  it('supports mixed case and repeated whitespace', () => {
-    assert.deepEqual(ids('I AM   GOING TO   STUDY.'), ['going-to']);
+
+  it('supports simple alternatives in a saved pattern', () => {
+    const saved = [structure('S + can/could + V', 'modal-choice')];
+    assert.equal(detectStructures('I can swim.', saved).length, 1);
+    assert.equal(detectStructures('We could wait.', saved).length, 1);
+    assert.equal(detectStructures('I should leave.', saved).length, 0);
   });
-  it('does not conflate be used to with a past habit', () => {
-    assert.deepEqual(ids('I am used to working late.'), []);
+
+  it('does not match when a required part is missing', () => {
+    const saved = [structure('To be good at/ bad at + N/ V-ing')];
+    assert.deepEqual(detectStructures('English is very bad.', saved), []);
+  });
+
+  it('deduplicates equivalent saved patterns', () => {
+    const result = detectStructures('I am good at swimming.', [
+      structure('To be good at/ bad at + N/ V-ing', 'first'),
+      structure('to be good at/ bad at + n/ v-ing', 'second'),
+    ]);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, 'saved:first');
+  });
+
+  it('keeps the matching sentence from a passage', () => {
+    const result = detectStructures(
+      'I like music. She is really good at singing.',
+      [structure('To be good at/ bad at + N/ V-ing')],
+    );
+    assert.equal(result[0].sentence, 'She is really good at singing.');
   });
 });

@@ -41,7 +41,13 @@ describe('Google Drive backups', () => {
   });
   it('creates a new multipart backup rather than overwriting earlier snapshots', async () => {
     const lessons = exampleLessons();
+    let requests = 0;
     const fetcher: typeof fetch = async (url, init) => {
+      requests++;
+      if (!String(url).includes('uploadType=multipart')) {
+        assert.match(String(url), /spaces=appDataFolder/);
+        return json({ files: [] });
+      }
       assert.match(String(url), /uploadType=multipart/);
       assert.equal(init?.method, 'POST');
       assert.ok(init?.body instanceof Blob);
@@ -53,6 +59,7 @@ describe('Google Drive backups', () => {
       return json({ id: 'new-backup' });
     };
     await createDriveClient('token', fetcher).uploadBackup(lessons);
+    assert.equal(requests, 2);
   });
   it('rejects invalid and oversized uploads before calling Google', async () => {
     let requests = 0;

@@ -70,6 +70,8 @@ describe('lesson validation and duplicate keys', () => {
       { ...lesson(), status: 'done' },
       lesson({ createdAt: 'invalid' }),
       lesson({ updatedAt: 'invalid' }),
+      lesson({ lastReviewedAt: 'invalid' }),
+      lesson({ nextReviewAt: 'invalid' }),
       { ...lesson(), highlights: null },
     ];
     for (const input of invalid) assert.throws(() => validateLesson(input));
@@ -166,7 +168,13 @@ describe('lesson validation and duplicate keys', () => {
 
 describe('backup files', () => {
   it('round-trips all lesson fields and writes valid metadata', () => {
-    const records = [lesson({ status: 'learned' })];
+    const records = [
+      lesson({
+        status: 'learned',
+        lastReviewedAt: '2026-01-02T00:00:00.000Z',
+        nextReviewAt: '2026-01-06T00:00:00.000Z',
+      }),
+    ];
     const text = serializeBackup(records);
     const metadata = JSON.parse(text);
     assert.equal(metadata.app, 'phrasebook');

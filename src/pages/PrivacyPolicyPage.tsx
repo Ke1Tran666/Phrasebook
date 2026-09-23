@@ -14,14 +14,14 @@ const sections = [
     title: 'Phạm vi chính sách',
     paragraphs: [
       'Phrasebook giúp bạn lưu cụm từ, câu, đoạn văn, cấu trúc tiếng Anh và theo dõi việc ôn tập. Chính sách này mô tả cách phiên bản hiện tại xử lý dữ liệu học tập và thông tin Google khi bạn sử dụng ứng dụng.',
-      'Bạn có thể học và quản lý bài mà không kết nối Google. Kết nối Google là lựa chọn bổ sung để tạo và khôi phục bản sao trên Google Drive, đồng thời xác minh quyền dùng tính năng nghe phát âm.',
+      'Bạn có thể học, quản lý bài và nghe phát âm mà không kết nối Google. Kết nối Google chỉ là lựa chọn bổ sung để tạo và khôi phục bản sao trên Google Drive.',
     ],
   },
   {
     id: 'learning-data',
     title: 'Dữ liệu học tập trên trình duyệt',
     paragraphs: [
-      'Phrasebook lưu nội dung tiếng Anh, nghĩa, ghi chú, chủ đề, cụm từ được đánh dấu, trạng thái học, mã bài và thời gian tạo/cập nhật trong cơ sở dữ liệu của trình duyệt (IndexedDB). Ứng dụng hiện không có máy chủ riêng để lưu các bài học này.',
+      'Phrasebook lưu nội dung tiếng Anh, nghĩa, ghi chú, chủ đề, cụm từ được đánh dấu, trạng thái học, lịch ôn tiếp theo, mã bài và thời gian tạo/cập nhật trong cơ sở dữ liệu của trình duyệt (IndexedDB). Ứng dụng hiện không có máy chủ riêng để lưu các bài học này.',
       'Dữ liệu gắn với trình duyệt và địa chỉ trang web bạn sử dụng. Đổi thiết bị, trình duyệt hoặc địa chỉ truy cập không tự chuyển bài học sang nơi mới. Xóa dữ liệu trang web có thể làm mất các bài đã lưu.',
       'Đăng xuất hoặc đổi tài khoản Google không xóa hay tách dữ liệu học tập trên trình duyệt. Người dùng chung cùng hồ sơ trình duyệt có thể truy cập sổ bài học này.',
     ],
@@ -47,11 +47,12 @@ const sections = [
   },
   {
     id: 'speech',
-    title: 'Nghe phát âm bằng Google Cloud',
+    title: 'Nghe phát âm trên thiết bị',
     paragraphs: [
-      'Khi bấm Nghe phát âm, nội dung tiếng Anh đang chọn, giọng và tốc độ đọc được gửi qua backend Phrasebook đến Google Cloud Text-to-Speech để tạo âm thanh. Nội dung không tự gửi khi bạn mở bài học.',
-      'Mã truy cập Google trong phiên được gửi đến backend để Google xác minh tài khoản. Backend kiểm tra email được phép sử dụng và giữ bộ đếm lượt gọi tạm thời để giới hạn chi phí. Thông tin xác thực Google Cloud của dịch vụ được giữ riêng trên backend.',
-      'Mã ứng dụng không ghi nội dung bài, mã truy cập hoặc âm thanh vào log hay cơ sở dữ liệu backend. Âm thanh được giữ tạm trong trình duyệt để phát và được giải phóng khi dừng hoặc rời phần nghe. Hạ tầng hosting và Google có thể xử lý thông tin kết nối theo chính sách riêng.',
+      'Khi bạn bấm Nghe phát âm, Phrasebook sử dụng Web Speech API có sẵn trong trình duyệt để đọc nội dung tiếng Anh. Tính năng này không cần đăng nhập Google, API key, backend riêng hoặc dịch vụ trả phí của Phrasebook.',
+      'Giọng Anh–Mỹ, Anh–Anh và chất lượng âm thanh phụ thuộc vào giọng được cài trên trình duyệt hoặc hệ điều hành. Một số thiết bị có thể tải hoặc xử lý giọng nói bằng dịch vụ của nhà cung cấp trình duyệt hay hệ điều hành theo chính sách riêng của họ.',
+      'Phrasebook không lưu âm thanh và không gửi nội dung cần đọc đến backend của Phrasebook. Việc đọc dừng khi bạn bấm Dừng hoặc rời khỏi phần nghe.',
+      'Nếu bạn chọn Mở Google Translate, Phrasebook mở một tab mới và đưa nội dung tiếng Anh vào đường dẫn Google Translate với ngôn ngữ đích là tiếng Việt. Google nhận nội dung này và xử lý theo chính sách quyền riêng tư của Google.',
     ],
   },
   {
@@ -59,7 +60,7 @@ const sections = [
     title: 'Mục đích sử dụng và chia sẻ',
     paragraphs: [
       'Dữ liệu được dùng để hiển thị, tìm kiếm, chỉnh sửa, ôn tập và thực hiện thao tác sao lưu/khôi phục mà bạn yêu cầu. Ứng dụng hiện không tích hợp công cụ quảng cáo hoặc phân tích hành vi, không bán dữ liệu cá nhân và không gửi bài học đến dịch vụ huấn luyện AI.',
-      'Các thao tác sao lưu Drive được thực hiện trực tiếp giữa trình duyệt và dịch vụ Google. Tính năng nghe phát âm đi qua backend của Phrasebook. File JSON bạn xuất được tải về thiết bị; người có file này có thể đọc nội dung bài học, vì ứng dụng không mã hóa file sao lưu bằng mật khẩu.',
+      'Các thao tác sao lưu Drive được thực hiện trực tiếp giữa trình duyệt và dịch vụ Google. File JSON bạn xuất được tải về thiết bị; người có file này có thể đọc nội dung bài học, vì ứng dụng không mã hóa file sao lưu bằng mật khẩu.',
       'Trên trình duyệt hỗ trợ WebMCP, ứng dụng cung cấp công cụ chỉ đọc danh sách bài học cho trợ lý tương thích. Khi công cụ được gọi, nội dung bài học có thể được trả về cho trợ lý theo cơ chế quyền của trình duyệt; việc sử dụng tiếp theo còn phụ thuộc vào dịch vụ trợ lý bạn chọn.',
     ],
   },

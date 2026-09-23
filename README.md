@@ -1,6 +1,6 @@
 # Phrasebook
 
-Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt; backend tùy chọn phục vụ nghe phát âm Google Cloud Text-to-Speech. Có thể kết nối tài khoản Google để sao lưu thủ công lên Google Drive.
+Ứng dụng học tiếng Anh qua cụm từ, câu và đoạn văn. Bài học được lưu trong IndexedDB của trình duyệt. Có thể nghe phát âm bằng giọng đọc của thiết bị và kết nối tài khoản Google để sao lưu thủ công lên Google Drive.
 
 ## Chạy trên máy
 
@@ -28,14 +28,16 @@ React, TypeScript, Vite, Tailwind CSS, Dexie.js, IndexedDB và Lucide.
 - Thêm, xem, sửa và xóa bài học.
 - Bôi chọn nội dung trong ô tiếng Anh để lưu cụm từ kèm nghĩa riêng. Sửa nội dung tiếng Anh sẽ xóa các đánh dấu cũ để tránh sai vị trí.
 - Chủ đề, tìm kiếm, lọc trạng thái và sắp xếp.
-- Ôn bằng thẻ: hiện đáp án, đánh dấu cần ôn hoặc đã nhớ.
+- Ôn bằng thẻ theo chủ đề: mỗi lượt chọn ngẫu nhiên 10–15 bài đến hạn và ưu tiên đúng 3 đoạn văn khi dữ liệu đủ.
+- Bài **Đã ôn** xuất hiện lại sau 1–3 ngày; bài **Đã nhớ** xuất hiện lại sau 3–4 ngày.
+- Hiển thị ngày thêm, ngày chỉnh sửa và ngày ôn tiếp theo của bài học.
 - Xuất toàn bộ bài học và tiến độ sang JSON; kiểm tra định dạng trước khi nhập.
 - Bỏ qua bài trùng theo loại và nội dung tiếng Anh đã chuẩn hóa Unicode, chữ hoa/thường, khoảng trắng. Giữ nguyên bài cũ, ghi chú và tiến độ.
 - Dữ liệu khởi đầu trống; nút thêm 3 bài mẫu chỉ hoạt động khi người dùng chọn.
 
 ## Dữ liệu và sao lưu
 
-Mỗi bài chứa ID, loại, nội dung tiếng Anh, nghĩa, ghi chú, chủ đề, trạng thái, cụm từ đánh dấu và thời gian tạo/cập nhật. File sao lưu có `app: "phrasebook"`, `version: 1`, `exportedAt` và `lessons`.
+Mỗi bài chứa ID, loại, nội dung tiếng Anh, nghĩa, ghi chú, chủ đề, trạng thái, cụm từ đánh dấu, thời gian tạo/cập nhật và lịch ôn. File sao lưu có `app: "phrasebook"`, `version: 1`, `exportedAt` và `lessons`.
 
 Nhập tối đa 10 MB / 10.000 bài mỗi lần. Toàn bộ file được kiểm tra trước khi ghi và thao tác nhập dùng một transaction. Nếu ID bị trùng nhưng nội dung khác, ứng dụng tạo ID mới.
 
@@ -67,4 +69,4 @@ Vào **Sao lưu dữ liệu → Google Drive** để đăng nhập, tạo bản 
 
 ## Nghe phát âm
 
-Nút nghe trong chi tiết bài học và ôn tập sử dụng Google Cloud Text-to-Speech qua backend có xác thực. Xem [hướng dẫn cài đặt](docs/google-tts-setup.md). Chạy `pnpm dev:tts` cùng `pnpm dev`; cần cấu hình Google Cloud trước khi nghe thật.
+Nút nghe trong chi tiết bài học và ôn tập sử dụng Web Speech API có sẵn trong trình duyệt. Không cần backend, API key, Billing hay đăng nhập Google. Giọng đọc thực tế phụ thuộc vào trình duyệt và hệ điều hành. Nút **Mở Google Translate** chuyển nội dung tiếng Anh sang Google Translate trong tab mới để người dùng xem bản dịch hoặc nghe giọng của Google.

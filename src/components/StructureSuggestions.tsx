@@ -1,18 +1,31 @@
 import { ui } from '@/styles/ui';
 import { useMemo } from 'react';
-import { detectStructures, type StructureSuggestion } from '@/structures';
+import {
+  detectStructures,
+  type SavedStructure,
+  type StructureSuggestion,
+} from '@/structures';
 
 type Props = {
   english: string;
   onAdd?: (text: string) => void;
   notes?: string;
+  structures?: SavedStructure[];
 };
 
 const noteFor = (item: StructureSuggestion) =>
   `Cấu trúc: ${item.pattern}\n${item.meaning}\nVí dụ: ${item.sentence}`;
 
-const StructureSuggestions = ({ english, onAdd, notes = '' }: Props) => {
-  const suggestions = useMemo(() => detectStructures(english), [english]);
+const StructureSuggestions = ({
+  english,
+  onAdd,
+  notes = '',
+  structures = [],
+}: Props) => {
+  const suggestions = useMemo(
+    () => detectStructures(english, structures),
+    [english, structures],
+  );
   if (!english.trim()) return null;
   return (
     <section
@@ -21,8 +34,8 @@ const StructureSuggestions = ({ english, onAdd, notes = '' }: Props) => {
     >
       <h3 className="text-sm font-semibold text-forest">Gợi ý cấu trúc</h3>
       <p className="mt-1 text-xs leading-relaxed text-[#65766b]">
-        Gợi ý theo mẫu câu, hãy kiểm tra theo ngữ cảnh. S = chủ ngữ; V = động từ
-        nguyên mẫu.
+        Đối chiếu với các cấu trúc bạn đã lưu. S = chủ ngữ; V = động từ nguyên
+        mẫu.
       </p>
       {suggestions.length ? (
         <ul className="mt-3 space-y-3">
@@ -53,8 +66,9 @@ const StructureSuggestions = ({ english, onAdd, notes = '' }: Props) => {
         </ul>
       ) : (
         <p className="mt-3 text-sm text-[#65766b]">
-          Chưa nhận diện được mẫu phù hợp. Bạn vẫn có thể tự ghi cấu trúc trong
-          phần ghi chú.
+          {structures.length
+            ? 'Chưa tìm thấy cấu trúc đã lưu phù hợp với nội dung này.'
+            : 'Bạn chưa lưu cấu trúc câu nào để đối chiếu.'}
         </p>
       )}
     </section>

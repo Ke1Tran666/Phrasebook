@@ -44,6 +44,11 @@ const Editor = ({
   const area = useRef<HTMLTextAreaElement>(null);
   const topics =
     useLiveQuery(() => db.lessons.orderBy('topic').uniqueKeys(), []) ?? [];
+  const savedStructures =
+    useLiveQuery(
+      () => db.lessons.where('type').equals('structure').toArray(),
+      [],
+    ) ?? [];
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -61,6 +66,10 @@ const Editor = ({
         highlights: type === 'structure' ? [] : highlights,
         createdAt: lesson?.createdAt ?? now,
         updatedAt: now,
+        ...(lesson?.lastReviewedAt
+          ? { lastReviewedAt: lesson.lastReviewedAt }
+          : {}),
+        ...(lesson?.nextReviewAt ? { nextReviewAt: lesson.nextReviewAt } : {}),
       };
       await saveLesson(l);
       onSaved(l);
@@ -176,6 +185,7 @@ const Editor = ({
             <StructureSuggestions
               english={english}
               notes={notes}
+              structures={savedStructures}
               onAdd={(text) =>
                 setNotes((current) =>
                   current

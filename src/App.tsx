@@ -1,4 +1,5 @@
 import ListenButton from '@/components/ListenButton';
+import LessonDates from '@/components/LessonDates';
 import ProfilePage from '@/pages/ProfilePage';
 import type { AppView } from '@/navigation';
 import GoogleDriveBackup from '@/components/GoogleDriveBackup';
@@ -6,6 +7,11 @@ import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { ui } from '@/styles/ui';
 import StructureSuggestions from '@/components/StructureSuggestions';
 import { statusText } from '@/lesson-status';
+import {
+  buildReviewSession,
+  createReviewUpdate,
+  isLessonDue,
+} from '@/review-schedule';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowDownToLine,
@@ -69,6 +75,7 @@ const App = () => {
     [],
   );
   const all = lessons ?? [];
+  const savedStructures = all.filter((lesson) => lesson.type === 'structure');
   const [view, setView] = useState<AppView>('library');
   const [showIntroduction, setShowIntroduction] = useState(false);
   const [query, setQuery] = useState('');
@@ -85,7 +92,7 @@ const App = () => {
   const [reviewIds, setReviewIds] = useState<string[] | null>(null);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [reviewAll, setReviewAll] = useState(false);
+  const [reviewTopic, setReviewTopic] = useState('all');
   const [importResult, setImportResult] = useState<{
     added: number;
     skipped: number;
@@ -97,7 +104,7 @@ const App = () => {
   );
   const counts = {
     new: all.filter((l) => l.status === 'new').length,
-    review: all.filter((l) => l.status === 'review').length,
+    review: all.filter((l) => isLessonDue(l)).length,
     learned: all.filter((l) => l.status === 'learned').length,
   };
   const filtered = all
@@ -212,7 +219,11 @@ const App = () => {
       setBusy(false);
     }
   };
-  const reviewPool = all.filter((l) => reviewAll || l.status !== 'learned');
+  const reviewPool = all.filter(
+    (lesson) =>
+      isLessonDue(lesson) &&
+      (reviewTopic === 'all' || lesson.topic === reviewTopic),
+  );
   const current = reviewIds
     ? all.find((l) => l.id === reviewIds[reviewIndex])
     : null;
@@ -223,8 +234,7 @@ const App = () => {
     setBusy(true);
     try {
       await db.lessons.update(current.id, {
-        status: next,
-        updatedAt: new Date().toISOString(),
+        ...createReviewUpdate(next),
       });
       setReviewIndex((i) => i + 1);
       setFlipped(false);
@@ -506,29 +516,37 @@ const App = () => {
                   </span>
                   <h2>Một lần gặp lại, nhớ lâu hơn.</h2>
                   <p>
-                    Bạn có <strong>{reviewPool.length} bài học</strong> trong
-                    lượt ôn này.
+                    Có <strong>{reviewPool.length} bài đến hạn</strong>
+                    {reviewTopic === 'all'
+                      ? ' trong tất cả chủ đề.'
+                      : ` thuộc chủ đề ${reviewTopic}.`}
                   </p>
-                  <label className={ui('checkbox-label')}>
-                    <input
-                      type="checkbox"
-                      checked={reviewAll}
-                      onChange={(e) => setReviewAll(e.target.checked)}
-                    />{' '}
-                    Bao gồm cả bài đã nhớ
+                  <label className="w-full max-w-sm text-left">
+                    Chủ đề muốn ôn hôm nay
+                    <select
+                      value={reviewTopic}
+                      onChange={(event) => setReviewTopic(event.target.value)}
+                    >
+                      <option value="all">Tất cả chủ đề</option>
+                      {topics.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
                   </label>
+                  <p className="text-sm!">
+                    Mỗi lượt chọn ngẫu nhiên tối đa 10–15 bài, gồm 3 đoạn văn
+                    khi chủ đề có đủ dữ liệu.
+                  </p>
                   <button
                     className={ui('button primary')}
                     disabled={!reviewPool.length}
                     onClick={() => {
                       setReviewIds(
-                        reviewPool
-                          .sort(
-                            (a, b) =>
-                              (a.status === 'review' ? -1 : 1) -
-                              (b.status === 'review' ? -1 : 1),
-                          )
-                          .map((l) => l.id),
+                        buildReviewSession(all, reviewTopic).map(
+                          (lesson) => lesson.id,
+                        ),
                       );
                       setReviewIndex(0);
                       setFlipped(false);
@@ -554,7 +572,7 @@ const App = () => {
                     <CheckCheck size={42} />
                   </span>
                   <h2>Bạn đã hoàn thành lượt ôn!</h2>
-                  <p>Tiến độ đã được lưu. Hẹn gặp lại ở một lượt học mới.</p>
+                  <p>Tiến độ và lịch ôn tiếp theo đã được lưu cho từng bài.</p>
                   <button
                     className={ui('button primary')}
                     onClick={() => setReviewIds(null)}
@@ -590,11 +608,7 @@ const App = () => {
                       <h2>
                         <English lesson={current} />
                       </h2>
-                      <ListenButton
-                        key={current.id}
-                        text={current.english}
-                        accessToken={drive.accessToken}
-                      />
+                      <ListenButton key={current.id} text={current.english} />
                       {flipped ? (
                         <div className={ui('answer')}>
                           <span className={ui('eyebrow')}>
@@ -616,6 +630,12 @@ const App = () => {
                               {h.meaning || 'Chưa có ghi chú'}
                             </p>
                           ))}
+                          {current.type !== 'structure' && (
+                            <StructureSuggestions
+                              english={current.english}
+                              structures={savedStructures}
+                            />
+                          )}
                         </div>
                       ) : (
                         <p className={ui('recall-hint')}>
@@ -630,7 +650,7 @@ const App = () => {
                           disabled={busy}
                           onClick={() => grade('review')}
                         >
-                          <Bookmark size={18} /> Cần ôn lại
+                          <Bookmark size={18} /> Đã ôn
                         </button>
                         <button
                           className={ui('button primary')}
@@ -807,13 +827,12 @@ const App = () => {
               <h2 className={ui('detail-english')}>
                 <English lesson={detail} />
               </h2>
-              <ListenButton
-                key={detail.id}
-                text={detail.english}
-                accessToken={drive.accessToken}
-              />
+              <ListenButton key={detail.id} text={detail.english} />
               {detail.type !== 'structure' && (
-                <StructureSuggestions english={detail.english} />
+                <StructureSuggestions
+                  english={detail.english}
+                  structures={savedStructures}
+                />
               )}
               <div className={ui('detail-section')}>
                 <span className={ui('eyebrow')}>NGHĨA TIẾNG VIỆT</span>
@@ -839,6 +858,10 @@ const App = () => {
                   <p>{detail.notes}</p>
                 </div>
               )}
+              <div className={ui('detail-section')}>
+                <span className={ui('eyebrow')}>LỊCH SỬ BÀI HỌC</span>
+                <LessonDates lesson={detail} />
+              </div>
               <label className={ui('status-select')}>
                 Trạng thái học
                 <select
@@ -846,16 +869,16 @@ const App = () => {
                   onChange={(e) =>
                     act(
                       () =>
-                        db.lessons.update(detail.id, {
-                          status: e.target.value as Status,
-                          updatedAt: new Date().toISOString(),
-                        }),
+                        db.lessons.update(
+                          detail.id,
+                          createReviewUpdate(e.target.value as Status),
+                        ),
                       'Đã cập nhật trạng thái.',
                     )
                   }
                 >
                   <option value="new">Chưa học</option>
-                  <option value="review">Cần ôn</option>
+                  <option value="review">Đã ôn</option>
                   <option value="learned">Đã nhớ</option>
                 </select>
               </label>

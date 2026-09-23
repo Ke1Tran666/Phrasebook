@@ -168,7 +168,6 @@ export const useGoogleDrive = () => {
     configured: !!clientId,
     ready,
     account: session?.account,
-    accessToken: session?.accessToken,
     backups,
     busy,
     error,

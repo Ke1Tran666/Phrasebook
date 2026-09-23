@@ -17,6 +17,8 @@ export type Lesson = {
   highlights: Highlight[];
   createdAt: string;
   updatedAt: string;
+  lastReviewedAt?: string;
+  nextReviewAt?: string;
 };
 class PhraseDB extends Dexie {
   lessons!: Table<Lesson, string>;
@@ -63,6 +65,14 @@ export const validateLesson = (value: unknown): Lesson => {
     !Number.isFinite(Date.parse(String(x.updatedAt)))
   )
     throw Error('Ngày lưu bài học không hợp lệ.');
+  for (const field of ['lastReviewedAt', 'nextReviewAt'] as const) {
+    if (
+      x[field] !== undefined &&
+      (typeof x[field] !== 'string' ||
+        !Number.isFinite(Date.parse(String(x[field]))))
+    )
+      throw Error('Lịch ôn tập không hợp lệ.');
+  }
   if (!Array.isArray(x.highlights) || x.highlights.length > 1000)
     throw Error('Danh sách cụm từ không hợp lệ.');
   const hs: Highlight[] = x.highlights.map((h: unknown) => {
@@ -83,7 +93,7 @@ export const validateLesson = (value: unknown): Lesson => {
       throw Error('Vị trí cụm từ trong bài học không hợp lệ.');
     return { text: a.text, meaning: a.meaning, start: a.start, end: a.end };
   });
-  return {
+  const lesson: Lesson = {
     id: String(x.id),
     type: x.type as Lesson['type'],
     english: String(x.english),
@@ -95,6 +105,10 @@ export const validateLesson = (value: unknown): Lesson => {
     createdAt: String(x.createdAt),
     updatedAt: String(x.updatedAt),
   };
+  if (typeof x.lastReviewedAt === 'string')
+    lesson.lastReviewedAt = x.lastReviewedAt;
+  if (typeof x.nextReviewAt === 'string') lesson.nextReviewAt = x.nextReviewAt;
+  return lesson;
 };
 export const saveLesson = async (l: Lesson) => {
   const valid = validateLesson(l);

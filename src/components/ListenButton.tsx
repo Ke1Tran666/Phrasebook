@@ -1,124 +1,97 @@
-import { useEffect, useRef, useState, useId } from 'react';
-import { LoaderCircle, Square, Volume2 } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { ExternalLink, Square, Volume2 } from 'lucide-react';
 
-type Props = { text: string; accessToken?: string };
-const ListenButton = ({ text, accessToken }: Props) => {
-  const [voice, setVoice] = useState('en-US');
+type Props = { text: string };
+
+const ListenButton = ({ text }: Props) => {
+  const [language, setLanguage] = useState('en-US');
   const [rate, setRate] = useState('1');
-  const [state, setState] = useState<'idle' | 'loading' | 'playing'>('idle');
+  const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
-  const audio = useRef<HTMLAudioElement | null>(null);
-  const url = useRef<string | null>(null);
-  const request = useRef<AbortController | null>(null);
-  const id = useId();
+  const utterance = useRef<SpeechSynthesisUtterance | null>(null);
+  const descriptionId = useId();
+  const googleTranslateUrl = `https://translate.google.com/?sl=en&tl=vi&text=${encodeURIComponent(text)}&op=translate`;
+
   const stop = () => {
-    request.current?.abort();
-    request.current = null;
-    audio.current?.pause();
-    audio.current = null;
-    if (url.current) URL.revokeObjectURL(url.current);
-    url.current = null;
+    window.speechSynthesis?.cancel();
+    utterance.current = null;
   };
+
   useEffect(() => {
     stop();
-    setState('idle');
+    setPlaying(false);
     setError('');
     return stop;
-  }, [text, accessToken, voice, rate]);
-  const play = async () => {
-    if (state !== 'idle') {
-      stop();
-      setState('idle');
-      return;
-    }
-    if (!accessToken) {
+  }, [language, rate, text]);
+
+  const play = () => {
+    if (
+      !('speechSynthesis' in window) ||
+      !('SpeechSynthesisUtterance' in window)
+    ) {
       setError(
-        'Kết nối Google trong mục Sao lưu dữ liệu để sử dụng giọng đọc.',
+        'Trình duyệt này chưa hỗ trợ đọc văn bản. Hãy thử Chrome hoặc Edge phiên bản mới.',
       );
       return;
     }
+
+    if (playing) {
+      stop();
+      setPlaying(false);
+      return;
+    }
+
     stop();
     setError('');
-    setState('loading');
-    const controller = new AbortController();
-    request.current = controller;
-    const timer = setTimeout(() => controller.abort(), 45000);
-    try {
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ text, voice, rate: Number(rate) }),
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(
-          data?.error ||
-            'Chưa kết nối được dịch vụ nghe. Hãy kiểm tra backend TTS.',
-        );
+
+    const speech = new SpeechSynthesisUtterance(text.trim());
+    const normalizedLanguage = language.toLowerCase();
+    speech.lang = language;
+    speech.rate = Number(rate);
+    speech.voice =
+      window.speechSynthesis
+        .getVoices()
+        .find(
+          (voice) =>
+            voice.lang.replace('_', '-').toLowerCase() === normalizedLanguage,
+        ) ?? null;
+    speech.onstart = () => setPlaying(true);
+    speech.onend = () => {
+      if (utterance.current === speech) {
+        utterance.current = null;
+        setPlaying(false);
       }
-      if (!response.headers.get('content-type')?.includes('audio/mpeg'))
-        throw new Error('Dịch vụ nghe chưa được cấu hình.');
-      const blob = await response.blob();
-      if (controller.signal.aborted) return;
-      url.current = URL.createObjectURL(blob);
-      const player = new Audio(url.current);
-      audio.current = player;
-      player.onended = () => {
-        stop();
-        setState('idle');
-      };
-      player.onerror = () => {
-        stop();
-        setState('idle');
-        setError('Không phát được âm thanh. Hãy thử lại.');
-      };
-      await player.play();
-      if (!controller.signal.aborted) setState('playing');
-    } catch (e) {
-      if (request.current === controller) {
-        const timedOut = controller.signal.aborted;
-        stop();
-        setState('idle');
-        setError(
-          timedOut
-            ? 'Đã hết thời gian chờ giọng đọc. Hãy thử lại.'
-            : (e as Error).message,
-        );
+    };
+    speech.onerror = (event) => {
+      if (utterance.current !== speech) return;
+      utterance.current = null;
+      setPlaying(false);
+      if (event.error !== 'canceled' && event.error !== 'interrupted') {
+        setError('Không phát được giọng đọc trên thiết bị này. Hãy thử lại.');
       }
-    } finally {
-      clearTimeout(timer);
-    }
+    };
+
+    utterance.current = speech;
+    setPlaying(true);
+    window.speechSynthesis.speak(speech);
   };
+
   return (
     <div className="my-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => void play()}
-          aria-describedby={id}
+          onClick={play}
+          aria-describedby={descriptionId}
           className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-forest hover:bg-[#f0f4f1]"
         >
-          {state === 'loading' ? (
-            <LoaderCircle size={17} className="animate-spin" />
-          ) : state === 'playing' ? (
-            <Square size={17} />
-          ) : (
-            <Volume2 size={17} />
-          )}
-          {state === 'loading'
-            ? 'Hủy tải'
-            : state === 'playing'
-              ? 'Dừng đọc'
-              : 'Nghe phát âm'}
+          {playing ? <Square size={17} /> : <Volume2 size={17} />}
+          {playing ? 'Dừng đọc' : 'Nghe phát âm'}
         </button>
         <select
           aria-label="Giọng đọc"
-          value={voice}
-          onChange={(event) => setVoice(event.target.value)}
+          value={language}
+          onChange={(event) => setLanguage(event.target.value)}
         >
           <option value="en-US">Anh–Mỹ</option>
           <option value="en-GB">Anh–Anh</option>
@@ -132,10 +105,19 @@ const ListenButton = ({ text, accessToken }: Props) => {
           <option value="1">Bình thường · 1×</option>
           <option value="1.25">Nhanh · 1.25×</option>
         </select>
+        <a
+          href={googleTranslateUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-forest transition-colors hover:bg-[#f0f4f1]"
+        >
+          <ExternalLink size={17} aria-hidden="true" />
+          Mở Google Translate
+        </a>
       </div>
-      <p id={id} className="mt-2 text-xs leading-relaxed text-muted">
-        Khi bấm nghe, nội dung tiếng Anh được gửi đến Google Cloud để tạo giọng
-        đọc.
+      <p id={descriptionId} className="mt-2 text-xs leading-relaxed text-muted">
+        Giọng đọc do trình duyệt và thiết bị cung cấp. Khi mở Google Translate,
+        nội dung tiếng Anh được đưa vào đường dẫn gửi đến Google.
       </p>
       {error && (
         <p role="alert" className="mt-2 text-sm text-red-700">
@@ -145,4 +127,5 @@ const ListenButton = ({ text, accessToken }: Props) => {
     </div>
   );
 };
+
 export default ListenButton;

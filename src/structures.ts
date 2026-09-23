@@ -5,102 +5,138 @@ export type StructureSuggestion = {
   sentence: string;
 };
 
-// A conservative vocabulary avoids treating destinations ("going to school")
-// or nouns ("have to school") as infinitive verbs. Unknown verbs are skipped.
-const verbs = new Set(
-  'be have do go come get give take make learn study work help read write speak listen watch eat drink sleep buy sell call meet visit play run walk travel cook clean start stop try use need want see say tell know think feel find leave live move open close save practice remember understand bring put keep'.split(
-    ' ',
-  ),
-);
-const subject = '(?:i|you|we|they|he|she|it)';
-const rules = [
-  {
-    id: 'going-to',
-    pattern: 'S + be going to + V',
-    meaning: 'Diễn tả dự định hoặc dự đoán có căn cứ.',
-    regex: new RegExp(
-      `\\b${subject}\\s+(?:am|is|are)\\s+(?:not\\s+)?going\\s+to\\s+([a-z]+)\\b`,
-      'i',
-    ),
-  },
-  {
-    id: 'would-like',
-    pattern: 'S + would like to + V',
-    meaning: 'Diễn tả mong muốn một cách lịch sự.',
-    regex: new RegExp(
-      `\\b${subject}\\s+would\\s+like\\s+to\\s+([a-z]+)\\b`,
-      'i',
-    ),
-  },
-  {
-    id: 'used-to',
-    pattern: 'S + used to + V',
-    meaning:
-      'Diễn tả thói quen hoặc trạng thái trong quá khứ, thường không còn ở hiện tại.',
-    regex: new RegExp(`\\b${subject}\\s+used\\s+to\\s+([a-z]+)\\b`, 'i'),
-  },
-  {
-    id: 'have-to',
-    pattern: 'S + have/has to + V',
-    meaning: 'Diễn tả sự cần thiết hoặc nghĩa vụ.',
-    regex: new RegExp(
-      `\\b${subject}\\s+(?:have|has)\\s+to\\s+([a-z]+)\\b`,
-      'i',
-    ),
-  },
-  {
-    id: 'request',
-    pattern: 'Could/Would/Can/Will + you + V …?',
-    meaning: 'Có thể dùng để nhờ ai làm việc gì; cần xem ngữ cảnh của câu hỏi.',
-    regex: /\b(?:could|would|can|will)\s+you\s+([a-z]+)\b/i,
-  },
-  {
-    id: 'modal',
-    pattern: 'S + modal verb + V',
-    meaning:
-      'Động từ khuyết thiếu (can, could, should, must, may, might, will, would) đi với động từ nguyên mẫu; nghĩa tùy từ và ngữ cảnh.',
-    regex: new RegExp(
-      `\\b${subject}\\s+(?:can|could|should|must|may|might|will|would)\\s+(?:not\\s+)?([a-z]+)\\b`,
-      'i',
-    ),
-  },
-];
+export type SavedStructure = {
+  id: string;
+  english: string;
+  meaning: string;
+};
 
 const expandContractions = (text: string) =>
   text
     .replace(/[’‘]/g, "'")
     .replace(/\bi'm\b/gi, 'I am')
     .replace(/\b(you|we|they)'re\b/gi, '$1 are')
-    .replace(/\b(he|she|it)'s\s+(?=(?:not\s+)?going\b)/gi, '$1 is ')
+    .replace(/\b(he|she|it)'s\b/gi, '$1 is')
     .replace(/\b(i|you|we|they|he|she|it)'ll\b/gi, '$1 will')
-    .replace(/\b(i|you|we|they|he|she|it)'d\s+like\b/gi, '$1 would like')
+    .replace(/\b(i|you|we|they|he|she|it)'ve\b/gi, '$1 have')
     .replace(/\bcan't\b/gi, 'can not')
     .replace(/\bcannot\b/gi, 'can not')
     .replace(/\bwon't\b/gi, 'will not')
-    .replace(/\b(could|should|would|must|is|are)n't\b/gi, '$1 not');
+    .replace(
+      /\b(could|should|would|must|is|are|was|were|has|have|had|do|does|did)n't\b/gi,
+      '$1 not',
+    );
 
-export const detectStructures = (text: string): StructureSuggestion[] => {
-  const results: StructureSuggestion[] = [];
-  const seen = new Set<string>();
-  for (const raw of text.slice(0, 50000).match(/[^.!?\n]+[.!?]?/g) ?? []) {
-    const sentence = raw.trim();
-    const normalized = expandContractions(sentence);
-    for (const rule of rules) {
-      const match = rule.regex.exec(normalized);
-      if (!match || !verbs.has(match[1].toLowerCase())) continue;
-      if (rule.id === 'request' && !sentence.endsWith('?')) continue;
-      // "would like" has a more useful specific explanation than the modal rule.
-      if (rule.id === 'modal' && /\bwould\s+like\s+to\b/i.test(normalized))
-        continue;
-      if (seen.has(rule.id)) continue;
-      seen.add(rule.id);
-      results.push({
-        id: rule.id,
-        pattern: rule.pattern,
-        meaning: rule.meaning,
-        sentence,
-      });
-    }
+const canonicalWord = (word: string) => {
+  if (/^(?:am|is|are|was|were|been|being)$/i.test(word)) return 'be';
+  if (/^(?:has|had)$/i.test(word)) return 'have';
+  if (/^(?:does|did)$/i.test(word)) return 'do';
+  return word.toLowerCase();
+};
+
+const placeholders = new Set([
+  's',
+  'subject',
+  'n',
+  'noun',
+  'v',
+  'verb',
+  'v-ing',
+  'ving',
+  'v-ed',
+  'ved',
+  'v2',
+  'v3',
+  'adj',
+  'adjective',
+  'adv',
+  'adverb',
+  'object',
+  'o',
+  'something',
+  'someone',
+]);
+
+const isPlaceholder = (word: string) =>
+  placeholders.has(word.toLowerCase().replace(/\s+/g, ''));
+
+const savedStructureMatches = (sentence: string, pattern: string) => {
+  const normalizedSentence = expandContractions(sentence).toLowerCase();
+  let normalizedPattern = pattern
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/\bto\s+be\b/g, 'be');
+
+  const pairedPhrases = normalizedPattern.match(
+    /\b([a-z]+)\s+([a-z]+)\s*\/\s*([a-z]+)\s+([a-z]+)\b/,
+  );
+  if (pairedPhrases && /\bbe\b/.test(normalizedPattern)) {
+    const [, firstWord, firstLink, secondWord, secondLink] = pairedPhrases;
+    return new RegExp(
+      `\\b(?:am|is|are|was|were|been|being)\\s+(?:(?:very|really|quite|so|too|rather|pretty)\\s+)*(?:${firstWord}\\s+${firstLink}|${secondWord}\\s+${secondLink})\\b`,
+      'i',
+    ).test(normalizedSentence);
   }
+
+  const alternativeGroups: string[][] = [];
+  normalizedPattern = normalizedPattern.replace(
+    /\b([a-z]+(?:-[a-z]+)?)\s*\/\s*([a-z]+(?:-[a-z]+)?)\b/g,
+    (_, first: string, second: string) => {
+      if (!isPlaceholder(first) || !isPlaceholder(second)) {
+        alternativeGroups.push([canonicalWord(first), canonicalWord(second)]);
+      }
+      return ' ';
+    },
+  );
+
+  const anchors = [
+    ...new Set(
+      (normalizedPattern.match(/[a-z]+(?:-[a-z]+)?/g) ?? [])
+        .filter((word) => !isPlaceholder(word))
+        .map(canonicalWord),
+    ),
+  ];
+  if (!anchors.length && !alternativeGroups.length) return false;
+
+  const sentenceWords = new Set(
+    (normalizedSentence.match(/[a-z]+(?:-[a-z]+)?/g) ?? []).map(canonicalWord),
+  );
+  return (
+    anchors.every((word) => sentenceWords.has(word)) &&
+    alternativeGroups.every((group) =>
+      group.some((word) => sentenceWords.has(word)),
+    )
+  );
+};
+
+export const detectStructures = (
+  text: string,
+  savedStructures: SavedStructure[] = [],
+): StructureSuggestion[] => {
+  const sentences = (text.slice(0, 50000).match(/[^.!?\n]+[.!?]?/g) ?? [])
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+  const seenPatterns = new Set<string>();
+  const results: StructureSuggestion[] = [];
+
+  for (const structure of savedStructures) {
+    const pattern = structure.english.trim();
+    const normalizedPattern = pattern.toLocaleLowerCase();
+    if (!pattern || seenPatterns.has(normalizedPattern)) continue;
+    const sentence = sentences.find((item) =>
+      savedStructureMatches(item, pattern),
+    );
+    if (!sentence) continue;
+
+    seenPatterns.add(normalizedPattern);
+    results.push({
+      id: `saved:${structure.id}`,
+      pattern,
+      meaning:
+        structure.meaning.trim() || 'Cấu trúc bạn đã lưu trong sổ bài học.',
+      sentence,
+    });
+  }
+
   return results;
 };
