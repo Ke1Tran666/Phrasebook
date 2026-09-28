@@ -1,5 +1,7 @@
 import type { Lesson, Status } from '@/db';
 
+export type ReviewMode = 'content' | 'structure';
+
 const randomInteger = (
   minimum: number,
   maximum: number,
@@ -58,10 +60,15 @@ export const buildReviewSession = (
   topic = 'all',
   now = new Date(),
   random: () => number = Math.random,
+  mode: ReviewMode = 'content',
 ) => {
   const due = lessons.filter(
     (lesson) =>
-      isLessonDue(lesson, now) && (topic === 'all' || lesson.topic === topic),
+      isLessonDue(lesson, now) &&
+      (topic === 'all' || lesson.topic === topic) &&
+      (mode === 'structure'
+        ? lesson.type === 'structure'
+        : lesson.type === 'phrase' || lesson.type === 'passage'),
   );
   if (!due.length) return [];
 

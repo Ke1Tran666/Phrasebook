@@ -43,7 +43,7 @@ const StructureSuggestions = ({
             <li key={item.id} className="rounded-lg bg-white p-3">
               <strong className="text-sm text-forest">{item.pattern}</strong>
               <p className="mt-1 text-sm leading-relaxed">{item.meaning}</p>
-              <p className="mt-2 break-words text-sm text-[#65766b]">
+              <p className="mt-2 wrap-break-word text-sm text-[#65766b]">
                 “{item.sentence}”
               </p>
               {onAdd && (

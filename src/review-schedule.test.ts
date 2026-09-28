@@ -101,4 +101,38 @@ describe('review scheduling', () => {
     );
     assert.equal(buildReviewSession(lessons, 'Xe cộ', now).length, 7);
   });
+
+  it('keeps structures out of content review sessions', () => {
+    const lessons = [
+      lesson({ id: 'phrase', type: 'phrase' }),
+      lesson({ id: 'passage', type: 'passage' }),
+      lesson({ id: 'structure', type: 'structure' }),
+    ];
+
+    const session = buildReviewSession(lessons, 'Xe cộ', now);
+
+    assert.deepEqual(session.map((item) => item.type).sort(), [
+      'passage',
+      'phrase',
+    ]);
+  });
+
+  it('selects only structures for a structure review session', () => {
+    const lessons = [
+      lesson({ id: 'phrase', type: 'phrase' }),
+      lesson({ id: 'structure-1', type: 'structure' }),
+      lesson({ id: 'structure-2', type: 'structure', topic: 'Giao tiếp' }),
+    ];
+
+    const session = buildReviewSession(
+      lessons,
+      'Xe cộ',
+      now,
+      () => 0,
+      'structure',
+    );
+
+    assert.equal(session.length, 1);
+    assert.equal(session[0]?.id, 'structure-1');
+  });
 });

@@ -102,7 +102,7 @@ const styles: Record<string, string> = {
   required: 'hidden',
   'english-input': 'font-sans text-[length:20px]',
   segmented:
-    'flex bg-[#f1f4f1] pt-1 pr-1 pb-1 pl-1 rounded-[8px] [align-self:flex-start] flex-wrap [&_button]:flex [&_button]:items-center [&_button]:gap-[7px] [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-[length:13px] [&_button]:pt-[9px] [&_button]:pr-[13px] [&_button]:pb-[9px] [&_button]:pl-[13px] [&_button]:rounded-[6px] [&_button]:text-[#7d8a80] [&_button.active]:bg-[white] [&_button.active]:text-[#315b3c] [&_button.active]:[box-shadow:0_1px_4px_#133c1010]',
+    'flex bg-[#f1f4f1] pt-1 pr-1 pb-1 pl-1 rounded-[8px] [align-self:center] flex-wrap [&_button]:flex [&_button]:items-center [&_button]:gap-[7px] [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-[length:13px] [&_button]:pt-[9px] [&_button]:pr-[13px] [&_button]:pb-[9px] [&_button]:pl-[13px] [&_button]:rounded-[6px] [&_button]:text-[#7d8a80] [&_button.active]:bg-[white] [&_button.active]:text-[#315b3c] [&_button.active]:[box-shadow:0_1px_4px_#133c1010]',
   'selection-hint':
     'flex items-center gap-3 mt-[-12px] justify-between [&>span]:text-[length:12px] [&>span]:text-[#8f9b91] [&>span]:max-w-[330px] [&>span]:leading-[1.7] [&>.text-button]:whitespace-nowrap [@media(max-width:760px)]:items-start [@media(max-width:760px)]:flex-col [@media(max-width:760px)]:gap-0',
   'highlights-editor':

@@ -1,36 +1,25 @@
 import ListenButton from '@/components/ListenButton';
 import LessonDates from '@/components/LessonDates';
+import BackupPage from '@/pages/BackupPage';
+import LibraryPage from '@/pages/LibraryPage';
 import ProfilePage from '@/pages/ProfilePage';
+import ReviewPage from '@/pages/ReviewPage';
 import type { AppView } from '@/navigation';
-import GoogleDriveBackup from '@/components/GoogleDriveBackup';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { ui } from '@/styles/ui';
 import StructureSuggestions from '@/components/StructureSuggestions';
-import { statusText } from '@/lesson-status';
 import {
   buildReviewSession,
   createReviewUpdate,
   isLessonDue,
+  type ReviewMode,
 } from '@/review-schedule';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
-  ArrowDownToLine,
-  ArrowLeft,
-  ArrowRight,
   ArrowUpFromLine,
-  BookOpen,
-  Bookmark,
   Check,
-  CheckCheck,
-  FileText,
-  GraduationCap,
-  Layers,
   LoaderCircle,
   Pencil,
-  Plus,
-  Search,
-  ShieldCheck,
-  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
@@ -38,7 +27,6 @@ import { useEffect, useRef, useState } from 'react';
 import LessonForm from '@/components/LessonForm';
 import Toast from '@/components/Toast';
 import English from '@/components/English';
-import LessonCard from '@/components/LessonCard';
 import Modal from '@/components/Modal';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
@@ -51,10 +39,6 @@ import {
   type Lesson,
   type Status,
 } from '@/db';
-import SearchInput from './components/SearchInput';
-import FilterSelect from './components/FilterSelect';
-import StatCard from './components/StatCard';
-import WorkspaceFooter from './components/WorkspaceFooter';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 const App = () => {
@@ -93,6 +77,7 @@ const App = () => {
   const [reviewIndex, setReviewIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [reviewTopic, setReviewTopic] = useState('all');
+  const [reviewMode, setReviewMode] = useState<ReviewMode>('content');
   const [importResult, setImportResult] = useState<{
     added: number;
     skipped: number;
@@ -219,7 +204,15 @@ const App = () => {
       setBusy(false);
     }
   };
-  const reviewPool = all.filter(
+  const reviewLessons = all.filter((lesson) =>
+    reviewMode === 'structure'
+      ? lesson.type === 'structure'
+      : lesson.type === 'phrase' || lesson.type === 'passage',
+  );
+  const reviewTopics = [
+    ...new Set(reviewLessons.map((lesson) => lesson.topic).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b, 'vi'));
+  const reviewPool = reviewLessons.filter(
     (lesson) =>
       isLessonDue(lesson) &&
       (reviewTopic === 'all' || lesson.topic === reviewTopic),
@@ -271,407 +264,79 @@ const App = () => {
             </div>
           )}
           {view === 'library' && (
-            <>
-              <div className={ui('page-heading')}>
-                <div>
-                  <span className={ui('eyebrow')}>YOUR WORDS, YOUR WORLD</span>
-                  <h1>
-                    Sổ bài học<span>.</span>
-                  </h1>
-                  <p>
-                    Giữ lại những câu hay. Biến chúng thành tiếng Anh của bạn.
-                  </p>
-                </div>
-                <button
-                  className={ui('button primary')}
-                  onClick={() => setEditing(null)}
-                  disabled={!lessons || !!dbError}
-                >
-                  <Plus size={19} /> Thêm bài học
-                </button>
-              </div>
-              <div className={ui('stats')}>
-                <StatCard
-                  label="Tổng bài học"
-                  value={all.length}
-                  icon={Layers}
-                  color="green"
-                  description="Trong sổ của bạn"
-                  onClick={() => {
-                    setStatus('all');
-                    setKind('all');
-                    setTopic('all');
-                  }}
-                />
-
-                <StatCard
-                  label="Cần ôn tập"
-                  value={counts.review}
-                  icon={Bookmark}
-                  color="amber"
-                  description="Thêm một lần để nhớ"
-                  onClick={() => setStatus('review')}
-                />
-
-                <StatCard
-                  label="Đã ghi nhớ"
-                  value={counts.learned}
-                  icon={CheckCheck}
-                  color="blue"
-                  description="Từng chút tiến bộ"
-                  onClick={() => setStatus('learned')}
-                />
-              </div>
-              <div className={ui('library-toolbar')}>
-                <div
-                  className={ui('tab-group')}
-                  role="group"
-                  aria-label="Loại bài học"
-                >
-                  {[
-                    ['all', 'Tất cả'],
-                    ['phrase', 'Cụm từ / câu'],
-                    ['passage', 'Đoạn văn'],
-                    ['structure', 'Cấu trúc câu'],
-                  ].map(([v, label]) => (
-                    <button
-                      key={v}
-                      className={ui(kind === v ? 'active' : '')}
-                      onClick={() => setKind(v)}
-                    >
-                      {label}
-                      {v === 'all' && <span>{all.length}</span>}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  className={ui('text-button')}
-                  onClick={() => inputFile.current?.click()}
-                  disabled={busy}
-                >
-                  <ArrowUpFromLine size={16} /> Nhập file
-                </button>
-              </div>
-              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
-                <div className="min-w-0 sm:col-span-3 xl:col-span-1">
-                  <SearchInput value={query} onChange={setQuery} />
-                </div>
-                <FilterSelect
-                  label="Lọc chủ đề"
-                  value={topic}
-                  onChange={setTopic}
-                  options={[
-                    { value: 'all', label: 'Tất cả chủ đề' },
-                    ...topics.map((topic) => ({ value: topic, label: topic })),
-                  ]}
-                />
-
-                <FilterSelect
-                  label="Lọc trạng thái"
-                  value={status}
-                  onChange={setStatus}
-                  options={[
-                    { value: 'all', label: 'Mọi trạng thái' },
-                    ...Object.entries(statusText).map(([value, label]) => ({
-                      value,
-                      label,
-                    })),
-                  ]}
-                />
-
-                <FilterSelect
-                  label="Sắp xếp"
-                  value={sort}
-                  onChange={setSort}
-                  options={[
-                    { value: 'latest', label: 'Mới cập nhật' },
-                    { value: 'az', label: 'Tiếng Anh A–Z' },
-                  ]}
-                />
-              </div>
-              {!lessons ? (
-                <div className={ui('empty')}>
-                  <LoaderCircle className={ui('spin')} />
-                  Đang mở sổ bài học…
-                </div>
-              ) : all.length === 0 || showIntroduction ? (
-                <div className={ui('first-lesson')}>
-                  <div className={ui('first-copy')}>
-                    <span className={ui('eyebrow')}>
-                      TRANG ĐẦU TIÊN CỦA BẠN
-                    </span>
-                    <h2>
-                      Một câu mới.
-                      <br />
-                      Một bước tiến nhỏ.
-                    </h2>
-                    <p>
-                      Bắt đầu với một cụm từ bạn vừa gặp, một câu trong bộ phim
-                      yêu thích hoặc một đoạn văn muốn hiểu rõ hơn.
-                    </p>
-                    <button
-                      className={ui('button primary')}
-                      onClick={() => setEditing(null)}
-                    >
-                      <Plus size={18} />{' '}
-                      {all.length
-                        ? 'Viết bài học mới'
-                        : 'Viết bài học đầu tiên'}
-                    </button>
-                    <button
-                      className={ui('text-button examples-button')}
-                      onClick={() =>
-                        act(async () => {
-                          await importLessons(exampleLessons());
-                          setShowIntroduction(false);
-                        }, 'Đã thêm 3 bài mẫu. Bạn có thể sửa hoặc xóa tùy ý.')
-                      }
-                    >
-                      <Sparkles size={16} /> Hoặc thử với 3 bài mẫu
-                    </button>
-                  </div>
-                  <div className={ui('sample-note')}>
-                    <div className={ui('sample-label')}>
-                      <Bookmark size={16} /> VÍ DỤ MỘT BÀI HỌC
-                    </div>
-                    <p className={ui('sample-english')}>
-                      I’m going to
-                      <br />
-                      <mark>go home.</mark>
-                    </p>
-                    <p className={ui('sample-meaning')}>Tôi định về nhà.</p>
-                    <div className={ui('sample-rule')}>
-                      <span>CẤU TRÚC</span>
-                      <strong>be going to + V nguyên mẫu</strong>
-                      <p>Nói về một dự định.</p>
-                    </div>
-                    <span className={ui('topic-chip')}>Cuộc sống</span>
-                  </div>
-                </div>
-              ) : filtered.length === 0 ? (
-                <div className={ui('empty')}>
-                  <Search size={32} />
-                  <h2>Chưa tìm thấy bài học</h2>
-                  <p>Thử từ khóa khác hoặc bỏ bớt bộ lọc.</p>
-                  <button
-                    className={ui('button secondary')}
-                    onClick={() => {
-                      setQuery('');
-                      setKind('all');
-                      setStatus('all');
-                      setTopic('all');
-                    }}
-                  >
-                    Xóa bộ lọc
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className={ui('results-caption')}>
-                    {filtered.length} bài học{' '}
-                    <span>Bấm vào bài để xem và ghi chú</span>
-                  </div>
-                  <div className={ui('lesson-grid')}>
-                    {filtered.map((l) => (
-                      <LessonCard
-                        key={l.id}
-                        lesson={l}
-                        onSelect={setDetailId}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-              {all.length > 0 && !showIntroduction && (
-                <div className="mt-5 flex justify-center">
-                  <button
-                    type="button"
-                    className={ui('text-button')}
-                    onClick={() => setShowIntroduction(true)}
-                  >
-                    <Sparkles size={16} /> Xem lại giới thiệu
-                  </button>
-                </div>
-              )}
-              <WorkspaceFooter />
-            </>
+            <LibraryPage
+              lessons={lessons}
+              all={all}
+              filtered={filtered}
+              topics={topics}
+              counts={counts}
+              query={query}
+              kind={kind}
+              status={status}
+              topic={topic}
+              sort={sort}
+              showIntroduction={showIntroduction}
+              busy={busy}
+              dbError={dbError}
+              onAddLesson={() => setEditing(null)}
+              onImportFile={() => inputFile.current?.click()}
+              onAddExamples={() =>
+                act(async () => {
+                  await importLessons(exampleLessons());
+                  setShowIntroduction(false);
+                }, 'Đã thêm 3 bài mẫu. Bạn có thể sửa hoặc xóa tùy ý.')
+              }
+              onSelectLesson={setDetailId}
+              onQueryChange={setQuery}
+              onKindChange={setKind}
+              onStatusChange={setStatus}
+              onTopicChange={setTopic}
+              onSortChange={setSort}
+              onShowIntroductionChange={setShowIntroduction}
+            />
           )}
           {view === 'review' && (
-            <>
-              <div className={ui('page-heading')}>
-                <div>
-                  <span className={ui('eyebrow')}>
-                    A LITTLE PRACTICE, EVERY DAY
-                  </span>
-                  <h1>
-                    Ôn tập<span>.</span>
-                  </h1>
-                  <p>Đọc tiếng Anh, thử nhớ nghĩa, rồi kiểm tra lại.</p>
-                </div>
-              </div>
-              {reviewIds === null ? (
-                <div className={ui('review-start')}>
-                  <span className={ui('review-symbol')}>
-                    <GraduationCap size={42} />
-                  </span>
-                  <h2>Một lần gặp lại, nhớ lâu hơn.</h2>
-                  <p>
-                    Có <strong>{reviewPool.length} bài đến hạn</strong>
-                    {reviewTopic === 'all'
-                      ? ' trong tất cả chủ đề.'
-                      : ` thuộc chủ đề ${reviewTopic}.`}
-                  </p>
-                  <label className="w-full max-w-sm text-left">
-                    Chủ đề muốn ôn hôm nay
-                    <select
-                      value={reviewTopic}
-                      onChange={(event) => setReviewTopic(event.target.value)}
-                    >
-                      <option value="all">Tất cả chủ đề</option>
-                      {topics.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <p className="text-sm!">
-                    Mỗi lượt chọn ngẫu nhiên tối đa 10–15 bài, gồm 3 đoạn văn
-                    khi chủ đề có đủ dữ liệu.
-                  </p>
-                  <button
-                    className={ui('button primary')}
-                    disabled={!reviewPool.length}
-                    onClick={() => {
-                      setReviewIds(
-                        buildReviewSession(all, reviewTopic).map(
-                          (lesson) => lesson.id,
-                        ),
-                      );
-                      setReviewIndex(0);
-                      setFlipped(false);
-                    }}
-                  >
-                    Bắt đầu ôn tập <ArrowRight size={18} />
-                  </button>
-                  {!all.length && (
-                    <button
-                      className={ui('text-button')}
-                      onClick={() => {
-                        nav('library');
-                        setEditing(null);
-                      }}
-                    >
-                      Thêm bài học đầu tiên
-                    </button>
-                  )}
-                </div>
-              ) : finished ? (
-                <div className={ui('review-start')}>
-                  <span className={ui('review-symbol')}>
-                    <CheckCheck size={42} />
-                  </span>
-                  <h2>Bạn đã hoàn thành lượt ôn!</h2>
-                  <p>Tiến độ và lịch ôn tiếp theo đã được lưu cho từng bài.</p>
-                  <button
-                    className={ui('button primary')}
-                    onClick={() => setReviewIds(null)}
-                  >
-                    Về trang ôn tập
-                  </button>
-                  <button
-                    className={ui('text-button')}
-                    onClick={() => nav('library')}
-                  >
-                    Mở sổ bài học <ArrowRight size={17} />
-                  </button>
-                </div>
-              ) : (
-                current && (
-                  <div className={ui('review-session')}>
-                    <div className={ui('review-progress')}>
-                      <button
-                        className={ui('text-button')}
-                        onClick={() => setReviewIds(null)}
-                      >
-                        <ArrowLeft size={17} /> Kết thúc lượt ôn
-                      </button>
-                      <span>
-                        Bài {reviewIndex + 1} / {reviewIds.length}
-                      </span>
-                    </div>
-                    <progress max={reviewIds.length} value={reviewIndex} />
-                    <div className={ui('flashcard')}>
-                      <span className={ui('topic-chip')}>
-                        {current.topic || 'Chưa phân loại'}
-                      </span>
-                      <h2>
-                        <English lesson={current} />
-                      </h2>
-                      <ListenButton key={current.id} text={current.english} />
-                      {flipped ? (
-                        <div className={ui('answer')}>
-                          <span className={ui('eyebrow')}>
-                            {current.type === 'structure'
-                              ? 'CÁCH DÙNG / Ý NGHĨA'
-                              : 'NGHĨA TIẾNG VIỆT'}
-                          </span>
-                          <p>
-                            {current.meaning || 'Bài học chưa có bản dịch.'}
-                          </p>
-                          {current.notes && (
-                            <div className={ui('review-notes')}>
-                              {current.notes}
-                            </div>
-                          )}
-                          {current.highlights.map((h, i) => (
-                            <p className="review-phrase" key={i}>
-                              <strong>{h.text}</strong> —{' '}
-                              {h.meaning || 'Chưa có ghi chú'}
-                            </p>
-                          ))}
-                          {current.type !== 'structure' && (
-                            <StructureSuggestions
-                              english={current.english}
-                              structures={savedStructures}
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <p className={ui('recall-hint')}>
-                          Bạn có nhớ nghĩa và cách dùng của câu này?
-                        </p>
-                      )}
-                    </div>
-                    {flipped ? (
-                      <div className={ui('grade-buttons')}>
-                        <button
-                          className={ui('button secondary')}
-                          disabled={busy}
-                          onClick={() => grade('review')}
-                        >
-                          <Bookmark size={18} /> Đã ôn
-                        </button>
-                        <button
-                          className={ui('button primary')}
-                          disabled={busy}
-                          onClick={() => grade('learned')}
-                        >
-                          <Check size={18} /> Đã nhớ
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className={ui('button primary reveal-button')}
-                        onClick={() => setFlipped(true)}
-                      >
-                        Hiện đáp án <ArrowRight size={17} />
-                      </button>
-                    )}
-                  </div>
-                )
-              )}
-            </>
+            <ReviewPage
+              all={all}
+              savedStructures={savedStructures}
+              reviewPoolCount={reviewPool.length}
+              reviewTopics={reviewTopics}
+              reviewTopic={reviewTopic}
+              reviewMode={reviewMode}
+              reviewIds={reviewIds}
+              reviewIndex={reviewIndex}
+              current={current}
+              finished={finished}
+              flipped={flipped}
+              busy={busy}
+              onReviewTopicChange={setReviewTopic}
+              onReviewModeChange={(mode) => {
+                setReviewMode(mode);
+                setReviewTopic('all');
+              }}
+              onStart={() => {
+                setReviewIds(
+                  buildReviewSession(
+                    all,
+                    reviewTopic,
+                    new Date(),
+                    Math.random,
+                    reviewMode,
+                  ).map((lesson) => lesson.id),
+                );
+                setReviewIndex(0);
+                setFlipped(false);
+              }}
+              onRestart={() => setReviewIds(null)}
+              onEnd={() => setReviewIds(null)}
+              onOpenLibrary={() => nav('library')}
+              onAddFirstLesson={() => {
+                nav('library');
+                setEditing(null);
+              }}
+              onReveal={() => setFlipped(true)}
+              onGrade={grade}
+            />
           )}
           {view === 'profile' && (
             <ProfilePage
@@ -684,100 +349,18 @@ const App = () => {
             />
           )}
           {view === 'backup' && (
-            <>
-              <div className={ui('page-heading')}>
-                <div>
-                  <span className={ui('eyebrow')}>KEEP YOUR WORDS SAFE</span>
-                  <h1>
-                    Sao lưu dữ liệu<span>.</span>
-                  </h1>
-                  <p>Mang theo những gì bạn học, theo cách của bạn.</p>
-                </div>
-              </div>
-              <GoogleDriveBackup
-                drive={drive}
-                onRestore={setPendingImport}
-                disabled={busy || !!dbError || !lessons}
-              />
-              <div className={ui('backup-banner')}>
-                <ShieldCheck size={28} />
-                <div>
-                  <strong>Dữ liệu đang nằm trên trình duyệt này</strong>
-                  <p>
-                    Xóa dữ liệu trang web có thể làm mất bài học. Hãy xuất file
-                    định kỳ; khi đổi máy hoặc trình duyệt, nhập file để học
-                    tiếp.
-                  </p>
-                </div>
-              </div>
-              <div className={ui('backup-grid')}>
-                <section className={ui('backup-card')}>
-                  <span className={ui('stat-icon green')}>
-                    <ArrowDownToLine size={25} />
-                  </span>
-                  <h2>Xuất bản sao lưu</h2>
-                  <p>
-                    Lưu toàn bộ bài học, bản dịch, cụm từ, ghi chú và tiến độ
-                    vào một file JSON.
-                  </p>
-                  <div className={ui('backup-count')}>
-                    <strong>{all.length}</strong> bài học sẵn sàng để xuất
-                  </div>
-                  <button
-                    className={ui('button primary')}
-                    onClick={exportFile}
-                    disabled={!lessons || !!dbError}
-                  >
-                    <ArrowDownToLine size={17} /> Xuất file JSON
-                  </button>
-                </section>
-                <section className={ui('backup-card')}>
-                  <span className={ui('stat-icon blue')}>
-                    <ArrowUpFromLine size={25} />
-                  </span>
-                  <h2>Nhập bài học</h2>
-                  <p>
-                    Chọn file sao lưu Phrasebook từ máy. Bạn sẽ được xem số bài
-                    trước khi nhập.
-                  </p>
-                  <div
-                    className={ui('import-drop')}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (!busy) void readFile(e.dataTransfer.files[0]);
-                    }}
-                  >
-                    <FileText size={26} />
-                    <span>Kéo file JSON vào đây</span>
-                    <small>Tối đa 10 MB</small>
-                  </div>
-                  <button
-                    className={ui('button secondary')}
-                    disabled={busy || !!dbError}
-                    onClick={() => inputFile.current?.click()}
-                  >
-                    <ArrowUpFromLine size={17} /> Chọn file JSON
-                  </button>
-                </section>
-              </div>
-              {importResult && (
-                <div className={ui('success-result')}>
-                  <CheckCheck size={20} /> Lần nhập vừa rồi: thêm{' '}
-                  {importResult.added} bài học, bỏ qua {importResult.skipped}{' '}
-                  bài trùng.
-                </div>
-              )}
-              <div className={ui('backup-explanation')}>
-                <h3>Bài trùng được xử lý thế nào?</h3>
-                <p>
-                  Bài có cùng loại và nội dung tiếng Anh được xem là trùng,
-                  không phân biệt chữ hoa/thường và khoảng trắng thừa. Bài đã có
-                  sẽ được giữ nguyên, gồm ghi chú và tiến độ. Dữ liệu không tự
-                  đồng bộ giữa các máy.
-                </p>
-              </div>
-            </>
+            <BackupPage
+              drive={drive}
+              lessons={lessons}
+              all={all}
+              busy={busy}
+              dbError={dbError}
+              importResult={importResult}
+              onRestore={setPendingImport}
+              onExport={exportFile}
+              onChooseFile={() => inputFile.current?.click()}
+              onReadFile={(file) => void readFile(file)}
+            />
           )}
         </div>
       </main>
