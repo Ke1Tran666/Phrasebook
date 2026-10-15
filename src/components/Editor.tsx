@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { db, saveLesson, type Highlight, type Lesson } from '@/db';
+import { useLanguage } from '@/language';
 
 const Editor = ({
   lesson,
@@ -26,6 +27,7 @@ const Editor = ({
   onSaved: (l: Lesson) => void;
   notify: (m: string) => void;
 }) => {
+  const { t } = useLanguage();
   const [helpOpen, setHelpOpen] = useState(false);
   const [english, setEnglish] = useState(lesson?.english ?? '');
   const [meaning, setMeaning] = useState(lesson?.meaning ?? '');
@@ -73,7 +75,7 @@ const Editor = ({
       };
       await saveLesson(l);
       onSaved(l);
-      notify(lesson ? 'Đã cập nhật bài học.' : 'Đã thêm bài học vào sổ.');
+      notify(lesson ? t('editor.updated') : t('editor.added'));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -84,7 +86,7 @@ const Editor = ({
     if (!selection) return;
     const { start, end } = selection;
     if (highlights.some((h) => start < h.end && end > h.start)) {
-      setError('Phần này đã được đánh dấu. Hãy chọn một cụm từ khác.');
+      setError(t('editor.overlap'));
       return;
     }
     setHighlights([
@@ -99,14 +101,14 @@ const Editor = ({
       <form onSubmit={submit}>
         <div className={ui('modal-heading')}>
           <div>
-            <span className={ui('eyebrow')}>SỔ TAY CỦA BẠN</span>
-            <h2>{lesson ? 'Chỉnh sửa bài học' : 'Thêm một điều vừa học'}</h2>
+            <span className={ui('eyebrow')}>{t('editor.eyebrow')}</span>
+            <h2>{lesson ? t('editor.editTitle') : t('editor.addHeading')}</h2>
           </div>
           <button
             type="button"
             className={ui('icon-button')}
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t('common.close')}
           >
             <X />
           </button>
@@ -119,28 +121,28 @@ const Editor = ({
                 className={ui(type === 'phrase' ? 'active' : '')}
                 onClick={() => setType('phrase')}
               >
-                <Bookmark size={17} /> Cụm từ / câu
+                <Bookmark size={17} /> {t('lesson.phrase')}
               </button>
               <button
                 type="button"
                 className={ui(type === 'passage' ? 'active' : '')}
                 onClick={() => setType('passage')}
               >
-                <FileText size={17} /> Đoạn văn
+                <FileText size={17} /> {t('lesson.passage')}
               </button>
               <button
                 type="button"
                 className={ui(type === 'structure' ? 'active' : '')}
                 onClick={() => setType('structure')}
               >
-                <FileText size={17} /> Cấu trúc câu
+                <FileText size={17} /> {t('lesson.structure')}
               </button>
             </div>
             <button
               type="button"
               className={ui('icon-button shrink-0')}
-              aria-label="Hướng dẫn thêm, sửa, xóa bài học"
-              title="Hướng dẫn sử dụng"
+              aria-label={t('editor.helpLabel')}
+              title={t('editor.helpTitle')}
               aria-haspopup="dialog"
               onClick={() => setHelpOpen(true)}
             >
@@ -148,7 +150,9 @@ const Editor = ({
             </button>
           </div>
           <label>
-            {type === 'structure' ? 'Mẫu cấu trúc' : 'Nội dung tiếng Anh'}{' '}
+            {type === 'structure'
+              ? t('editor.structurePattern')
+              : t('editor.englishContent')}{' '}
             <span className={ui('required')}>*</span>
             <textarea
               ref={area}
@@ -159,10 +163,10 @@ const Editor = ({
               className={ui('english-input')}
               placeholder={
                 type === 'structure'
-                  ? 'Ví dụ: S + be going to + V'
+                  ? t('editor.structurePlaceholder')
                   : type === 'phrase'
-                    ? 'Ví dụ: I’m going to go home.'
-                    : 'Dán hoặc viết đoạn tiếng Anh bạn muốn học…'
+                    ? t('editor.phrasePlaceholder')
+                    : t('editor.passagePlaceholder')
               }
               value={english}
               onChange={(e) => {
@@ -200,17 +204,14 @@ ${text}`
 
           {type !== 'structure' && (
             <div className={ui('selection-hint')}>
-              <span>
-                Bôi chọn trong nội dung để lưu cụm từ. Sửa nội dung sẽ xóa các
-                đánh dấu.
-              </span>
+              <span>{t('editor.selectionHint')}</span>
               <button
                 type="button"
                 className={ui('text-button')}
                 disabled={!selection}
                 onClick={addHighlight}
               >
-                <Highlighter size={16} /> Lưu cụm từ
+                <Highlighter size={16} /> {t('editor.savePhrase')}
               </button>
             </div>
           )}
@@ -221,7 +222,7 @@ ${text}`
                   <strong>{h.text}</strong>
                   <input
                     aria-label={'Nghĩa của ' + h.text}
-                    placeholder="Nghĩa / cách dùng của cụm từ"
+                    placeholder={t('editor.phraseMeaning')}
                     maxLength={10000}
                     value={h.meaning}
                     onChange={(e) =>
@@ -247,21 +248,23 @@ ${text}`
             </div>
           )}
           <label>
-            {type === 'structure' ? 'Cách dùng / ý nghĩa' : 'Nghĩa tiếng Việt'}
+            {type === 'structure'
+              ? t('editor.usageMeaning')
+              : t('editor.vietnameseMeaning')}
             <textarea
               rows={3}
               maxLength={50000}
-              placeholder="Viết cách hiểu của bạn…"
+              placeholder={t('editor.meaningPlaceholder')}
               value={meaning}
               onChange={(e) => setMeaning(e.target.value)}
             />
           </label>
           <label>
-            Chủ đề
+            {t('editor.topic')}
             <input
               list="topics"
               maxLength={100}
-              placeholder="Ví dụ: Cuộc sống, Công việc, Giao tiếp"
+              placeholder={t('editor.topicPlaceholder')}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             />
@@ -272,11 +275,13 @@ ${text}`
             </datalist>
           </label>
           <label>
-            {type === 'structure' ? 'Ví dụ & ghi chú' : 'Ghi chú & ví dụ'}
+            {type === 'structure'
+              ? t('editor.structureNotes')
+              : t('editor.notes')}
             <textarea
               rows={4}
               maxLength={50000}
-              placeholder="Cấu trúc, cách dùng hoặc một câu bạn tự đặt…"
+              placeholder={t('editor.notesPlaceholder')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -289,7 +294,7 @@ ${text}`
         </div>
         <footer className={ui('modal-footer')}>
           <span>
-            <HardDrive size={15} /> Lưu trên trình duyệt này
+            <HardDrive size={15} /> {t('editor.savedLocally')}
           </span>
           <div>
             <button
@@ -297,7 +302,7 @@ ${text}`
               className={ui('button secondary')}
               onClick={onClose}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
             <button
               className={ui('button primary')}
@@ -308,7 +313,7 @@ ${text}`
               ) : (
                 <Check size={17} />
               )}{' '}
-              Lưu bài học
+              {t('editor.saveLesson')}
             </button>
           </div>
         </footer>

@@ -1,5 +1,4 @@
 import { ui } from '@/styles/ui';
-import { statusText } from '@/lesson-status';
 import {
   Bookmark,
   Check,
@@ -9,6 +8,13 @@ import {
 } from 'lucide-react';
 import { type Lesson, type Status } from '@/db';
 import LessonDates from '@/components/LessonDates';
+import { useLanguage, type MessageKey } from '@/language';
+
+const statusKeys: Record<Status, MessageKey> = {
+  new: 'status.new',
+  review: 'status.review',
+  learned: 'status.learned',
+};
 
 const LessonCard = ({
   lesson: l,
@@ -17,6 +23,7 @@ const LessonCard = ({
   lesson: Lesson;
   onSelect: (id: string) => void;
 }) => {
+  const { t } = useLanguage();
   return (
     <button className={ui('lesson-card')} onClick={() => onSelect(l.id)}>
       <div className={ui('card-top')}>
@@ -27,28 +34,33 @@ const LessonCard = ({
             <FileText size={15} />
           )}{' '}
           {l.type === 'structure'
-            ? 'Cấu trúc câu'
+            ? t('lesson.structure')
             : l.type === 'phrase'
-              ? 'Cụm từ / câu'
-              : 'Đoạn văn'}
+              ? t('lesson.phrase')
+              : t('lesson.passage')}
         </span>
         <MoreHorizontal size={20} />
       </div>
       <h2 className={ui(l.type === 'passage' ? 'passage-title' : '')}>
         {l.english}
       </h2>
-      <p className={ui('card-meaning')}>{l.meaning || 'Chưa có bản dịch'}</p>
+      <p className={ui('card-meaning')}>
+        {l.meaning || t('lesson.noTranslation')}
+      </p>
       <LessonDates lesson={l} compact />
       {l.highlights.length > 0 && (
         <div className={ui('card-highlights')}>
           <Highlighter size={14} />
-          {l.highlights.length} cụm từ được đánh dấu
+          {l.highlights.length} {t('lesson.highlightCount')}
         </div>
       )}
       <div className={ui('card-footer')}>
-        <span className={ui('topic-chip')}>{l.topic || 'Chưa phân loại'}</span>
+        <span className={ui('topic-chip')}>
+          {l.topic || t('common.uncategorized')}
+        </span>
         <span className={ui('status ' + l.status)}>
-          {l.status === 'learned' && <Check size={13} />} {statusText[l.status]}
+          {l.status === 'learned' && <Check size={13} />}{' '}
+          {t(statusKeys[l.status])}
         </span>
       </div>
     </button>

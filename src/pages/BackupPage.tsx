@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import type { DragEvent } from 'react';
+import { useLanguage } from '@/language';
 
 type BackupPageProps = {
   drive: ReturnType<typeof useGoogleDrive>;
@@ -36,6 +37,7 @@ const BackupPage = ({
   onChooseFile,
   onReadFile,
 }: BackupPageProps) => {
+  const { t } = useLanguage();
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (!busy) onReadFile(event.dataTransfer.files[0]);
@@ -45,11 +47,12 @@ const BackupPage = ({
     <>
       <div className={ui('page-heading')}>
         <div>
-          <span className={ui('eyebrow')}>KEEP YOUR WORDS SAFE</span>
+          <span className={ui('eyebrow')}>{t('backup.eyebrow')}</span>
           <h1>
-            Sao lưu dữ liệu<span>.</span>
+            {t('backup.title')}
+            <span>.</span>
           </h1>
-          <p>Mang theo những gì bạn học, theo cách của bạn.</p>
+          <p>{t('backup.subtitle')}</p>
         </div>
       </div>
       <GoogleDriveBackup
@@ -60,11 +63,8 @@ const BackupPage = ({
       <div className={ui('backup-banner')}>
         <ShieldCheck size={28} />
         <div>
-          <strong>Dữ liệu đang nằm trên trình duyệt này</strong>
-          <p>
-            Xóa dữ liệu trang web có thể làm mất bài học. Hãy xuất file định kỳ;
-            khi đổi máy hoặc trình duyệt, nhập file để học tiếp.
-          </p>
+          <strong>{t('backup.localTitle')}</strong>
+          <p>{t('backup.localDescription')}</p>
         </div>
       </div>
       <div className={ui('backup-grid')}>
@@ -72,62 +72,52 @@ const BackupPage = ({
           <span className={ui('stat-icon green')}>
             <ArrowDownToLine size={25} />
           </span>
-          <h2>Xuất bản sao lưu</h2>
-          <p>
-            Lưu toàn bộ bài học, bản dịch, cụm từ, ghi chú và tiến độ vào một
-            file JSON.
-          </p>
+          <h2>{t('backup.exportTitle')}</h2>
+          <p>{t('backup.exportDescription')}</p>
           <div className={ui('backup-count')}>
-            <strong>{all.length}</strong> bài học sẵn sàng để xuất
+            <strong>{all.length}</strong> {t('backup.readyToExport')}
           </div>
           <button
             className={ui('button primary')}
             onClick={onExport}
             disabled={!lessons || !!dbError}
           >
-            <ArrowDownToLine size={17} /> Xuất file JSON
+            <ArrowDownToLine size={17} /> {t('backup.exportJson')}
           </button>
         </section>
         <section className={ui('backup-card')}>
           <span className={ui('stat-icon blue')}>
             <ArrowUpFromLine size={25} />
           </span>
-          <h2>Nhập bài học</h2>
-          <p>
-            Chọn file sao lưu Phrasebook từ máy. Bạn sẽ được xem số bài trước
-            khi nhập.
-          </p>
+          <h2>{t('backup.importTitle')}</h2>
+          <p>{t('backup.importDescription')}</p>
           <div
             className={ui('import-drop')}
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
           >
             <FileText size={26} />
-            <span>Kéo file JSON vào đây</span>
-            <small>Tối đa 10 MB</small>
+            <span>{t('backup.drop')}</span>
+            <small>{t('backup.maxSize')}</small>
           </div>
           <button
             className={ui('button secondary')}
             disabled={busy || !!dbError}
             onClick={onChooseFile}
           >
-            <ArrowUpFromLine size={17} /> Chọn file JSON
+            <ArrowUpFromLine size={17} /> {t('backup.chooseJson')}
           </button>
         </section>
       </div>
       {importResult && (
         <div className={ui('success-result')}>
-          <CheckCheck size={20} /> Lần nhập vừa rồi: thêm {importResult.added}{' '}
-          bài học, bỏ qua {importResult.skipped} bài trùng.
+          <CheckCheck size={20} /> {t('backup.lastImport')} {importResult.added}{' '}
+          {t('backup.skipped')} {importResult.skipped} {t('backup.duplicates')}
         </div>
       )}
       <div className={ui('backup-explanation')}>
-        <h3>Bài trùng được xử lý thế nào?</h3>
-        <p>
-          Bài có cùng loại và nội dung tiếng Anh được xem là trùng, không phân
-          biệt chữ hoa/thường và khoảng trắng thừa. Bài đã có sẽ được giữ
-          nguyên, gồm ghi chú và tiến độ. Dữ liệu không tự đồng bộ giữa các máy.
-        </p>
+        <h3>{t('backup.duplicateTitle')}</h3>
+        <p>{t('backup.duplicateDescription')}</p>
       </div>
     </>
   );

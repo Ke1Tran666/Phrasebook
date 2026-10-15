@@ -33,7 +33,7 @@ const StructureEditor = ({ notes, onChange }: Props) => {
 
   return (
     <section
-      className="my-4 rounded-xl border border-[#dce4de] bg-[var(--color-surface)] p-4"
+      className="my-4 rounded-xl border border-[#dce4de] bg-surface p-4"
       aria-label="Thêm cấu trúc câu"
     >
       <h3 className="text-sm font-semibold text-forest">Thêm cấu trúc câu</h3>

@@ -4,8 +4,8 @@ import SearchInput from '@/components/SearchInput';
 import StatCard from '@/components/StatCard';
 import WorkspaceFooter from '@/components/WorkspaceFooter';
 import type { Lesson } from '@/db';
-import { statusText } from '@/lesson-status';
 import { ui } from '@/styles/ui';
+import { useLanguage, type MessageKey } from '@/language';
 import {
   ArrowUpFromLine,
   Bookmark,
@@ -43,6 +43,12 @@ type LibraryPageProps = {
   onShowIntroductionChange: (value: boolean) => void;
 };
 
+const statusKeys: Record<Lesson['status'], MessageKey> = {
+  new: 'status.new',
+  review: 'status.review',
+  learned: 'status.learned',
+};
+
 const LibraryPage = ({
   lessons,
   all,
@@ -68,6 +74,7 @@ const LibraryPage = ({
   onSortChange,
   onShowIntroductionChange,
 }: LibraryPageProps) => {
+  const { t } = useLanguage();
   const clearFilters = () => {
     onQueryChange('');
     onKindChange('all');
@@ -79,28 +86,29 @@ const LibraryPage = ({
     <>
       <div className={ui('page-heading')}>
         <div>
-          <span className={ui('eyebrow')}>LESSON LIBRARY</span>
+          <span className={ui('eyebrow')}>{t('library.eyebrow')}</span>
           <h1>
-            Lessons<span>.</span>
+            {t('library.title')}
+            <span>.</span>
           </h1>
-          <p>Quản lý toàn bộ câu, đoạn văn và cấu trúc bạn đang học.</p>
+          <p>{t('library.description')}</p>
         </div>
         <button
           className={ui('button primary')}
           onClick={onAddLesson}
           disabled={!lessons || !!dbError}
         >
-          <Plus size={19} /> Thêm lesson
+          <Plus size={19} /> {t('library.add')}
         </button>
       </div>
 
       <div className={ui('stats')}>
         <StatCard
-          label="Tổng bài học"
+          label={t('dashboard.totalLessons')}
           value={all.length}
           icon={Layers}
           color="green"
-          description="Trong sổ của bạn"
+          description={t('library.inNotebook')}
           onClick={() => {
             onStatusChange('all');
             onKindChange('all');
@@ -108,30 +116,34 @@ const LibraryPage = ({
           }}
         />
         <StatCard
-          label="Cần ôn tập"
+          label={t('status.review')}
           value={counts.review}
           icon={Bookmark}
           color="amber"
-          description="Thêm một lần để nhớ"
+          description={t('library.reviewHint')}
           onClick={() => onStatusChange('review')}
         />
         <StatCard
-          label="Đã ghi nhớ"
+          label={t('status.learned')}
           value={counts.learned}
           icon={CheckCheck}
           color="blue"
-          description="Từng chút tiến bộ"
+          description={t('library.progressHint')}
           onClick={() => onStatusChange('learned')}
         />
       </div>
 
       <div className={ui('library-toolbar')}>
-        <div className={ui('tab-group')} role="group" aria-label="Loại bài học">
+        <div
+          className={ui('tab-group')}
+          role="group"
+          aria-label={t('library.type')}
+        >
           {[
-            ['all', 'Tất cả'],
-            ['phrase', 'Cụm từ / câu'],
-            ['passage', 'Đoạn văn'],
-            ['structure', 'Cấu trúc câu'],
+            ['all', t('library.all')],
+            ['phrase', t('lesson.phrase')],
+            ['passage', t('lesson.passage')],
+            ['structure', t('lesson.structure')],
           ].map(([value, label]) => (
             <button
               key={value}
@@ -148,7 +160,7 @@ const LibraryPage = ({
           onClick={onImportFile}
           disabled={busy}
         >
-          <ArrowUpFromLine size={16} /> Nhập file
+          <ArrowUpFromLine size={16} /> {t('library.import')}
         </button>
       </div>
 
@@ -157,33 +169,33 @@ const LibraryPage = ({
           <SearchInput value={query} onChange={onQueryChange} />
         </div>
         <FilterSelect
-          label="Lọc chủ đề"
+          label={t('library.topicFilter')}
           value={topic}
           onChange={onTopicChange}
           options={[
-            { value: 'all', label: 'Tất cả chủ đề' },
+            { value: 'all', label: t('library.allTopics') },
             ...topics.map((item) => ({ value: item, label: item })),
           ]}
         />
         <FilterSelect
-          label="Lọc trạng thái"
+          label={t('library.statusFilter')}
           value={status}
           onChange={onStatusChange}
           options={[
-            { value: 'all', label: 'Mọi trạng thái' },
-            ...Object.entries(statusText).map(([value, label]) => ({
+            { value: 'all', label: t('library.allStatuses') },
+            ...Object.entries(statusKeys).map(([value, key]) => ({
               value,
-              label,
+              label: t(key),
             })),
           ]}
         />
         <FilterSelect
-          label="Sắp xếp"
+          label={t('library.sort')}
           value={sort}
           onChange={onSortChange}
           options={[
-            { value: 'latest', label: 'Mới cập nhật' },
-            { value: 'az', label: 'Tiếng Anh A–Z' },
+            { value: 'latest', label: t('library.latest') },
+            { value: 'az', label: t('library.englishAZ') },
           ]}
         />
       </div>
@@ -191,63 +203,59 @@ const LibraryPage = ({
       {!lessons ? (
         <div className={ui('empty')}>
           <LoaderCircle className={ui('spin')} />
-          Đang mở sổ bài học…
+          {t('library.loading')}
         </div>
       ) : all.length === 0 || showIntroduction ? (
         <div className={ui('first-lesson')}>
           <div className={ui('first-copy')}>
-            <span className={ui('eyebrow')}>TRANG ĐẦU TIÊN CỦA BẠN</span>
-            <h2>
-              Một câu mới.
-              <br />
-              Một bước tiến nhỏ.
-            </h2>
-            <p>
-              Bắt đầu với một cụm từ bạn vừa gặp, một câu trong bộ phim yêu
-              thích hoặc một đoạn văn muốn hiểu rõ hơn.
-            </p>
+            <span className={ui('eyebrow')}>{t('library.firstEyebrow')}</span>
+            <h2>{t('library.firstTitle')}</h2>
+            <p>{t('library.firstDescription')}</p>
             <button className={ui('button primary')} onClick={onAddLesson}>
               <Plus size={18} />{' '}
-              {all.length ? 'Viết bài học mới' : 'Viết bài học đầu tiên'}
+              {all.length ? t('library.writeNew') : t('library.writeFirst')}
             </button>
             <button
               className={ui('text-button examples-button')}
               onClick={onAddExamples}
             >
-              <Sparkles size={16} /> Hoặc thử với 3 bài mẫu
+              <Sparkles size={16} /> {t('library.tryExamples')}
             </button>
           </div>
           <div className={ui('sample-note')}>
             <div className={ui('sample-label')}>
-              <Bookmark size={16} /> VÍ DỤ MỘT BÀI HỌC
+              <Bookmark size={16} /> {t('library.example')}
             </div>
             <p className={ui('sample-english')}>
               I’m going to
               <br />
               <mark>go home.</mark>
             </p>
-            <p className={ui('sample-meaning')}>Tôi định về nhà.</p>
+            <p className={ui('sample-meaning')}>
+              {t('library.exampleMeaning')}
+            </p>
             <div className={ui('sample-rule')}>
-              <span>CẤU TRÚC</span>
+              <span>{t('library.structure')}</span>
               <strong>be going to + V nguyên mẫu</strong>
-              <p>Nói về một dự định.</p>
+              <p>{t('library.structureDescription')}</p>
             </div>
-            <span className={ui('topic-chip')}>Cuộc sống</span>
+            <span className={ui('topic-chip')}>{t('library.lifeTopic')}</span>
           </div>
         </div>
       ) : filtered.length === 0 ? (
         <div className={ui('empty')}>
           <Search size={32} />
-          <h2>Chưa tìm thấy bài học</h2>
-          <p>Thử từ khóa khác hoặc bỏ bớt bộ lọc.</p>
+          <h2>{t('library.notFound')}</h2>
+          <p>{t('library.notFoundDescription')}</p>
           <button className={ui('button secondary')} onClick={clearFilters}>
-            Xóa bộ lọc
+            {t('library.clearFilters')}
           </button>
         </div>
       ) : (
         <>
           <div className={ui('results-caption')}>
-            {filtered.length} bài học <span>Bấm vào bài để xem và ghi chú</span>
+            {filtered.length} {t('library.lessonCount')}{' '}
+            <span>{t('library.openHint')}</span>
           </div>
           <div className={ui('lesson-grid')}>
             {filtered.map((lesson) => (
@@ -268,7 +276,7 @@ const LibraryPage = ({
             className={ui('text-button')}
             onClick={() => onShowIntroductionChange(true)}
           >
-            <Sparkles size={16} /> Xem lại giới thiệu
+            <Sparkles size={16} /> {t('library.showIntroduction')}
           </button>
         </div>
       )}

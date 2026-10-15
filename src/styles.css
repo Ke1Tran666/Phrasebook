@@ -30,89 +30,129 @@
   :root {
     @apply bg-page font-sans text-base text-text [font-synthesis:none];
   }
+
   * {
     @apply box-border;
   }
+
   body {
     @apply mt-0 mr-0 mb-0 ml-0;
   }
+
   button {
-    @apply [font:inherit] [-webkit-tap-highlight-color:transparent] cursor-pointer [transition:background_0.18s,_color_0.18s,_box-shadow_0.18s];
+    @apply [font:inherit] [-webkit-tap-highlight-color:transparent] cursor-pointer;
+    transition:
+      background 0.18s,
+      color 0.18s,
+      box-shadow 0.18s;
   }
+
   input {
     @apply [font:inherit] [-webkit-tap-highlight-color:transparent] outline-none min-w-[0];
   }
+
   select {
     @apply bg-surface text-muted [font:inherit] [-webkit-tap-highlight-color:transparent] outline-none [border:1px_solid_var(--color-line)] rounded-[7px] pt-2.5 pr-2.5 pb-2.5 pl-2.5;
   }
+
   textarea {
     @apply bg-surface text-text [font:inherit] [-webkit-tap-highlight-color:transparent] outline-none min-w-[0] [border:1px_solid_var(--color-line)] pt-3 pr-[13px] pb-3 pl-[13px] rounded-[7px] text-[length:14px] leading-[1.65] w-full font-normal resize-y;
   }
+
   a {
     @apply [-webkit-tap-highlight-color:transparent] text-inherit no-underline;
   }
+
   button:disabled {
     @apply [opacity:0.5] cursor-not-allowed;
   }
+
   button:focus-visible {
     @apply [outline:3px_solid_#b66be5] [outline-offset:3px];
   }
+
   a:focus-visible {
     @apply [outline:3px_solid_#b66be5] [outline-offset:3px];
   }
+
   button svg {
     @apply shrink-0;
   }
+
   h1 {
     @apply mt-0 mr-0 mb-0 ml-0;
   }
+
   h2 {
     @apply mt-0 mr-0 mb-0 ml-0;
   }
+
   h3 {
     @apply mt-0 mr-0 mb-0 ml-0;
   }
+
   p {
     @apply mt-0 mr-0 mb-0 ml-0;
   }
+
   input:focus {
-    @apply [border-color:#9b4ed6]! [box-shadow:0_0_0_3px_#8b2bd11a];
+    border-color: #9b4ed6 !important;
+    box-shadow: 0 0 0 3px #8b2bd11a;
   }
+
   textarea:focus {
-    @apply [border-color:#9b4ed6]! [box-shadow:0_0_0_3px_#8b2bd11a];
+    border-color: #9b4ed6 !important;
+    box-shadow: 0 0 0 3px #8b2bd11a;
   }
+
   select:focus {
-    @apply [border-color:#9b4ed6]! [box-shadow:0_0_0_3px_#8b2bd11a];
+    border-color: #9b4ed6 !important;
+    box-shadow: 0 0 0 3px #8b2bd11a;
   }
+
   mark {
     @apply bg-[#f0d9ff] text-inherit [box-decoration-break:clone] pt-0 pr-0.5 pb-0 pl-0.5;
   }
+
   label {
     @apply flex flex-col gap-[9px] text-[length:14px] font-semibold text-[#685f6d];
   }
+
   input:not([type='checkbox']) {
     @apply bg-surface text-text [border:1px_solid_var(--color-line)] pt-3 pr-[13px] pb-3 pl-[13px] rounded-[7px] text-[length:14px] leading-[1.65] w-full font-normal;
   }
+
   textarea::placeholder {
     @apply text-[#a0aaa1];
   }
+
   input::placeholder {
     @apply text-[#a0aaa1];
   }
+
   progress {
     @apply w-full h-[5px] border-0 bg-[#e6ece1] mt-[15px] mr-0 mb-[25px] ml-0 appearance-none;
   }
+
   progress::-webkit-progress-bar {
     @apply bg-[#e6ece1] rounded-[4px];
   }
+
   progress::-webkit-progress-value {
     @apply bg-[#9b45d5] rounded-[4px];
   }
+
   progress::-moz-progress-bar {
     @apply bg-[#9b45d5];
   }
-  * {
-    @apply motion-reduce:animate-none! motion-reduce:transition-none!;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -180,7 +220,7 @@ select {
   color: var(--color-muted);
 }
 
-:root[data-theme='dark'] span {
+:root[data-theme='dark'] span:not(.theme-fixed-color) {
   color: inherit;
 }
 

@@ -5,6 +5,7 @@ import {
   type SavedStructure,
   type StructureSuggestion,
 } from '@/structures';
+import { useLanguage } from '@/language';
 
 type Props = {
   english: string;
@@ -22,6 +23,7 @@ const StructureSuggestions = ({
   notes = '',
   structures = [],
 }: Props) => {
+  const { t } = useLanguage();
   const suggestions = useMemo(
     () => detectStructures(english, structures),
     [english, structures],
@@ -30,20 +32,18 @@ const StructureSuggestions = ({
   return (
     <section
       className="my-4 rounded-xl border border-[#e8dcef] bg-[#f8f1fc] p-4"
-      aria-label="Gợi ý cấu trúc"
+      aria-label={t('suggestions.title')}
     >
-      <h3 className="text-sm font-semibold text-forest">Gợi ý cấu trúc</h3>
+      <h3 className="text-sm font-semibold text-forest">
+        {t('suggestions.title')}
+      </h3>
       <p className="mt-1 text-xs leading-relaxed text-[#756c7a]">
-        Đối chiếu với các cấu trúc bạn đã lưu. S = chủ ngữ; V = động từ nguyên
-        mẫu.
+        {t('suggestions.description')}
       </p>
       {suggestions.length ? (
         <ul className="mt-3 space-y-3">
           {suggestions.map((item) => (
-            <li
-              key={item.id}
-              className="rounded-lg bg-[var(--color-surface)] p-3"
-            >
+            <li key={item.id} className="rounded-lg bg-surface p-3">
               <strong className="text-sm text-forest">{item.pattern}</strong>
               <p className="mt-1 text-sm leading-relaxed">{item.meaning}</p>
               <p className="mt-2 wrap-break-word text-sm text-[#756c7a]">
@@ -60,8 +60,8 @@ const StructureSuggestions = ({
                   onClick={() => onAdd(noteFor(item))}
                 >
                   {notes.includes(noteFor(item))
-                    ? 'Đã thêm vào ghi chú'
-                    : 'Thêm vào ghi chú'}
+                    ? t('suggestions.added')
+                    : t('suggestions.add')}
                 </button>
               )}
             </li>
@@ -70,8 +70,8 @@ const StructureSuggestions = ({
       ) : (
         <p className="mt-3 text-sm text-[#756c7a]">
           {structures.length
-            ? 'Chưa tìm thấy cấu trúc đã lưu phù hợp với nội dung này.'
-            : 'Bạn chưa lưu cấu trúc câu nào để đối chiếu.'}
+            ? t('suggestions.noMatch')
+            : t('suggestions.noStructures')}
         </p>
       )}
     </section>

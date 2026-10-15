@@ -2,13 +2,14 @@ import type { AppView } from '@/navigation';
 import { ui } from '@/styles/ui';
 import { ChevronRight, Cloud, HardDrive } from 'lucide-react';
 import HeaderPreferences from '@/components/HeaderPreferences';
+import { useLanguage, type MessageKey } from '@/language';
 
-const pageLabels: Record<AppView, string> = {
-  dashboard: 'Dashboard',
-  lessons: 'Lessons',
-  'exam-practice': 'Exam Practice',
-  backup: 'Sao lưu dữ liệu',
-  profile: 'Hồ sơ cá nhân',
+const pageLabelKeys: Record<AppView, MessageKey> = {
+  dashboard: 'nav.dashboard',
+  lessons: 'nav.lessons',
+  'exam-practice': 'nav.examPractice',
+  backup: 'nav.backup',
+  profile: 'nav.profile',
 };
 
 const Topbar = ({
@@ -18,17 +19,18 @@ const Topbar = ({
   view: AppView;
   connected?: boolean;
 }) => {
+  const { t } = useLanguage();
   return (
     <header className={ui('topbar')}>
       <div className="min-w-0 max-[760px]:[&>span]:hidden max-[760px]:[&>svg]:hidden">
-        <span>Không gian cá nhân</span>
+        <span>{t('topbar.workspace')}</span>
         <ChevronRight size={14} />
-        <strong>{pageLabels[view]}</strong>
+        <strong>{t(pageLabelKeys[view])}</strong>
       </div>
       <div className="shrink-0">
         <span className={`${ui('local-label')} max-[1100px]:hidden`}>
           {connected ? <Cloud size={15} /> : <HardDrive size={15} />}
-          {connected ? 'Đã kết nối Drive' : 'Lưu cục bộ'}
+          {connected ? t('topbar.driveConnected') : t('topbar.local')}
         </span>
         <HeaderPreferences />
       </div>

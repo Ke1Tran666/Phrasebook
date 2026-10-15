@@ -12,6 +12,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { type Lesson } from '@/db';
+import { useLanguage } from '@/language';
 
 const Sidebar = ({
   view,
@@ -36,10 +37,11 @@ const Sidebar = ({
   setStatus: (value: string) => void;
   setKind: (value: string) => void;
 }) => {
+  const { t } = useLanguage();
   return (
     <aside className={ui('sidebar')}>
       <Logo onClick={() => nav('dashboard')} />
-      <span className={ui('sidebar-caption')}>HỌC TẬP</span>
+      <span className={ui('sidebar-caption')}>{t('sidebar.learning')}</span>
       <nav aria-label="Điều hướng chính">
         <button
           className={ui(
@@ -47,7 +49,7 @@ const Sidebar = ({
           )}
           onClick={() => nav('dashboard')}
         >
-          <LayoutDashboard size={20} /> Dashboard
+          <LayoutDashboard size={20} /> {t('nav.dashboard')}
         </button>
         <button
           className={ui(view === 'lessons' ? 'nav-item selected' : 'nav-item')}
@@ -56,7 +58,7 @@ const Sidebar = ({
             setTopic('all');
           }}
         >
-          <BookOpen size={20} /> Lessons <span>{all.length}</span>
+          <BookOpen size={20} /> {t('nav.lessons')} <span>{all.length}</span>
         </button>
         <button
           className={ui(
@@ -64,18 +66,18 @@ const Sidebar = ({
           )}
           onClick={() => nav('exam-practice')}
         >
-          <ClipboardCheck size={20} /> Exam Practice{' '}
+          <ClipboardCheck size={20} /> {t('nav.examPractice')}{' '}
           {counts.review > 0 && <span>{counts.review}</span>}
         </button>
         <button
           className={ui(view === 'backup' ? 'nav-item selected' : 'nav-item')}
           onClick={() => nav('backup')}
         >
-          <HardDrive size={20} /> Sao lưu dữ liệu
+          <HardDrive size={20} /> {t('nav.backup')}
         </button>
       </nav>
       <div className={ui('sidebar-topics')}>
-        <span className={ui('sidebar-caption')}>CHỦ ĐỀ</span>
+        <span className={ui('sidebar-caption')}>{t('sidebar.topics')}</span>
         {topics.length ? (
           topics.map((t) => (
             <button
@@ -103,20 +105,17 @@ const Sidebar = ({
             </button>
           ))
         ) : (
-          <p>Chủ đề xuất hiện khi bạn thêm bài học.</p>
+          <p>{t('sidebar.noTopics')}</p>
         )}
       </div>
       <div className={ui('local-card')}>
         <span className={ui('local-icon')}>
           <ShieldCheck size={21} />
         </span>
-        <strong>Kiến thức của riêng bạn</strong>
-        <p>
-          Bài học lưu trên trình duyệt này. Xuất file để sao lưu hoặc chuyển
-          máy.
-        </p>
+        <strong>{t('sidebar.privateTitle')}</strong>
+        <p>{t('sidebar.privateDescription')}</p>
         <button onClick={() => nav('backup')}>
-          Quản lý bản sao lưu <ChevronRight size={15} />
+          {t('sidebar.manageBackup')} <ChevronRight size={15} />
         </button>
       </div>
       <ProfileButton

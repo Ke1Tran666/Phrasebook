@@ -41,8 +41,10 @@ import {
   type Status,
 } from '@/db';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import { useLanguage } from '@/language';
 
 const App = () => {
+  const { t } = useLanguage();
   if (window.location.pathname === '/privacy') {
     return <PrivacyPolicyPage />;
   }
@@ -394,7 +396,7 @@ const App = () => {
       />
       <Modal
         open={!!detail && editing === undefined}
-        label="Chi tiết bài học"
+        label={t('detail.label')}
         onClose={() => setDetailId(null)}
         wide
       >
@@ -404,18 +406,18 @@ const App = () => {
               <div>
                 <span className={ui('eyebrow')}>
                   {detail.type === 'structure'
-                    ? 'CẤU TRÚC CÂU'
+                    ? t('lesson.structure').toLocaleUpperCase()
                     : detail.type === 'phrase'
-                      ? 'CỤM TỪ / CÂU'
-                      : 'ĐOẠN VĂN'}
+                      ? t('lesson.phrase').toLocaleUpperCase()
+                      : t('lesson.passage').toLocaleUpperCase()}
                 </span>
                 <span className={ui('detail-topic')}>
-                  {detail.topic || 'Chưa phân loại'}
+                  {detail.topic || t('common.uncategorized')}
                 </span>
               </div>
               <button
                 className={ui('icon-button')}
-                aria-label="Đóng"
+                aria-label={t('common.close')}
                 onClick={() => setDetailId(null)}
               >
                 <X />
@@ -433,35 +435,34 @@ const App = () => {
                 />
               )}
               <div className={ui('detail-section')}>
-                <span className={ui('eyebrow')}>NGHĨA TIẾNG VIỆT</span>
-                <p>
-                  {detail.meaning ||
-                    'Chưa có bản dịch. Chỉnh sửa bài để bổ sung.'}
-                </p>
+                <span className={ui('eyebrow')}>{t('detail.meaning')}</span>
+                <p>{detail.meaning || t('detail.noTranslation')}</p>
               </div>
               {detail.highlights.length > 0 && (
                 <div className={ui('detail-section')}>
-                  <span className={ui('eyebrow')}>CỤM TỪ ĐÃ ĐÁNH DẤU</span>
+                  <span className={ui('eyebrow')}>
+                    {t('detail.highlights')}
+                  </span>
                   {detail.highlights.map((h, i) => (
                     <div className={ui('phrase-row')} key={i}>
                       <strong>{h.text}</strong>
-                      <p>{h.meaning || 'Chưa có ghi chú'}</p>
+                      <p>{h.meaning || t('review.noNote')}</p>
                     </div>
                   ))}
                 </div>
               )}
               {detail.notes && (
                 <div className={ui('detail-section notes-box')}>
-                  <span className={ui('eyebrow')}>GHI CHÚ & VÍ DỤ</span>
+                  <span className={ui('eyebrow')}>{t('detail.notes')}</span>
                   <p>{detail.notes}</p>
                 </div>
               )}
               <div className={ui('detail-section')}>
-                <span className={ui('eyebrow')}>LỊCH SỬ BÀI HỌC</span>
+                <span className={ui('eyebrow')}>{t('detail.history')}</span>
                 <LessonDates lesson={detail} />
               </div>
               <label className={ui('status-select')}>
-                Trạng thái học
+                {t('detail.status')}
                 <select
                   value={detail.status}
                   onChange={(e) =>
@@ -475,9 +476,9 @@ const App = () => {
                     )
                   }
                 >
-                  <option value="new">Chưa học</option>
-                  <option value="review">Đã ôn</option>
-                  <option value="learned">Đã nhớ</option>
+                  <option value="new">{t('status.new')}</option>
+                  <option value="review">{t('review.reviewed')}</option>
+                  <option value="learned">{t('review.remembered')}</option>
                 </select>
               </label>
             </div>
@@ -489,13 +490,13 @@ const App = () => {
                   setDetailId(null);
                 }}
               >
-                <Trash2 size={17} /> Xóa bài học
+                <Trash2 size={17} /> {t('detail.deleteLesson')}
               </button>
               <button
                 className={ui('button primary')}
                 onClick={() => setEditing(detail)}
               >
-                <Pencil size={16} /> Chỉnh sửa
+                <Pencil size={16} /> {t('common.edit')}
               </button>
             </footer>
           </>
@@ -503,25 +504,22 @@ const App = () => {
       </Modal>
       <Modal
         open={!!deleting}
-        label="Xóa bài học"
+        label={t('detail.deleteLesson')}
         onClose={() => setDeleting(null)}
       >
         <div className={ui('confirm-content')}>
           <span className={ui('stat-icon red')}>
             <Trash2 />
           </span>
-          <h2>Xóa bài học này?</h2>
+          <h2>{t('detail.deleteQuestion')}</h2>
           <p className="delete-preview">{deleting?.english}</p>
-          <p>
-            Bài học và ghi chú sẽ được xóa khỏi trình duyệt này. Bạn chỉ có thể
-            khôi phục nếu đã xuất bản sao lưu.
-          </p>
+          <p>{t('detail.deleteDescription')}</p>
           <div className={ui('confirm-actions')}>
             <button
               className={ui('button secondary')}
               onClick={() => setDeleting(null)}
             >
-              Giữ lại
+              {t('detail.keep')}
             </button>
             <button
               className={ui('button danger-button')}
@@ -532,14 +530,14 @@ const App = () => {
                 }, 'Đã xóa bài học.')
               }
             >
-              Xóa bài học
+              {t('detail.deleteLesson')}
             </button>
           </div>
         </div>
       </Modal>
       <Modal
         open={pendingImport !== null}
-        label="Xác nhận nhập dữ liệu"
+        label={t('detail.importLabel')}
         onClose={() => {
           if (!busy) setPendingImport(null);
         }}
@@ -548,11 +546,13 @@ const App = () => {
           <span className={ui('stat-icon blue')}>
             <ArrowUpFromLine />
           </span>
-          <h2>Nhập bài học từ file?</h2>
+          <h2>{t('detail.importQuestion')}</h2>
           <p>
-            File hợp lệ, gồm{' '}
-            <strong>{pendingImport?.length ?? 0} bài học</strong>. Bài mới sẽ
-            được thêm; bài trùng được bỏ qua và giữ nguyên dữ liệu hiện tại.
+            {t('detail.validFile')}{' '}
+            <strong>
+              {pendingImport?.length ?? 0} {t('library.lessonCount')}
+            </strong>
+            . {t('detail.importDescription')}
           </p>
           <div className={ui('confirm-actions')}>
             <button
@@ -560,7 +560,7 @@ const App = () => {
               disabled={busy}
               onClick={() => setPendingImport(null)}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
             <button
               className={ui('button primary')}
@@ -572,7 +572,7 @@ const App = () => {
               ) : (
                 <Check size={16} />
               )}{' '}
-              Xác nhận nhập
+              {t('detail.confirmImport')}
             </button>
           </div>
         </div>

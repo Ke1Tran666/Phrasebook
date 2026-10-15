@@ -1,40 +1,54 @@
 import { Check, ChevronDown, Moon, Palette, Star, Sun } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { applyTheme, getStoredTheme, type AppTheme } from '@/theme';
+import { useLanguage, type AppLanguage, type MessageKey } from '@/language';
 
 const themes: Array<{
   id: AppTheme;
-  label: string;
-  description: string;
   icon: typeof Sun;
   swatch: string;
+  labelKey: MessageKey;
+  descriptionKey: MessageKey;
 }> = [
   {
     id: 'light',
-    label: 'Sáng',
-    description: 'Tím SimEnglish',
     icon: Sun,
     swatch: 'bg-[#8b2bd1]',
+    labelKey: 'theme.light',
+    descriptionKey: 'theme.lightDescription',
   },
   {
     id: 'dark',
-    label: 'Tối',
-    description: 'Tím than dịu mắt',
     icon: Moon,
     swatch: 'bg-[#211826]',
+    labelKey: 'theme.dark',
+    descriptionKey: 'theme.darkDescription',
   },
   {
     id: 'independence',
-    label: 'Lễ Độc lập',
-    description: 'Đỏ sao vàng',
     icon: Star,
     swatch: 'bg-[#da251d]',
+    labelKey: 'theme.independence',
+    descriptionKey: 'theme.independenceDescription',
   },
+];
+
+const languages: Array<{
+  id: AppLanguage;
+  code: string;
+  flag: string;
+  labelKey: MessageKey;
+}> = [
+  { id: 'vi', code: 'VI', flag: '🇻🇳', labelKey: 'language.vi' },
+  { id: 'en', code: 'EN', flag: '🇬🇧', labelKey: 'language.en' },
 ];
 
 const HeaderPreferences = () => {
   const [theme, setTheme] = useState<AppTheme>(getStoredTheme);
   const themeMenu = useRef<HTMLDetailsElement>(null);
+  const languageMenu = useRef<HTMLDetailsElement>(null);
+  const { language, setLanguage, t } = useLanguage();
+  const currentLanguage = languages.find((option) => option.id === language)!;
 
   const chooseTheme = (nextTheme: AppTheme) => {
     setTheme(nextTheme);
@@ -42,35 +56,66 @@ const HeaderPreferences = () => {
     themeMenu.current?.removeAttribute('open');
   };
 
+  const chooseLanguage = (nextLanguage: AppLanguage) => {
+    setLanguage(nextLanguage);
+    languageMenu.current?.removeAttribute('open');
+  };
+
   return (
     <div className="flex items-center gap-2.5 max-[760px]:gap-2">
-      <label className="language-control relative flex h-10 min-w-[116px] cursor-pointer items-center gap-2 rounded-full border border-line bg-[var(--color-surface-soft)] px-3.5 text-sm font-semibold text-forest shadow-[0_3px_10px_#53206c12] transition-colors hover:brightness-95 focus-within:ring-2 focus-within:ring-[#8b2bd133] max-[760px]:h-9 max-[760px]:min-w-[96px] max-[760px]:px-3">
-        <span aria-hidden="true" className="text-base leading-none">
-          🇬🇧
-        </span>
-        <span>EN</span>
-        <ChevronDown aria-hidden="true" className="ml-auto" size={16} />
-        <select
-          aria-label="Ngôn ngữ học"
-          className="absolute inset-0 cursor-pointer appearance-none opacity-0"
-          defaultValue="en"
+      <details ref={languageMenu} className="group relative">
+        <summary
+          aria-label={t('language.title')}
+          className="language-control flex h-10 min-w-29 cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-surface-soft px-3.5 text-sm font-semibold text-forest shadow-[0_3px_10px_#53206c12] transition-colors marker:content-none hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest max-[760px]:h-9 max-[760px]:min-w-24 max-[760px]:px-3 [&::-webkit-details-marker]:hidden"
         >
-          <option value="en">EN</option>
-        </select>
-      </label>
+          <span aria-hidden="true" className="text-base leading-none">
+            {currentLanguage.flag}
+          </span>
+          <span>{currentLanguage.code}</span>
+          <ChevronDown aria-hidden="true" className="ml-auto" size={16} />
+        </summary>
+
+        <div className="absolute top-[calc(100%+10px)] right-0 z-20 w-60 rounded-xl border border-line bg-surface p-3 text-text shadow-[0_16px_45px_#3213401f]">
+          <p className="px-2 pb-2 text-xs font-bold tracking-[0.12em] text-muted uppercase">
+            {t('language.title')}
+          </p>
+          <div className="grid gap-1">
+            {languages.map((option) => {
+              const selected = option.id === language;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={selected}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-soft ${selected ? 'bg-surface-soft' : 'bg-transparent'}`}
+                  onClick={() => chooseLanguage(option.id)}
+                >
+                  <span className="text-xl leading-none" aria-hidden="true">
+                    {option.flag}
+                  </span>
+                  <strong className="min-w-0 flex-1 text-sm">
+                    {t(option.labelKey)}
+                  </strong>
+                  {selected && <Check className="text-forest" size={17} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </details>
 
       <details ref={themeMenu} className="group relative">
         <summary
-          aria-label="Đổi giao diện"
-          className="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-line bg-[var(--color-surface)] text-forest shadow-[0_3px_10px_#53206c12] transition-colors marker:content-none hover:bg-[var(--color-surface-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest max-[760px]:size-9 [&::-webkit-details-marker]:hidden"
-          title="Đổi giao diện"
+          aria-label={t('theme.open')}
+          className="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-line bg-surface text-forest shadow-[0_3px_10px_#53206c12] transition-colors marker:content-none hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest max-[760px]:size-9 [&::-webkit-details-marker]:hidden"
+          title={t('theme.open')}
         >
           <Palette size={21} strokeWidth={2} />
         </summary>
 
-        <div className="theme-menu absolute top-[calc(100%+10px)] right-0 z-20 w-64 rounded-xl border border-line bg-[var(--color-surface)] p-3 text-[var(--color-text)] shadow-[0_16px_45px_#3213401f]">
+        <div className="theme-menu absolute top-[calc(100%+10px)] right-0 z-20 w-64 rounded-xl border border-line bg-surface p-3 text-text shadow-[0_16px_45px_#3213401f]">
           <p className="px-2 pb-2 text-xs font-bold tracking-[0.12em] text-muted uppercase">
-            Chọn giao diện
+            {t('theme.title')}
           </p>
           <div className="grid gap-1">
             {themes.map((option) => {
@@ -81,7 +126,7 @@ const HeaderPreferences = () => {
                   key={option.id}
                   type="button"
                   aria-pressed={selected}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-surface-soft)] ${selected ? 'bg-[var(--color-surface-soft)]' : 'bg-transparent'}`}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-soft ${selected ? 'bg-surface-soft' : 'bg-transparent'}`}
                   onClick={() => chooseTheme(option.id)}
                 >
                   <span
@@ -90,9 +135,11 @@ const HeaderPreferences = () => {
                     <Icon size={16} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <strong className="block text-sm">{option.label}</strong>
+                    <strong className="block text-sm">
+                      {t(option.labelKey)}
+                    </strong>
                     <small className="mt-0.5 block text-xs text-muted">
-                      {option.description}
+                      {t(option.descriptionKey)}
                     </small>
                   </span>
                   {selected && <Check className="text-forest" size={17} />}

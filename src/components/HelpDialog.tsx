@@ -46,7 +46,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
           </li>
         </ol>
         <div className="mt-4 space-y-3">
-          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
+          <div className="rounded-lg bg-surface-soft p-3">
             <h4 className="mb-2 font-semibold text-forest">
               Ví dụ: Cụm từ / câu
             </h4>
@@ -72,7 +72,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
               </div>
             </dl>
           </div>
-          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
+          <div className="rounded-lg bg-surface-soft p-3">
             <h4 className="mb-2 font-semibold text-forest">Ví dụ: Đoạn văn</h4>
             <dl className="space-y-2">
               <div>
@@ -102,7 +102,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
               </div>
             </dl>
           </div>
-          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
+          <div className="rounded-lg bg-surface-soft p-3">
             <h4 className="mb-2 font-semibold text-forest">
               Ví dụ: Cấu trúc câu
             </h4>

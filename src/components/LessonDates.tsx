@@ -1,13 +1,13 @@
 import { CalendarClock } from 'lucide-react';
 import type { Lesson } from '@/db';
+import { useLanguage } from '@/language';
 
-const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
-const formatDate = (value: string) => dateFormatter.format(new Date(value));
+const formatDate = (value: string, locale: string) =>
+  new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value));
 
 const LessonDates = ({
   lesson,
@@ -16,13 +16,19 @@ const LessonDates = ({
   lesson: Lesson;
   compact?: boolean;
 }) => {
+  const { language, t } = useLanguage();
+  const locale = language === 'vi' ? 'vi-VN' : 'en-GB';
   if (compact) {
     return (
       <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#918895]">
         <CalendarClock size={14} aria-hidden="true" />
-        <span>Thêm {formatDate(lesson.createdAt)}</span>
+        <span>
+          {t('dates.added')} {formatDate(lesson.createdAt, locale)}
+        </span>
         <span aria-hidden="true">·</span>
-        <span>Sửa {formatDate(lesson.updatedAt)}</span>
+        <span>
+          {t('dates.edited')} {formatDate(lesson.updatedAt, locale)}
+        </span>
       </p>
     );
   }
@@ -31,24 +37,24 @@ const LessonDates = ({
     <dl className="grid gap-3 text-sm text-[#756b7a] sm:grid-cols-3">
       <div>
         <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
-          NGÀY THÊM
+          {t('dates.addedLabel')}
         </dt>
-        <dd className="mt-1">{formatDate(lesson.createdAt)}</dd>
+        <dd className="mt-1">{formatDate(lesson.createdAt, locale)}</dd>
       </div>
       <div>
         <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
-          CHỈNH SỬA
+          {t('dates.editedLabel')}
         </dt>
-        <dd className="mt-1">{formatDate(lesson.updatedAt)}</dd>
+        <dd className="mt-1">{formatDate(lesson.updatedAt, locale)}</dd>
       </div>
       <div>
         <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
-          ÔN TIẾP THEO
+          {t('dates.nextReview')}
         </dt>
         <dd className="mt-1">
           {lesson.nextReviewAt
-            ? formatDate(lesson.nextReviewAt)
-            : 'Có thể ôn ngay'}
+            ? formatDate(lesson.nextReviewAt, locale)
+            : t('dates.reviewNow')}
         </dd>
       </div>
     </dl>

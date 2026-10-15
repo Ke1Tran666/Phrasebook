@@ -105,7 +105,7 @@ const PrivacyPolicyPage = () => {
 
   return (
     <div className="min-h-screen bg-page text-text">
-      <header className="border-b border-line bg-[var(--color-surface)]">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <a
             href="/"
@@ -145,7 +145,7 @@ const PrivacyPolicyPage = () => {
           </p>
         </div>
         <div className="my-8 grid gap-4 sm:grid-cols-2">
-          <div className="flex items-start gap-3 rounded-xl border border-line bg-[var(--color-surface)] p-5">
+          <div className="flex items-start gap-3 rounded-xl border border-line bg-surface p-5">
             <HardDrive
               size={22}
               aria-hidden="true"
@@ -158,7 +158,7 @@ const PrivacyPolicyPage = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-xl border border-line bg-[var(--color-surface)] p-5">
+          <div className="flex items-start gap-3 rounded-xl border border-line bg-surface p-5">
             <Cloud
               size={22}
               aria-hidden="true"
@@ -175,7 +175,7 @@ const PrivacyPolicyPage = () => {
         <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
           <nav
             aria-label="Mục lục chính sách"
-            className="rounded-xl border border-line bg-[var(--color-surface)] p-5 lg:sticky lg:top-6"
+            className="rounded-xl border border-line bg-surface p-5 lg:sticky lg:top-6"
           >
             <h2 className="mb-3 text-xs font-semibold tracking-widest text-[#756b7a]">
               NỘI DUNG
@@ -185,7 +185,7 @@ const PrivacyPolicyPage = () => {
                 <li key={section.id}>
                   <a
                     href={`#${section.id}`}
-                    className="block rounded-md px-2 py-2 text-sm leading-5 text-[#655d6a] hover:bg-[var(--color-surface-soft)]"
+                    className="block rounded-md px-2 py-2 text-sm leading-5 text-[#655d6a] hover:bg-surface-soft"
                   >
                     {index + 1}. {section.title}
                   </a>
@@ -195,7 +195,7 @@ const PrivacyPolicyPage = () => {
           </nav>
           <article
             aria-label="Nội dung chính sách quyền riêng tư"
-            className="min-w-0 divide-y divide-line rounded-xl border border-line bg-[var(--color-surface)] px-5 sm:px-8"
+            className="min-w-0 divide-y divide-line rounded-xl border border-line bg-surface px-5 sm:px-8"
           >
             {sections.map((section, index) => (
               <section
