@@ -79,18 +79,18 @@ const LibraryPage = ({
     <>
       <div className={ui('page-heading')}>
         <div>
-          <span className={ui('eyebrow')}>YOUR WORDS, YOUR WORLD</span>
+          <span className={ui('eyebrow')}>LESSON LIBRARY</span>
           <h1>
-            Sổ bài học<span>.</span>
+            Lessons<span>.</span>
           </h1>
-          <p>Giữ lại những câu hay. Biến chúng thành tiếng Anh của bạn.</p>
+          <p>Quản lý toàn bộ câu, đoạn văn và cấu trúc bạn đang học.</p>
         </div>
         <button
           className={ui('button primary')}
           onClick={onAddLesson}
           disabled={!lessons || !!dbError}
         >
-          <Plus size={19} /> Thêm bài học
+          <Plus size={19} /> Thêm lesson
         </button>
       </div>
 

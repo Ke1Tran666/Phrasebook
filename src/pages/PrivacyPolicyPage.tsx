@@ -104,8 +104,8 @@ const PrivacyPolicyPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-[#26382f]">
-      <header className="border-b border-line bg-white">
+    <div className="min-h-screen bg-page text-text">
+      <header className="border-b border-line bg-[var(--color-surface)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <a
             href="/"
@@ -115,7 +115,7 @@ const PrivacyPolicyPage = () => {
             <span className="grid size-9 place-items-center rounded-xl bg-forest text-lime">
               <BookOpen size={22} aria-hidden="true" />
             </span>
-            phrasebook<span className="-ml-2 text-[#829d53]">.</span>
+            phrasebook<span className="-ml-2 text-[#b45bea]">.</span>
           </a>
           <a
             href="/"
@@ -130,22 +130,22 @@ const PrivacyPolicyPage = () => {
         className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14"
       >
         <div className="max-w-3xl">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#eaf0e7] px-3 py-1.5 text-xs font-semibold tracking-wide text-forest">
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#f3e9f8] px-3 py-1.5 text-xs font-semibold tracking-wide text-forest">
             <ShieldCheck size={16} aria-hidden="true" /> QUYỀN RIÊNG TƯ CỦA BẠN
           </span>
           <h1 className="text-3xl leading-tight font-medium tracking-tight sm:text-5xl">
-            Chính sách quyền riêng tư<span className="text-[#829d53]">.</span>
+            Chính sách quyền riêng tư<span className="text-[#b45bea]">.</span>
           </h1>
-          <p className="mt-5 text-base leading-7 text-[#65756b]">
+          <p className="mt-5 text-base leading-7 text-[#756b7a]">
             Hiểu dữ liệu nào được lưu, khi nào được gửi đến Google và cách bạn
             quản lý các bản sao của mình.
           </p>
-          <p className="mt-4 text-sm text-[#65756b]">
+          <p className="mt-4 text-sm text-[#756b7a]">
             Cập nhật lần cuối: <time dateTime="2026-09-18">18/09/2026</time>
           </p>
         </div>
         <div className="my-8 grid gap-4 sm:grid-cols-2">
-          <div className="flex items-start gap-3 rounded-xl border border-line bg-white p-5">
+          <div className="flex items-start gap-3 rounded-xl border border-line bg-[var(--color-surface)] p-5">
             <HardDrive
               size={22}
               aria-hidden="true"
@@ -153,12 +153,12 @@ const PrivacyPolicyPage = () => {
             />
             <div>
               <h2 className="font-semibold">Bài học lưu trên trình duyệt</h2>
-              <p className="mt-1 text-sm leading-6 text-[#65756b]">
+              <p className="mt-1 text-sm leading-6 text-[#756b7a]">
                 Bạn có thể dùng sổ học mà không kết nối Google.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-xl border border-line bg-white p-5">
+          <div className="flex items-start gap-3 rounded-xl border border-line bg-[var(--color-surface)] p-5">
             <Cloud
               size={22}
               aria-hidden="true"
@@ -166,7 +166,7 @@ const PrivacyPolicyPage = () => {
             />
             <div>
               <h2 className="font-semibold">Sao lưu khi bạn chọn</h2>
-              <p className="mt-1 text-sm leading-6 text-[#65756b]">
+              <p className="mt-1 text-sm leading-6 text-[#756b7a]">
                 Google Drive giữ bản sao thủ công, không tự đồng bộ.
               </p>
             </div>
@@ -175,9 +175,9 @@ const PrivacyPolicyPage = () => {
         <div className="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
           <nav
             aria-label="Mục lục chính sách"
-            className="rounded-xl border border-line bg-white p-5 lg:sticky lg:top-6"
+            className="rounded-xl border border-line bg-[var(--color-surface)] p-5 lg:sticky lg:top-6"
           >
-            <h2 className="mb-3 text-xs font-semibold tracking-widest text-[#65756b]">
+            <h2 className="mb-3 text-xs font-semibold tracking-widest text-[#756b7a]">
               NỘI DUNG
             </h2>
             <ol className="space-y-1">
@@ -185,7 +185,7 @@ const PrivacyPolicyPage = () => {
                 <li key={section.id}>
                   <a
                     href={`#${section.id}`}
-                    className="block rounded-md px-2 py-2 text-sm leading-5 text-[#53685b] hover:bg-[#f0f4f1]"
+                    className="block rounded-md px-2 py-2 text-sm leading-5 text-[#655d6a] hover:bg-[var(--color-surface-soft)]"
                   >
                     {index + 1}. {section.title}
                   </a>
@@ -195,7 +195,7 @@ const PrivacyPolicyPage = () => {
           </nav>
           <article
             aria-label="Nội dung chính sách quyền riêng tư"
-            className="min-w-0 divide-y divide-line rounded-xl border border-line bg-white px-5 sm:px-8"
+            className="min-w-0 divide-y divide-line rounded-xl border border-line bg-[var(--color-surface)] px-5 sm:px-8"
           >
             {sections.map((section, index) => (
               <section
@@ -210,7 +210,7 @@ const PrivacyPolicyPage = () => {
                 >
                   {index + 1}. {section.title}
                 </h2>
-                <div className="mt-4 space-y-4 text-sm leading-7 text-[#53685b] sm:text-base">
+                <div className="mt-4 space-y-4 text-sm leading-7 text-[#6e6373] sm:text-base">
                   {section.paragraphs.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
@@ -226,7 +226,7 @@ const PrivacyPolicyPage = () => {
                   </p>
                 )}
                 {section.id === 'data-use' && (
-                  <p className="mt-4 text-sm leading-7 text-[#53685b]">
+                  <p className="mt-4 text-sm leading-7 text-[#6e6373]">
                     Việc sử dụng và chuyển giao thông tin nhận từ Google APIs
                     tuân theo{' '}
                     <a
@@ -271,7 +271,7 @@ const PrivacyPolicyPage = () => {
             ))}
           </article>
         </div>
-        <footer className="mt-10 border-t border-line pt-6 text-sm text-[#65756b]">
+        <footer className="mt-10 border-t border-line pt-6 text-sm text-[#756b7a]">
           Phrasebook · Sổ tiếng Anh cá nhân
         </footer>
       </main>

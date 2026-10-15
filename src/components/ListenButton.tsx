@@ -83,7 +83,7 @@ const ListenButton = ({ text }: Props) => {
           type="button"
           onClick={play}
           aria-describedby={descriptionId}
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-forest hover:bg-[#f0f4f1]"
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-[var(--color-surface)] px-3 py-2 text-forest hover:bg-[var(--color-surface-soft)]"
         >
           {playing ? <Square size={17} /> : <Volume2 size={17} />}
           {playing ? 'Dừng đọc' : 'Nghe phát âm'}
@@ -109,7 +109,7 @@ const ListenButton = ({ text }: Props) => {
           href={googleTranslateUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-forest transition-colors hover:bg-[#f0f4f1]"
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-[var(--color-surface)] px-3 py-2 text-forest transition-colors hover:bg-[var(--color-surface-soft)]"
         >
           <ExternalLink size={17} aria-hidden="true" />
           Mở Google Translate

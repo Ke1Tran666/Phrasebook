@@ -30,7 +30,7 @@ const ProfilePage = ({
 }: ProfilePageProps) => (
   <section aria-labelledby="profile-title">
     <button type="button" className={ui('text-button')} onClick={onBack}>
-      <ArrowLeft size={17} /> Sổ bài học
+      <ArrowLeft size={17} /> Dashboard
     </button>
     <div className={ui('page-heading')}>
       <div>
@@ -41,7 +41,7 @@ const ProfilePage = ({
         <p>Thông tin tài khoản và hành trình học của bạn.</p>
       </div>
     </div>
-    <div className="mb-6 flex min-w-0 flex-col gap-5 rounded-xl border border-line bg-white p-5 sm:flex-row sm:items-center sm:p-8">
+    <div className="mb-6 flex min-w-0 flex-col gap-5 rounded-xl border border-line bg-[var(--color-surface)] p-5 sm:flex-row sm:items-center sm:p-8">
       <span
         aria-hidden="true"
         className="grid size-16 shrink-0 place-items-center rounded-full bg-[#f0e9dc] text-3xl text-[#6a604b]"
@@ -56,10 +56,10 @@ const ProfilePage = ({
         <h2 className="text-xl font-semibold wrap-anywhere">
           {account?.name || 'Sổ tay cá nhân'}
         </h2>
-        <p className="mt-2 text-sm text-[#75836f] wrap-anywhere">
+        <p className="mt-2 text-sm text-[#817486] wrap-anywhere">
           {account?.email || 'Bạn đang sử dụng sổ tay trên trình duyệt này.'}
         </p>
-        <p className="mt-2 text-sm text-[#75836f]">
+        <p className="mt-2 text-sm text-[#817486]">
           {account
             ? 'Đã kết nối tài khoản Google.'
             : 'Kết nối Google trong mục sao lưu để lưu bản sao lên Drive.'}
@@ -96,20 +96,20 @@ const ProfilePage = ({
         description="Từng chút tiến bộ"
       />
     </div>
-    <p className="mt-5 text-sm leading-relaxed text-[#75836f]">
+    <p className="mt-5 text-sm leading-relaxed text-[#817486]">
       Thống kê thuộc dữ liệu trên trình duyệt này. Bài học không tự đồng bộ với
       Google Drive.
     </p>
     <a
       href="/privacy"
-      className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-white p-5 text-forest transition-colors hover:bg-[#f0f4f1]"
+      className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-[var(--color-surface)] p-5 text-forest transition-colors hover:bg-[var(--color-surface-soft)]"
     >
       <ShieldCheck size={22} aria-hidden="true" className="shrink-0" />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold">
           Chính sách quyền riêng tư
         </span>
-        <span className="mt-1 block text-sm leading-relaxed text-[#75836f]">
+        <span className="mt-1 block text-sm leading-relaxed text-[#817486]">
           Tìm hiểu cách Phrasebook lưu trữ và sử dụng dữ liệu của bạn.
         </span>
       </span>

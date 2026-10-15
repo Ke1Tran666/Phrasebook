@@ -21,6 +21,7 @@ cho chức năng chính và không tự đồng bộ dữ liệu lên cloud.
 - Xuất/nhập bản sao JSON có validation và chống trùng.
 - Đăng nhập Google để sao lưu và khôi phục thủ công từ Drive `appDataFolder`.
 - Trang hồ sơ và chính sách quyền riêng tư.
+- Dashboard tổng hợp tiến độ, bài đến hạn và nội dung vừa cập nhật.
 
 ## Cài đặt
 
@@ -85,13 +86,15 @@ src/
 
 Các page hiện có:
 
+- `DashboardPage`: tổng quan học tập và lối tắt cho buổi học tiếp theo.
 - `LibraryPage`: danh sách, thống kê, tìm kiếm và bộ lọc.
-- `ReviewPage`: chọn chế độ ôn và thực hiện phiên ôn.
+- `ReviewPage`: giao diện Exam Practice, chọn chế độ và thực hiện phiên ôn.
 - `BackupPage`: Google Drive và file JSON.
 - `ProfilePage`: tài khoản và thống kê cá nhân.
 - `PrivacyPolicyPage`: chính sách tại `/privacy`.
 
-`App.tsx` dùng `useLiveQuery` để đọc dữ liệu phản ứng từ IndexedDB, tính dữ liệu
+Điều hướng chính gồm **Dashboard**, **Lessons** và **Exam Practice**. `App.tsx`
+dùng `useLiveQuery` để đọc dữ liệu phản ứng từ IndexedDB, tính dữ liệu
 dùng chung rồi truyền xuống page qua props. Logic có thể kiểm thử độc lập được
 đặt trong `db.ts`, `review-schedule.ts`, `structures.ts` và các service.
 

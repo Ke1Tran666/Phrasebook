@@ -18,7 +18,7 @@ const LessonDates = ({
 }) => {
   if (compact) {
     return (
-      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#8b968f]">
+      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#918895]">
         <CalendarClock size={14} aria-hidden="true" />
         <span>Thêm {formatDate(lesson.createdAt)}</span>
         <span aria-hidden="true">·</span>
@@ -28,21 +28,21 @@ const LessonDates = ({
   }
 
   return (
-    <dl className="grid gap-3 text-sm text-[#65756b] sm:grid-cols-3">
+    <dl className="grid gap-3 text-sm text-[#756b7a] sm:grid-cols-3">
       <div>
-        <dt className="text-xs font-semibold tracking-wide text-[#87928b]">
+        <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
           NGÀY THÊM
         </dt>
         <dd className="mt-1">{formatDate(lesson.createdAt)}</dd>
       </div>
       <div>
-        <dt className="text-xs font-semibold tracking-wide text-[#87928b]">
+        <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
           CHỈNH SỬA
         </dt>
         <dd className="mt-1">{formatDate(lesson.updatedAt)}</dd>
       </div>
       <div>
-        <dt className="text-xs font-semibold tracking-wide text-[#87928b]">
+        <dt className="text-xs font-semibold tracking-wide text-[#857d89]">
           ÔN TIẾP THEO
         </dt>
         <dd className="mt-1">

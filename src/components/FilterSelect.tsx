@@ -13,7 +13,7 @@ const FilterSelect = ({
   onChange,
 }: FilterSelectProps) => (
   <select
-    className="w-full min-w-0 rounded-[7px] border border-line bg-white px-2.5 py-3 text-base font-normal text-[#65766b] outline-none focus:border-[#56866b] focus:shadow-[0_0_0_3px_#234c3b12] min-[761px]:text-sm"
+    className="w-full min-w-0 rounded-[7px] border border-line bg-[var(--color-surface)] px-2.5 py-3 text-base font-normal text-[#706875] outline-none focus:border-[#9b4ed6] focus:shadow-[0_0_0_3px_#8b2bd11a] min-[761px]:text-sm"
     aria-label={label}
     value={value}
     onChange={(event) => onChange(event.target.value)}

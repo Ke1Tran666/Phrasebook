@@ -15,7 +15,7 @@ const ProfileButton = ({ account, active, onClick }: ProfileButtonProps) => {
       onClick={onClick}
       aria-label="Mở trang profile"
       aria-current={active ? 'page' : undefined}
-      className={`mt-5 flex w-full min-w-0 items-center gap-3 rounded-lg border-0 border-t border-solid border-t-[var(--color-line)] px-1 py-4 text-left transition-colors hover:bg-[#f0f4f1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#214f3d] ${active ? 'bg-[#f0f4f1]' : 'bg-transparent'}`}
+      className={`mt-5 flex w-full min-w-0 items-center gap-3 rounded-lg border-0 border-t border-solid border-t-[var(--color-line)] px-1 py-4 text-left transition-colors hover:bg-[var(--color-surface-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8b2bd1] ${active ? 'bg-[var(--color-surface-soft)]' : 'bg-transparent'}`}
     >
       <span
         aria-hidden="true"

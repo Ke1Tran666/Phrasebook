@@ -6,8 +6,9 @@ import Logo from '@/components/Logo';
 import {
   BookOpen,
   ChevronRight,
-  GraduationCap,
+  ClipboardCheck,
   HardDrive,
+  LayoutDashboard,
   ShieldCheck,
 } from 'lucide-react';
 import { type Lesson } from '@/db';
@@ -37,23 +38,33 @@ const Sidebar = ({
 }) => {
   return (
     <aside className={ui('sidebar')}>
-      <Logo onClick={() => nav('library')} />
-      <span className={ui('sidebar-caption')}>GÓC HỌC CỦA BẠN</span>
+      <Logo onClick={() => nav('dashboard')} />
+      <span className={ui('sidebar-caption')}>HỌC TẬP</span>
       <nav aria-label="Điều hướng chính">
         <button
-          className={ui(view === 'library' ? 'nav-item selected' : 'nav-item')}
+          className={ui(
+            view === 'dashboard' ? 'nav-item selected' : 'nav-item',
+          )}
+          onClick={() => nav('dashboard')}
+        >
+          <LayoutDashboard size={20} /> Dashboard
+        </button>
+        <button
+          className={ui(view === 'lessons' ? 'nav-item selected' : 'nav-item')}
           onClick={() => {
-            nav('library');
+            nav('lessons');
             setTopic('all');
           }}
         >
-          <BookOpen size={20} /> Sổ bài học <span>{all.length}</span>
+          <BookOpen size={20} /> Lessons <span>{all.length}</span>
         </button>
         <button
-          className={ui(view === 'review' ? 'nav-item selected' : 'nav-item')}
-          onClick={() => nav('review')}
+          className={ui(
+            view === 'exam-practice' ? 'nav-item selected' : 'nav-item',
+          )}
+          onClick={() => nav('exam-practice')}
         >
-          <GraduationCap size={21} /> Ôn tập{' '}
+          <ClipboardCheck size={20} /> Exam Practice{' '}
           {counts.review > 0 && <span>{counts.review}</span>}
         </button>
         <button
@@ -70,23 +81,23 @@ const Sidebar = ({
             <button
               className={ui(
                 'topic-nav ' +
-                  (topic === t && view === 'library' ? 'chosen' : ''),
+                  (topic === t && view === 'lessons' ? 'chosen' : ''),
               )}
               key={t}
               onClick={() => {
                 setTopic(t);
                 setStatus('all');
                 setKind('all');
-                nav('library');
+                nav('lessons');
               }}
             >
-              <span className="size-2 shrink-0 rounded-full border border-[#94a78b]" />
+              <span className="size-2 shrink-0 rounded-full border border-[#a88ab9]" />
 
               <span className="min-w-0 flex-1 truncate" title={t}>
                 {t}
               </span>
 
-              <span className="shrink-0 text-xs text-[#8b968f]">
+              <span className="shrink-0 text-xs text-[#918895]">
                 {all.filter((lesson) => lesson.topic === t).length}
               </span>
             </button>

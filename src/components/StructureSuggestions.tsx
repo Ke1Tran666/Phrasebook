@@ -29,21 +29,24 @@ const StructureSuggestions = ({
   if (!english.trim()) return null;
   return (
     <section
-      className="my-4 rounded-xl border border-[#dce4de] bg-[#f2f6f0] p-4"
+      className="my-4 rounded-xl border border-[#e8dcef] bg-[#f8f1fc] p-4"
       aria-label="Gợi ý cấu trúc"
     >
       <h3 className="text-sm font-semibold text-forest">Gợi ý cấu trúc</h3>
-      <p className="mt-1 text-xs leading-relaxed text-[#65766b]">
+      <p className="mt-1 text-xs leading-relaxed text-[#756c7a]">
         Đối chiếu với các cấu trúc bạn đã lưu. S = chủ ngữ; V = động từ nguyên
         mẫu.
       </p>
       {suggestions.length ? (
         <ul className="mt-3 space-y-3">
           {suggestions.map((item) => (
-            <li key={item.id} className="rounded-lg bg-white p-3">
+            <li
+              key={item.id}
+              className="rounded-lg bg-[var(--color-surface)] p-3"
+            >
               <strong className="text-sm text-forest">{item.pattern}</strong>
               <p className="mt-1 text-sm leading-relaxed">{item.meaning}</p>
-              <p className="mt-2 wrap-break-word text-sm text-[#65766b]">
+              <p className="mt-2 wrap-break-word text-sm text-[#756c7a]">
                 “{item.sentence}”
               </p>
               {onAdd && (
@@ -65,7 +68,7 @@ const StructureSuggestions = ({
           ))}
         </ul>
       ) : (
-        <p className="mt-3 text-sm text-[#65766b]">
+        <p className="mt-3 text-sm text-[#756c7a]">
           {structures.length
             ? 'Chưa tìm thấy cấu trúc đã lưu phù hợp với nội dung này.'
             : 'Bạn chưa lưu cấu trúc câu nào để đối chiếu.'}

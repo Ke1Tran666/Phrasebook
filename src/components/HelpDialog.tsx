@@ -46,7 +46,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
           </li>
         </ol>
         <div className="mt-4 space-y-3">
-          <div className="rounded-lg bg-[#f2f6f0] p-3">
+          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
             <h4 className="mb-2 font-semibold text-forest">
               Ví dụ: Cụm từ / câu
             </h4>
@@ -72,7 +72,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
               </div>
             </dl>
           </div>
-          <div className="rounded-lg bg-[#f2f6f0] p-3">
+          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
             <h4 className="mb-2 font-semibold text-forest">Ví dụ: Đoạn văn</h4>
             <dl className="space-y-2">
               <div>
@@ -102,7 +102,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
               </div>
             </dl>
           </div>
-          <div className="rounded-lg bg-[#f2f6f0] p-3">
+          <div className="rounded-lg bg-[var(--color-surface-soft)] p-3">
             <h4 className="mb-2 font-semibold text-forest">
               Ví dụ: Cấu trúc câu
             </h4>
@@ -144,7 +144,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
             <strong>Hủy</strong> để bỏ thay đổi chưa lưu.
           </li>
         </ol>
-        <p className="mt-2 text-[#65766b]">
+        <p className="mt-2 text-[#756c7a]">
           Khi sửa nội dung tiếng Anh, các cụm từ đã đánh dấu sẽ được xóa để
           tránh sai vị trí. Bạn có thể bôi chọn và đánh dấu lại.
         </p>
@@ -163,7 +163,7 @@ const HelpDialog = ({ open, onClose }: HelpDialogProps) => (
             nhận. Chọn <strong>Giữ lại</strong> nếu đổi ý.
           </li>
         </ol>
-        <p className="mt-2 text-[#65766b]">
+        <p className="mt-2 text-[#756c7a]">
           Bài đã xóa chỉ có thể khôi phục từ file sao lưu đã xuất trước đó.
         </p>
       </section>

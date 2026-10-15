@@ -1,1 +1,2 @@
-export type AppView = 'library' | 'review' | 'backup' | 'profile';
+export type AppView =
+  'dashboard' | 'lessons' | 'exam-practice' | 'backup' | 'profile';

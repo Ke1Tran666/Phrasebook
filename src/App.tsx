@@ -1,6 +1,7 @@
 import ListenButton from '@/components/ListenButton';
 import LessonDates from '@/components/LessonDates';
 import BackupPage from '@/pages/BackupPage';
+import DashboardPage from '@/pages/DashboardPage';
 import LibraryPage from '@/pages/LibraryPage';
 import ProfilePage from '@/pages/ProfilePage';
 import ReviewPage from '@/pages/ReviewPage';
@@ -60,7 +61,7 @@ const App = () => {
   );
   const all = lessons ?? [];
   const savedStructures = all.filter((lesson) => lesson.type === 'structure');
-  const [view, setView] = useState<AppView>('library');
+  const [view, setView] = useState<AppView>('dashboard');
   const [showIntroduction, setShowIntroduction] = useState(false);
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState('all');
@@ -256,14 +257,28 @@ const App = () => {
         setKind={setKind}
       />
       <main className={ui('main-content')}>
-        <Topbar view={view} />
+        <Topbar view={view} connected={!!drive.account} />
         <div className={ui('workspace')}>
           {dbError && (
             <div className={ui('error')} role="alert">
               {dbError}
             </div>
           )}
-          {view === 'library' && (
+          {view === 'dashboard' && (
+            <DashboardPage
+              lessons={lessons}
+              all={all}
+              dueLessons={all.filter((lesson) => isLessonDue(lesson))}
+              topics={topics}
+              counts={counts}
+              accountName={drive.account?.name}
+              onOpenLessons={() => nav('lessons')}
+              onOpenExamPractice={() => nav('exam-practice')}
+              onAddLesson={() => setEditing(null)}
+              onSelectLesson={setDetailId}
+            />
+          )}
+          {view === 'lessons' && (
             <LibraryPage
               lessons={lessons}
               all={all}
@@ -295,7 +310,7 @@ const App = () => {
               onShowIntroductionChange={setShowIntroduction}
             />
           )}
-          {view === 'review' && (
+          {view === 'exam-practice' && (
             <ReviewPage
               all={all}
               savedStructures={savedStructures}
@@ -329,9 +344,9 @@ const App = () => {
               }}
               onRestart={() => setReviewIds(null)}
               onEnd={() => setReviewIds(null)}
-              onOpenLibrary={() => nav('library')}
+              onOpenLibrary={() => nav('lessons')}
               onAddFirstLesson={() => {
-                nav('library');
+                nav('lessons');
                 setEditing(null);
               }}
               onReveal={() => setFlipped(true)}
@@ -344,7 +359,7 @@ const App = () => {
               total={all.length}
               review={counts.review}
               learned={counts.learned}
-              onBack={() => nav('library')}
+              onBack={() => nav('dashboard')}
               onBackup={() => nav('backup')}
             />
           )}

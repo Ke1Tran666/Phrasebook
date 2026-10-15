@@ -12,13 +12,13 @@ const button =
 
 const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
   <section
-    className="mb-6 rounded-xl border border-line bg-white p-5 sm:p-7"
+    className="mb-6 rounded-xl border border-line bg-[var(--color-surface)] p-5 sm:p-7"
     aria-label="Sao lưu Google Drive"
   >
     <h2 className="flex items-center gap-2 text-xl font-semibold text-forest">
       <Cloud size={24} /> Google Drive
     </h2>
-    <p className="mt-2 text-sm leading-relaxed text-[#65766b]">
+    <p className="mt-2 text-sm leading-relaxed text-[#756c7a]">
       Đăng nhập Google để tạo bản sao và lấy lại bài học trên thiết bị khác. Mỗi
       lần sao lưu tạo một bản mới; dữ liệu không tự đồng bộ.
     </p>
@@ -34,7 +34,7 @@ const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-semibold">{drive.account.name}</p>
-                <p className="break-all text-sm text-[#65766b]">
+                <p className="break-all text-sm text-[#756c7a]">
                   {drive.account.email}
                 </p>
               </div>
@@ -65,7 +65,7 @@ const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
                 <RefreshCw size={17} /> Làm mới
               </button>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-[#65766b]">
+            <p className="mt-3 text-xs leading-relaxed text-[#756c7a]">
               Hiển thị tối đa 20 bản gần nhất. Tối đa 5 MB / 10.000 bài mỗi bản.
               Bản sao nằm trong vùng dữ liệu riêng của ứng dụng, không hiện
               trong danh sách file thông thường của Drive.
@@ -78,7 +78,7 @@ const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
                 >
                   <div className="min-w-0 flex-1">
                     <p className="break-all text-sm font-medium">{file.name}</p>
-                    <p className="mt-1 text-xs text-[#65766b]">
+                    <p className="mt-1 text-xs text-[#756c7a]">
                       {new Date(file.modifiedTime).toLocaleString('vi-VN')}
                     </p>
                   </div>
@@ -95,11 +95,11 @@ const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
               ))}
             </ul>
             {!drive.backups.length && (
-              <p className="mt-4 text-sm text-[#65766b]">
+              <p className="mt-4 text-sm text-[#756c7a]">
                 Chưa có bản sao trong danh sách. Sau khi sao lưu, bấm Làm mới.
               </p>
             )}
-            <p className="mt-4 text-xs leading-relaxed text-[#65766b]">
+            <p className="mt-4 text-xs leading-relaxed text-[#756c7a]">
               Bạn sẽ xem số bài và xác nhận trước khi nhập. Bài trùng giữ nguyên
               ghi chú và tiến độ hiện tại. Đăng xuất hoặc đổi tài khoản Google
               không xóa hay tách dữ liệu đang lưu trên trình duyệt này.
@@ -124,7 +124,7 @@ const GoogleDriveBackup = ({ drive, onRestore, disabled = false }: Props) => (
                 Tải lại kết nối
               </button>
             )}
-            <p className="mt-2 text-xs text-[#65766b]">
+            <p className="mt-2 text-xs text-[#756c7a]">
               Khi tải lại trang hoặc hết phiên, bạn cần đăng nhập lại để truy
               cập Drive.
             </p>

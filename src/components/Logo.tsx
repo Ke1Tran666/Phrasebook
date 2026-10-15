@@ -9,7 +9,7 @@ const Logo = ({ onClick }: LogoProps) => (
   <a
     className={ui('brand')}
     href="#"
-    aria-label="Phrasebook — Sổ bài học"
+    aria-label="Phrasebook — Dashboard"
     onClick={(event) => {
       event.preventDefault();
       onClick();

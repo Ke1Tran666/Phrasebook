@@ -111,9 +111,7 @@ export const createDriveClient = (
     const boundary = `phrasebook_${crypto.randomUUID()}`;
 
     const metadata = {
-      name: `phrasebook-${new Date()
-        .toISOString()
-        .replace(/[:.]/g, '-')}.json`,
+      name: `phrasebook-${new Date().toISOString().replace(/[:.]/g, '-')}.json`,
       mimeType: 'application/json',
       parents: ['appDataFolder'],
       appProperties: {

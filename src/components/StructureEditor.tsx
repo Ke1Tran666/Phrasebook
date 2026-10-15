@@ -33,11 +33,11 @@ const StructureEditor = ({ notes, onChange }: Props) => {
 
   return (
     <section
-      className="my-4 rounded-xl border border-[#dce4de] bg-white p-4"
+      className="my-4 rounded-xl border border-[#dce4de] bg-[var(--color-surface)] p-4"
       aria-label="Thêm cấu trúc câu"
     >
       <h3 className="text-sm font-semibold text-forest">Thêm cấu trúc câu</h3>
-      <p className="mt-1 mb-3 text-xs leading-relaxed text-[#65766b]">
+      <p className="mt-1 mb-3 text-xs leading-relaxed text-[#756c7a]">
         Nhập cấu trúc bạn muốn học. Sau khi thêm, bạn có thể sửa hoặc xóa trong
         phần Ghi chú & ví dụ.
       </p>
@@ -82,7 +82,7 @@ const StructureEditor = ({ notes, onChange }: Props) => {
         <Plus size={16} /> Thêm cấu trúc vào ghi chú
       </button>
       {duplicate && (
-        <p className="mt-2 text-sm text-[#65766b]">
+        <p className="mt-2 text-sm text-[#756c7a]">
           Cấu trúc này đã có trong ghi chú.
         </p>
       )}
