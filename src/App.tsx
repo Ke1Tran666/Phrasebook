@@ -1,5 +1,3 @@
-import ListenButton from '@/components/ListenButton';
-import LessonDates from '@/components/LessonDates';
 import BackupPage from '@/pages/BackupPage';
 import DashboardPage from '@/pages/DashboardPage';
 import LibraryPage from '@/pages/LibraryPage';
@@ -8,7 +6,6 @@ import ReviewPage from '@/pages/ReviewPage';
 import type { AppView } from '@/navigation';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
 import { ui } from '@/styles/ui';
-import StructureSuggestions from '@/components/StructureSuggestions';
 import {
   buildReviewSession,
   createReviewUpdate,
@@ -16,18 +13,11 @@ import {
   type ReviewMode,
 } from '@/review-schedule';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  ArrowUpFromLine,
-  Check,
-  LoaderCircle,
-  Pencil,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { ArrowUpFromLine, Check, LoaderCircle, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import LessonForm from '@/components/LessonForm';
+import LessonDetailModal from '@/components/LessonDetailModal';
 import Toast from '@/components/Toast';
-import English from '@/components/English';
 import Modal from '@/components/Modal';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
@@ -122,6 +112,7 @@ const App = () => {
       );
     }
   };
+
   useEffect(() => {
     const ctx = (
       document as Document & {
@@ -161,6 +152,7 @@ const App = () => {
     } catch {}
     return () => lifecycle.abort();
   }, []);
+
   const exportFile = async () => {
     try {
       const records = await db.lessons.toArray();
@@ -177,6 +169,7 @@ const App = () => {
       notify('Không thể xuất dữ liệu. Vui lòng thử lại.');
     }
   };
+
   const readFile = async (file?: File) => {
     if (!file) return;
     setBusy(true);
@@ -191,6 +184,7 @@ const App = () => {
       if (inputFile.current) inputFile.current.value = '';
     }
   };
+
   const confirmImport = async () => {
     if (!pendingImport) return;
     setBusy(true);
@@ -207,6 +201,7 @@ const App = () => {
       setBusy(false);
     }
   };
+
   const reviewLessons = all.filter((lesson) =>
     reviewMode === 'structure'
       ? lesson.type === 'structure'
@@ -225,6 +220,7 @@ const App = () => {
     : null;
   const finished =
     reviewIds !== null && (reviewIndex >= reviewIds.length || !current);
+
   const grade = async (next: Status) => {
     if (!current || busy) return;
     setBusy(true);
@@ -240,10 +236,12 @@ const App = () => {
       setBusy(false);
     }
   };
+
   const nav = (v: typeof view) => {
     setView(v);
     setDetailId(null);
   };
+
   return (
     <div className={ui('app-shell')}>
       <Sidebar
@@ -381,6 +379,7 @@ const App = () => {
           )}
         </div>
       </main>
+
       <input
         ref={inputFile}
         type="file"
@@ -388,120 +387,40 @@ const App = () => {
         hidden
         onChange={(e) => void readFile(e.target.files?.[0])}
       />
+
       <LessonForm
         lesson={editing}
         onClose={() => setEditing(undefined)}
         onSaved={() => setEditing(undefined)}
         notify={notify}
       />
-      <Modal
-        open={!!detail && editing === undefined}
-        label={t('detail.label')}
-        onClose={() => setDetailId(null)}
-        wide
-      >
-        {detail && (
-          <>
-            <div className={ui('modal-heading')}>
-              <div>
-                <span className={ui('eyebrow')}>
-                  {detail.type === 'structure'
-                    ? t('lesson.structure').toLocaleUpperCase()
-                    : detail.type === 'phrase'
-                      ? t('lesson.phrase').toLocaleUpperCase()
-                      : t('lesson.passage').toLocaleUpperCase()}
-                </span>
-                <span className={ui('detail-topic')}>
-                  {detail.topic || t('common.uncategorized')}
-                </span>
-              </div>
-              <button
-                className={ui('icon-button')}
-                aria-label={t('common.close')}
-                onClick={() => setDetailId(null)}
-              >
-                <X />
-              </button>
-            </div>
-            <div className={ui('detail-body')}>
-              <h2 className={ui('detail-english')}>
-                <English lesson={detail} />
-              </h2>
-              <ListenButton key={detail.id} text={detail.english} />
-              {detail.type !== 'structure' && (
-                <StructureSuggestions
-                  english={detail.english}
-                  structures={savedStructures}
-                />
-              )}
-              <div className={ui('detail-section')}>
-                <span className={ui('eyebrow')}>{t('detail.meaning')}</span>
-                <p>{detail.meaning || t('detail.noTranslation')}</p>
-              </div>
-              {detail.highlights.length > 0 && (
-                <div className={ui('detail-section')}>
-                  <span className={ui('eyebrow')}>
-                    {t('detail.highlights')}
-                  </span>
-                  {detail.highlights.map((h, i) => (
-                    <div className={ui('phrase-row')} key={i}>
-                      <strong>{h.text}</strong>
-                      <p>{h.meaning || t('review.noNote')}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {detail.notes && (
-                <div className={ui('detail-section notes-box')}>
-                  <span className={ui('eyebrow')}>{t('detail.notes')}</span>
-                  <p>{detail.notes}</p>
-                </div>
-              )}
-              <div className={ui('detail-section')}>
-                <span className={ui('eyebrow')}>{t('detail.history')}</span>
-                <LessonDates lesson={detail} />
-              </div>
-              <label className={ui('status-select')}>
-                {t('detail.status')}
-                <select
-                  value={detail.status}
-                  onChange={(e) =>
-                    act(
-                      () =>
-                        db.lessons.update(
-                          detail.id,
-                          createReviewUpdate(e.target.value as Status),
-                        ),
-                      'Đã cập nhật trạng thái.',
-                    )
-                  }
-                >
-                  <option value="new">{t('status.new')}</option>
-                  <option value="review">{t('review.reviewed')}</option>
-                  <option value="learned">{t('review.remembered')}</option>
-                </select>
-              </label>
-            </div>
-            <footer className={ui('modal-footer')}>
-              <button
-                className={ui('text-button danger')}
-                onClick={() => {
-                  setDeleting(detail);
-                  setDetailId(null);
-                }}
-              >
-                <Trash2 size={17} /> {t('detail.deleteLesson')}
-              </button>
-              <button
-                className={ui('button primary')}
-                onClick={() => setEditing(detail)}
-              >
-                <Pencil size={16} /> {t('common.edit')}
-              </button>
-            </footer>
-          </>
-        )}
-      </Modal>
+
+      {/* Modal chi tiết bài học đã được tách riêng */}
+      {editing === undefined && (
+        <LessonDetailModal
+          detail={detail}
+          savedStructures={savedStructures}
+          onClose={() => setDetailId(null)}
+          onEdit={(item) => setEditing(item)}
+          onDelete={(item) => {
+            setDeleting(item);
+            setDetailId(null);
+          }}
+          onStatusChange={(newStatus) => {
+            if (!detail) return;
+            act(
+              () =>
+                db.lessons.update(
+                  detail.id,
+                  createReviewUpdate(newStatus as Status),
+                ),
+              'Đã cập nhật trạng thái.',
+            );
+          }}
+        />
+      )}
+
+      {/* Modal xác nhận xóa */}
       <Modal
         open={!!deleting}
         label={t('detail.deleteLesson')}
@@ -535,6 +454,8 @@ const App = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Modal xác nhận nhập */}
       <Modal
         open={pendingImport !== null}
         label={t('detail.importLabel')}
@@ -577,6 +498,7 @@ const App = () => {
           </div>
         </div>
       </Modal>
+
       <Toast message={toast} onMessageChange={setToast} />
     </div>
   );

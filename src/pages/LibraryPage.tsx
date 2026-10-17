@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import FilterSelect from '@/components/FilterSelect';
 import LessonCard from '@/components/LessonCard';
 import SearchInput from '@/components/SearchInput';
 import StatCard from '@/components/StatCard';
+import TopicChips from '@/components/TopicChips';
 import WorkspaceFooter from '@/components/WorkspaceFooter';
 import type { Lesson } from '@/db';
 import { ui } from '@/styles/ui';
@@ -16,6 +18,7 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
+import { LessonProgressSection } from '@/components/LessonProgressSection';
 
 type LibraryPageProps = {
   lessons?: Lesson[];
@@ -53,7 +56,6 @@ const LibraryPage = ({
   lessons,
   all,
   filtered,
-  topics,
   counts,
   query,
   kind,
@@ -75,6 +77,29 @@ const LibraryPage = ({
   onShowIntroductionChange,
 }: LibraryPageProps) => {
   const { t } = useLanguage();
+
+  // Danh sách chủ đề ĐỘNG theo loại bài học đang xem (kind)
+  const currentCategoryTopics = useMemo(() => {
+    const lessonsInKind =
+      kind === 'all' ? all : all.filter((l) => l.type === kind);
+    return [...new Set(lessonsInKind.map((l) => l.topic).filter(Boolean))].sort(
+      (a, b) => a.localeCompare(b, 'vi'),
+    );
+  }, [all, kind]);
+
+  // Đổi loại bài: tự động reset topic về 'all' nếu tab mới không chứa topic cũ
+  const handleTabChange = (newKind: string) => {
+    onKindChange(newKind);
+    if (topic !== 'all') {
+      const lessonsInNewKind =
+        newKind === 'all' ? all : all.filter((l) => l.type === newKind);
+      const hasTopic = lessonsInNewKind.some((l) => l.topic === topic);
+      if (!hasTopic) {
+        onTopicChange('all');
+      }
+    }
+  };
+
   const clearFilters = () => {
     onQueryChange('');
     onKindChange('all');
@@ -111,7 +136,7 @@ const LibraryPage = ({
           description={t('library.inNotebook')}
           onClick={() => {
             onStatusChange('all');
-            onKindChange('all');
+            handleTabChange('all');
             onTopicChange('all');
           }}
         />
@@ -133,6 +158,10 @@ const LibraryPage = ({
         />
       </div>
 
+      {/* Banner Tiến độ tổng quan */}
+      <LessonProgressSection all={all} />
+
+      {/* Toolbar Loại bài học (Tab group) */}
       <div className={ui('library-toolbar')}>
         <div
           className={ui('tab-group')}
@@ -148,7 +177,7 @@ const LibraryPage = ({
             <button
               key={value}
               className={ui(kind === value ? 'active' : '')}
-              onClick={() => onKindChange(value)}
+              onClick={() => handleTabChange(value)}
             >
               {label}
               {value === 'all' && <span>{all.length}</span>}
@@ -164,19 +193,22 @@ const LibraryPage = ({
         </button>
       </div>
 
-      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
-        <div className="min-w-0 sm:col-span-3 xl:col-span-1">
+      {currentCategoryTopics.length > 0 && (
+        <div className="mb-4">
+          <TopicChips
+            topics={currentCategoryTopics}
+            selectedTopic={topic}
+            allLabel={t('library.allTopics')}
+            onSelectTopic={onTopicChange}
+          />
+        </div>
+      )}
+
+      {/* Thanh tìm kiếm và bộ lọc Trạng thái / Sắp xếp */}
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_180px]">
+        <div className="min-w-0 sm:col-span-2 xl:col-span-1">
           <SearchInput value={query} onChange={onQueryChange} />
         </div>
-        <FilterSelect
-          label={t('library.topicFilter')}
-          value={topic}
-          onChange={onTopicChange}
-          options={[
-            { value: 'all', label: t('library.allTopics') },
-            ...topics.map((item) => ({ value: item, label: item })),
-          ]}
-        />
         <FilterSelect
           label={t('library.statusFilter')}
           value={status}

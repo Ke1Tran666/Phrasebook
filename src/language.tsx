@@ -310,13 +310,19 @@ const vi = {
   'suggestions.noMatch':
     'Chưa tìm thấy cấu trúc đã lưu phù hợp với nội dung này.',
   'suggestions.noStructures': 'Bạn chưa lưu cấu trúc câu nào để đối chiếu.',
+  'progress.eyebrow': 'TIẾN ĐỘ HỌC TẬP',
+  'progress.overview': 'Tổng quan hoàn thành',
+  'progress.masteredSummary':
+    'Bạn đã nắm vững {learned} / {total} nội dung trong kho kiến thức.',
+  'progress.label': 'Tiến độ',
+  'progress.itemsSuffix': 'nội dung',
 } as const;
 
 export type MessageKey = keyof typeof vi;
 
 const en: Record<MessageKey, string> = {
   'language.title': 'Language',
-  'language.vi': 'Vietnamese',
+  'language.vi': 'Tiếng Việt',
   'language.en': 'English',
   'theme.open': 'Change theme',
   'theme.title': 'Choose theme',
@@ -614,6 +620,12 @@ const en: Record<MessageKey, string> = {
   'suggestions.add': 'Add to notes',
   'suggestions.noMatch': 'No saved structure matches this content yet.',
   'suggestions.noStructures': 'You have not saved any structures to compare.',
+  'progress.eyebrow': 'LEARNING PROGRESS',
+  'progress.overview': 'Completion Progress',
+  'progress.masteredSummary':
+    'You have mastered {learned} / {total} items in your notebook.',
+  'progress.label': 'Progress',
+  'progress.itemsSuffix': 'items',
 };
 
 export const getStoredLanguage = (): AppLanguage =>
