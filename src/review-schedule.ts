@@ -8,10 +8,32 @@ export type ReviewMode = 'content' | 'structure';
  */
 const INTERVAL_LADDER = [1, 3, 7, 14, 30, 60];
 
+const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+
+const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+};
+
+const shuffle = <T>(items: T[], random: () => number): T[] => {
+  const result = [...items];
+
+  for (let index = result.length - 1; index > 0; index--) {
+    const target = Math.floor(random() * (index + 1));
+    [result[index], result[target]] = [result[target], result[index]];
+  }
+
+  return result;
+};
+
 /**
  * Kiểm tra xem bài học đã đến hạn ôn tập hay chưa
  */
-export const isLessonDue = (lesson: Lesson, now: Date = new Date()): boolean => {
+export const isLessonDue = (
+  lesson: Lesson,
+  now: Date = new Date(),
+): boolean => {
   // Bài mới tạo chưa học cũng được coi là có thể đưa vào danh sách học/ôn
   if (lesson.status === 'new') return true;
   if (!lesson.nextReviewAt) return true;
@@ -36,6 +58,7 @@ export const createReviewUpdate = (
     return {
       status: 'new',
       updatedAt: currentDateStr,
+      lastReviewedAt: undefined,
       nextReviewAt: undefined,
     };
   }
@@ -43,8 +66,7 @@ export const createReviewUpdate = (
   // 2. Nếu người dùng chọn "Cần ôn tập" (Chưa thuộc / Cần xem lại)
   if (nextStatus === 'review') {
     // Hẹn ôn lại vào ngày mai (1 ngày)
-    const nextDate = new Date(now);
-    nextDate.setDate(nextDate.getDate() + 1);
+    const nextDate = addDays(now, 1);
 
     return {
       status: 'review',
@@ -60,21 +82,26 @@ export const createReviewUpdate = (
 
   if (lesson?.lastReviewedAt && lesson.nextReviewAt) {
     const prevDiffDays = Math.round(
-      (new Date(lesson.nextReviewAt).getTime() - new Date(lesson.lastReviewedAt).getTime()) /
-        (1000 * 60 * 60 * 24),
+      (new Date(lesson.nextReviewAt).getTime() -
+        new Date(lesson.lastReviewedAt).getTime()) /
+        DAY_IN_MILLISECONDS,
     );
 
     // Tìm bậc tiếp theo trong thang giãn cách
-    const currentStepIndex = INTERVAL_LADDER.findIndex((d) => d >= prevDiffDays);
-    if (currentStepIndex !== -1 && currentStepIndex < INTERVAL_LADDER.length - 1) {
+    const currentStepIndex = INTERVAL_LADDER.findIndex(
+      (d) => d >= prevDiffDays,
+    );
+    if (
+      currentStepIndex !== -1 &&
+      currentStepIndex < INTERVAL_LADDER.length - 1
+    ) {
       daysToAdd = INTERVAL_LADDER[currentStepIndex + 1];
     } else {
       daysToAdd = INTERVAL_LADDER[INTERVAL_LADDER.length - 1]; // Tối đa 60 ngày
     }
   }
 
-  const nextDate = new Date(now);
-  nextDate.setDate(nextDate.getDate() + daysToAdd);
+  const nextDate = addDays(now, daysToAdd);
 
   return {
     status: 'learned',
@@ -109,12 +136,19 @@ export const buildReviewSession = (
       (selectedTopic === 'all' || l.topic === selectedTopic),
   );
 
-  // Xáo trộn ngẫu nhiên (Fisher-Yates shuffle)
-  const shuffled = [...eligible];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(randomFn() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  if (mode === 'structure') {
+    return shuffle(eligible, randomFn).slice(0, limit);
   }
 
-  return shuffled.slice(0, limit);
+  // Một phiên nội dung ưu tiên tối đa 3 đoạn văn, phần còn lại là cụm từ.
+  const passages = shuffle(
+    eligible.filter((lesson) => lesson.type === 'passage'),
+    randomFn,
+  ).slice(0, Math.min(3, limit));
+  const phrases = shuffle(
+    eligible.filter((lesson) => lesson.type === 'phrase'),
+    randomFn,
+  ).slice(0, Math.max(0, limit - passages.length));
+
+  return shuffle([...passages, ...phrases], randomFn);
 };
