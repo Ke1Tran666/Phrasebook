@@ -23,23 +23,54 @@ const lesson = (overrides: Partial<Lesson> = {}): Lesson => ({
 });
 
 describe('review scheduling', () => {
-  it('schedules reviewed lessons after 1–3 days', () => {
+  it('schedules lessons that need review after one day', () => {
     assert.equal(
-      createReviewUpdate('review', now, () => 0).nextReviewAt,
+      createReviewUpdate('review', lesson(), now).nextReviewAt,
       '2026-09-24T08:00:00.000Z',
-    );
-    assert.equal(
-      createReviewUpdate('review', now, () => 0.999).nextReviewAt,
-      '2026-09-26T08:00:00.000Z',
     );
   });
 
-  it('schedules remembered lessons after 3–4 days', () => {
-    const earliest = createReviewUpdate('learned', now, () => 0);
-    const latest = createReviewUpdate('learned', now, () => 0.999);
-    assert.equal(earliest.lastReviewedAt, now.toISOString());
-    assert.equal(earliest.nextReviewAt, '2026-09-26T08:00:00.000Z');
-    assert.equal(latest.nextReviewAt, '2026-09-27T08:00:00.000Z');
+  it('moves remembered lessons through the progressive interval ladder', () => {
+    const firstReview = createReviewUpdate('learned', lesson(), now);
+    const afterOneDay = createReviewUpdate(
+      'learned',
+      lesson({
+        status: 'learned',
+        lastReviewedAt: '2026-09-22T08:00:00.000Z',
+        nextReviewAt: '2026-09-23T08:00:00.000Z',
+      }),
+      now,
+    );
+    const afterThirtyDays = createReviewUpdate(
+      'learned',
+      lesson({
+        status: 'learned',
+        lastReviewedAt: '2026-08-24T08:00:00.000Z',
+        nextReviewAt: '2026-09-23T08:00:00.000Z',
+      }),
+      now,
+    );
+
+    assert.equal(firstReview.lastReviewedAt, now.toISOString());
+    assert.equal(firstReview.nextReviewAt, '2026-09-24T08:00:00.000Z');
+    assert.equal(afterOneDay.nextReviewAt, '2026-09-26T08:00:00.000Z');
+    assert.equal(afterThirtyDays.nextReviewAt, '2026-11-22T08:00:00.000Z');
+  });
+
+  it('clears the review history when a lesson is reset to new', () => {
+    const update = createReviewUpdate(
+      'new',
+      lesson({
+        status: 'learned',
+        lastReviewedAt: '2026-09-20T08:00:00.000Z',
+        nextReviewAt: '2026-09-23T08:00:00.000Z',
+      }),
+      now,
+    );
+
+    assert.equal(update.status, 'new');
+    assert.equal(update.lastReviewedAt, undefined);
+    assert.equal(update.nextReviewAt, undefined);
   });
 
   it('treats new and legacy lessons as due, then waits until the scheduled time', () => {
@@ -78,7 +109,11 @@ describe('review scheduling', () => {
       ...Array.from({ length: 15 }, (_, index) =>
         lesson({ id: `phrase-${index}` }),
       ),
-      lesson({ id: 'future', nextReviewAt: '2026-09-24T08:00:00.000Z' }),
+      lesson({
+        id: 'future',
+        status: 'review',
+        nextReviewAt: '2026-09-24T08:00:00.000Z',
+      }),
     ];
     const otherTopic = Array.from({ length: 5 }, (_, index) =>
       lesson({ id: `other-${index}`, topic: 'Cuộc sống' }),
