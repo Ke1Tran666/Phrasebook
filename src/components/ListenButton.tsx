@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ExternalLink, Square, Volume2 } from 'lucide-react';
 import { useLanguage } from '@/language';
+import FilterSelect from '@/components/FilterSelect';
 
 type Props = { text: string };
 
@@ -78,46 +79,58 @@ const ListenButton = ({ text }: Props) => {
 
   return (
     <div className="my-4 text-sm">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="relative flex flex-nowrap items-center gap-2">
         <button
           type="button"
           onClick={play}
           aria-describedby={descriptionId}
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-forest hover:bg-surface-soft"
+          className="inline-flex shrink-0 min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-forest transition-colors hover:bg-surface-soft"
         >
-          {playing ? <Square size={17} /> : <Volume2 size={17} />}
-          {playing ? t('listen.stop') : t('listen.play')}
+          {playing ? <Square size={16} /> : <Volume2 size={16} />}
+          <span>{playing ? t('listen.stop') : t('listen.play')}</span>
         </button>
-        <select
-          aria-label={t('listen.voice')}
-          value={language}
-          onChange={(event) => setLanguage(event.target.value)}
-        >
-          <option value="en-US">{t('listen.us')}</option>
-          <option value="en-GB">{t('listen.uk')}</option>
-        </select>
-        <select
-          aria-label={t('listen.speed')}
-          value={rate}
-          onChange={(event) => setRate(event.target.value)}
-        >
-          <option value="0.75">{t('listen.slow')} · 0.75×</option>
-          <option value="1">{t('listen.normal')} · 1×</option>
-          <option value="1.25">{t('listen.fast')} · 1.25×</option>
-        </select>
+
+        <div className="w-31.25 shrink-0">
+          <FilterSelect
+            label={t('listen.voice')}
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { value: 'en-US', label: t('listen.us') },
+              { value: 'en-GB', label: t('listen.uk') },
+            ]}
+          />
+        </div>
+
+        <div className="w-36.25 shrink-0">
+          <FilterSelect
+            label={t('listen.speed')}
+            value={rate}
+            onChange={setRate}
+            options={[
+              { value: '0.75', label: `${t('listen.slow')} · 0.75×` },
+              { value: '1', label: `${t('listen.normal')} · 1×` },
+              { value: '1.25', label: `${t('listen.fast')} · 1.25×` },
+            ]}
+          />
+        </div>
+
+        {/* Nút Mở Google Translate */}
         <a
           href={googleTranslateUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-forest transition-colors hover:bg-surface-soft"
+          className="inline-flex shrink-0 min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-forest transition-colors hover:bg-surface-soft"
         >
-          <ExternalLink size={17} aria-hidden="true" />
-          {t('listen.openTranslate')}
+          <ExternalLink size={15} aria-hidden="true" />
+          <span>{t('listen.openTranslate')}</span>
         </a>
       </div>
+
       <p id={descriptionId} className="mt-2 text-xs leading-relaxed text-muted">
         {t('listen.description')}
       </p>
+
       {error && (
         <p role="alert" className="mt-2 text-sm text-red-700">
           {error}
