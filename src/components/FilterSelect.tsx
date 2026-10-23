@@ -24,7 +24,6 @@ const FilterSelect = ({
   const selectedOption =
     options.find((opt) => opt.value === value) || options[0];
 
-  // Đóng dropdown khi bấm ra ngoài hoặc ấn Esc
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -62,7 +61,6 @@ const FilterSelect = ({
       ref={containerRef}
       className={`relative w-full min-w-0 select-none ${className}`}
     >
-      {/* Nút trigger dropdown */}
       <button
         type="button"
         role="combobox"
@@ -70,17 +68,17 @@ const FilterSelect = ({
         aria-expanded={isOpen}
         aria-label={label}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex w-full min-w-0 items-center justify-between rounded-[7px] border border-line bg-surface px-3 py-2.5 text-left text-sm font-normal text-text transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20 ${
+        className={`flex w-full min-h-10 items-center justify-between rounded-[7px] border border-line bg-surface px-3 py-2 text-left text-xs sm:text-sm font-normal text-text transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20 ${
           isOpen
             ? 'border-forest ring-2 ring-forest/20'
             : 'hover:border-forest/50'
         }`}
       >
-        <span className="truncate pr-2">
+        <span className="truncate pr-1">
           {selectedOption ? selectedOption.label : label}
         </span>
         <ChevronDown
-          size={16}
+          size={15}
           aria-hidden="true"
           className={`shrink-0 text-muted transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-forest' : ''
@@ -88,12 +86,12 @@ const FilterSelect = ({
         />
       </button>
 
-      {/* Menu danh sách tùy chọn */}
+      {/* Danh sách các lựa chọn với z-[100] nổi hoàn toàn lên trên */}
       {isOpen && (
         <div
           role="listbox"
           aria-label={label}
-          className="absolute z-50 mt-1 max-h-60 w-full min-w-35 overflow-auto rounded-lg border border-line bg-surface p-1 shadow-lg animate-in fade-in-0 zoom-in-95 duration-100"
+          className="absolute left-0 top-full z-100 mt-1 max-h-60 w-full min-w-35 overflow-auto rounded-lg border border-line bg-surface p-1 shadow-xl animate-in fade-in-0 zoom-in-95 duration-100"
         >
           {options.map((option) => {
             const isSelected = option.value === value;
@@ -113,7 +111,7 @@ const FilterSelect = ({
                 <span className="truncate">{option.label}</span>
                 {isSelected && (
                   <Check
-                    size={15}
+                    size={14}
                     aria-hidden="true"
                     className="ml-2 shrink-0 text-forest"
                   />

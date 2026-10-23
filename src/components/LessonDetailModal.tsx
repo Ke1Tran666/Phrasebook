@@ -1,13 +1,12 @@
 import English from '@/components/English';
-import FilterSelect from '@/components/FilterSelect';
 import LessonDates from '@/components/LessonDates';
 import ListenButton from '@/components/ListenButton';
 import Modal from '@/components/Modal';
 import StructureSuggestions from '@/components/StructureSuggestions';
-import type { Lesson, Status } from '@/db';
+import type { Lesson } from '@/db';
 import { useLanguage } from '@/language';
 import { ui } from '@/styles/ui';
-import { Pencil, Trash2, X } from 'lucide-react';
+import { Bookmark, Check, CircleDot, Pencil, Trash2, X } from 'lucide-react';
 
 interface LessonDetailModalProps {
   detail: Lesson | null | undefined;
@@ -15,7 +14,6 @@ interface LessonDetailModalProps {
   onClose: () => void;
   onEdit: (lesson: Lesson) => void;
   onDelete: (lesson: Lesson) => void;
-  onStatusChange: (newStatus: Status) => void;
 }
 
 export const LessonDetailModal = ({
@@ -24,11 +22,40 @@ export const LessonDetailModal = ({
   onClose,
   onEdit,
   onDelete,
-  onStatusChange,
 }: LessonDetailModalProps) => {
   const { t } = useLanguage();
 
   if (!detail) return null;
+
+  // Cấu hình hiển thị Badge trạng thái (Read-only)
+  const getStatusBadge = () => {
+    switch (detail.status) {
+      case 'learned':
+        return {
+          label: t('status.learned'),
+          icon: Check,
+          className:
+            'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+        };
+      case 'review':
+        return {
+          label: t('status.review'),
+          icon: Bookmark,
+          className:
+            'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+        };
+      case 'new':
+      default:
+        return {
+          label: t('status.new'),
+          icon: CircleDot,
+          className: 'bg-surface-soft text-muted border-line',
+        };
+    }
+  };
+
+  const statusBadge = getStatusBadge();
+  const StatusIcon = statusBadge.icon;
 
   return (
     <Modal open={!!detail} label={t('detail.label')} onClose={onClose} wide>
@@ -97,23 +124,17 @@ export const LessonDetailModal = ({
           <LessonDates lesson={detail} />
         </div>
 
-        {/* Trạng thái học với FilterSelect mới */}
-        <div className="flex flex-col gap-2 pt-2 min-[761px]:flex-row min-[761px]:items-center min-[761px]:justify-between">
+        {/* Trạng thái học: Hiển thị dạng Badge chỉ đọc */}
+        <div className="flex items-center justify-between pt-3 border-t border-line">
           <span className="text-sm font-semibold text-muted">
             {t('detail.status')}
           </span>
-          <div className="w-full min-[761px]:w-45">
-            <FilterSelect
-              label={t('detail.status')}
-              value={detail.status}
-              onChange={(value) => onStatusChange(value as Status)}
-              options={[
-                { value: 'new', label: t('status.new') },
-                { value: 'review', label: t('review.reviewed') },
-                { value: 'learned', label: t('review.remembered') },
-              ]}
-            />
-          </div>
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusBadge.className}`}
+          >
+            <StatusIcon size={14} />
+            {statusBadge.label}
+          </span>
         </div>
       </div>
 

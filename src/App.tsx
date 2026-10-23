@@ -225,8 +225,9 @@ const App = () => {
     if (!current || busy) return;
     setBusy(true);
     try {
+      // Truyền current vào createReviewUpdate để tính toán thang ngày lũy tiến
       await db.lessons.update(current.id, {
-        ...createReviewUpdate(next),
+        ...createReviewUpdate(next, current),
       });
       setReviewIndex((i) => i + 1);
       setFlipped(false);
@@ -405,17 +406,6 @@ const App = () => {
           onDelete={(item) => {
             setDeleting(item);
             setDetailId(null);
-          }}
-          onStatusChange={(newStatus) => {
-            if (!detail) return;
-            act(
-              () =>
-                db.lessons.update(
-                  detail.id,
-                  createReviewUpdate(newStatus as Status),
-                ),
-              'Đã cập nhật trạng thái.',
-            );
           }}
         />
       )}
