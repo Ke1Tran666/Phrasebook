@@ -68,10 +68,10 @@ const FilterSelect = ({
         aria-expanded={isOpen}
         aria-label={label}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex w-full min-h-10 items-center justify-between rounded-[7px] border border-line bg-surface px-3 py-2 text-left text-xs sm:text-sm font-normal text-text transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20 ${
+        className={`flex w-full min-h-10 items-center justify-between rounded-xl border border-line bg-surface px-3.5 py-2 text-left text-xs sm:text-sm font-normal text-text transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/20 ${
           isOpen
-            ? 'border-forest ring-2 ring-forest/20'
-            : 'hover:border-forest/50'
+            ? 'border-forest ring-2 ring-forest/20 shadow-xs'
+            : 'hover:border-line-hover'
         }`}
       >
         <span className="truncate pr-1">
@@ -86,12 +86,11 @@ const FilterSelect = ({
         />
       </button>
 
-      {/* Danh sách các lựa chọn với z-[100] nổi hoàn toàn lên trên */}
       {isOpen && (
         <div
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-full z-100 mt-1 max-h-60 w-full min-w-35 overflow-auto rounded-lg border border-line bg-surface p-1 shadow-xl animate-in fade-in-0 zoom-in-95 duration-100"
+          className="absolute left-0 top-full z-50 mt-1.5 max-h-60 w-full min-w-36 overflow-auto rounded-2xl border border-line bg-surface-elevated p-1.5 shadow-dropdown backdrop-blur-md animate-in fade-in-0 zoom-in-95 duration-100"
         >
           {options.map((option) => {
             const isSelected = option.value === value;
@@ -102,10 +101,10 @@ const FilterSelect = ({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => handleSelect(option.value)}
-                className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs sm:text-sm transition-colors ${
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs sm:text-sm transition-colors ${
                   isSelected
-                    ? 'bg-surface-soft font-medium text-forest'
-                    : 'text-text hover:bg-surface-soft hover:text-forest'
+                    ? 'bg-surface-soft font-semibold text-forest'
+                    : 'text-text hover:bg-surface-soft'
                 }`}
               >
                 <span className="truncate">{option.label}</span>

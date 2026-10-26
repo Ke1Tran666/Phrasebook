@@ -110,7 +110,7 @@ const ReviewPage = ({
           {/* Cột trái: Thẻ tóm tắt số lượng bài sẵn sàng */}
           <div className="flex flex-col justify-between rounded-2xl border border-line bg-surface-soft p-5 sm:p-6 transition-colors">
             <div>
-              <span className="theme-fixed-color grid size-12 place-items-center rounded-2xl bg-[#fbf2e3] text-[#b08137] shadow-xs">
+              <span className="grid size-12 place-items-center rounded-2xl bg-status-review-bg text-status-review shadow-xs">
                 <GraduationCap size={24} />
               </span>
               <h2 className="mt-5 text-xl font-bold tracking-tight text-text">
@@ -233,7 +233,7 @@ const ReviewPage = ({
       ) : finished ? (
         /* Màn hình 2: Hoàn thành phiên ôn tập */
         <div className="flex flex-col items-center justify-center rounded-2xl border border-line bg-surface px-6 py-12 text-center transition-colors">
-          <span className="theme-fixed-color grid size-16 place-items-center rounded-2xl bg-[#eaf1fa] text-[#5c81a1] shadow-xs">
+          <span className="grid size-16 place-items-center rounded-2xl bg-status-info-bg text-status-info shadow-xs">
             <CheckCheck size={36} />
           </span>
           <h2 className="mt-5 text-2xl font-bold tracking-tight text-text">
@@ -373,7 +373,7 @@ const ReviewPage = ({
                     disabled={busy}
                     onClick={() => onGrade('review')}
                   >
-                    <Bookmark size={17} className="text-[#b08137]" />
+                    <Bookmark size={17} className="text-status-review" />
                     {t('review.reviewed')}
                   </button>
                   <button

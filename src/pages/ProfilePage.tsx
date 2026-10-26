@@ -33,7 +33,7 @@ const ProfilePage = ({
   return (
     <section aria-labelledby="profile-title">
       <button type="button" className={ui('text-button')} onClick={onBack}>
-        <ArrowLeft size={17} /> {t('profile.back')}
+        <ArrowLeft size={16} /> {t('profile.back')}
       </button>
       <div className={ui('page-heading')}>
         <div>
@@ -45,10 +45,10 @@ const ProfilePage = ({
           <p>{t('profile.description')}</p>
         </div>
       </div>
-      <div className="mb-6 flex min-w-0 flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-center sm:p-8">
+      <div className="mb-6 flex min-w-0 flex-col gap-5 rounded-2xl border border-line bg-surface p-5 shadow-xs sm:flex-row sm:items-center sm:p-7">
         <span
           aria-hidden="true"
-          className="grid size-16 shrink-0 place-items-center rounded-full bg-[#f0e9dc] text-3xl text-[#6a604b]"
+          className="grid size-16 shrink-0 place-items-center rounded-2xl bg-forest-soft text-3xl font-bold text-forest shadow-xs"
         >
           {account
             ? Array.from(account.name || account.email)[0]?.toLocaleUpperCase(
@@ -59,13 +59,13 @@ const ProfilePage = ({
               : 'P'}
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl font-semibold wrap-anywhere">
+          <h2 className="text-xl font-bold text-text break-words">
             {account?.name || t('profile.notSignedIn')}
           </h2>
-          <p className="mt-2 text-sm text-[#817486] wrap-anywhere">
+          <p className="mt-1 text-sm text-muted break-words">
             {account?.email || t('profile.localDescription')}
           </p>
-          <p className="mt-2 text-sm text-[#817486]">
+          <p className="mt-1 text-xs text-muted">
             {account ? t('profile.connected') : t('profile.connectHint')}
           </p>
         </div>
@@ -74,7 +74,7 @@ const ProfilePage = ({
           className={ui('button secondary')}
           onClick={onBackup}
         >
-          <HardDrive size={18} />{' '}
+          <HardDrive size={17} />{' '}
           {account ? t('profile.manageBackup') : t('profile.connectGoogle')}
         </button>
       </div>
@@ -101,23 +101,27 @@ const ProfilePage = ({
           description={t('library.progressHint')}
         />
       </div>
-      <p className="mt-5 text-sm leading-relaxed text-[#817486]">
+      <p className="mt-4 text-xs leading-relaxed text-muted">
         {t('profile.statsHint')}
       </p>
       <a
         href="/privacy"
-        className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-surface p-5 text-forest transition-colors hover:bg-surface-soft"
+        className="mt-6 flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-5 text-forest shadow-xs transition-all hover:bg-surface-soft hover:border-line-hover"
       >
         <ShieldCheck size={22} aria-hidden="true" className="shrink-0" />
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold">
+          <span className="block text-sm font-semibold text-text">
             {t('profile.privacy')}
           </span>
-          <span className="mt-1 block text-sm leading-relaxed text-[#817486]">
+          <span className="mt-0.5 block text-xs leading-relaxed text-muted">
             {t('profile.privacyDescription')}
           </span>
         </span>
-        <ChevronRight size={18} aria-hidden="true" className="shrink-0" />
+        <ChevronRight
+          size={18}
+          aria-hidden="true"
+          className="shrink-0 text-muted"
+        />
       </a>
     </section>
   );
