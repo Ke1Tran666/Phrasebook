@@ -303,6 +303,16 @@ const App = () => {
                 }, 'Đã thêm 3 bài mẫu. Bạn có thể sửa hoặc xóa tùy ý.')
               }
               onSelectLesson={setDetailId}
+              onEditLesson={(item: Lesson) => setEditing(item)}
+              onDeleteLesson={(item: Lesson) => setDeleting(item)}
+              onQuickStatusChange={async (id: string, nextStatus: Status) => {
+                await act(async () => {
+                  await db.lessons.update(id, {
+                    status: nextStatus,
+                    updatedAt: new Date().toISOString(),
+                  });
+                });
+              }}
               onQueryChange={setQuery}
               onKindChange={setKind}
               onStatusChange={setStatus}

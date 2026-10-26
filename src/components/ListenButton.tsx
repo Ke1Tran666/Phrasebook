@@ -78,19 +78,19 @@ const ListenButton = ({ text }: Props) => {
   };
 
   return (
-    <div className="my-4 text-sm">
-      <div className="relative flex flex-nowrap items-center gap-2">
+    <div className="my-3 text-sm">
+      <div className="relative flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={play}
           aria-describedby={descriptionId}
-          className="inline-flex shrink-0 min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-forest transition-colors hover:bg-surface-soft"
+          className="inline-flex shrink-0 min-h-10 items-center gap-2 whitespace-nowrap rounded-xl border border-line bg-surface px-3.5 py-2 text-xs sm:text-sm font-semibold text-forest shadow-xs transition-colors hover:bg-surface-soft hover:border-line-hover"
         >
           {playing ? <Square size={16} /> : <Volume2 size={16} />}
           <span>{playing ? t('listen.stop') : t('listen.play')}</span>
         </button>
 
-        <div className="w-31.25 shrink-0">
+        <div className="w-32 shrink-0">
           <FilterSelect
             label={t('listen.voice')}
             value={language}
@@ -102,7 +102,7 @@ const ListenButton = ({ text }: Props) => {
           />
         </div>
 
-        <div className="w-36.25 shrink-0">
+        <div className="w-36 shrink-0">
           <FilterSelect
             label={t('listen.speed')}
             value={rate}
@@ -120,9 +120,9 @@ const ListenButton = ({ text }: Props) => {
           href={googleTranslateUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex shrink-0 min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-forest transition-colors hover:bg-surface-soft"
+          className="inline-flex shrink-0 min-h-10 items-center gap-1.5 whitespace-nowrap rounded-xl border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-semibold text-muted shadow-xs transition-colors hover:bg-surface-soft hover:text-text hover:border-line-hover"
         >
-          <ExternalLink size={15} aria-hidden="true" />
+          <ExternalLink size={14} aria-hidden="true" />
           <span>{t('listen.openTranslate')}</span>
         </a>
       </div>
@@ -132,7 +132,7 @@ const ListenButton = ({ text }: Props) => {
       </p>
 
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-xs font-medium text-status-danger">
           {error}
         </p>
       )}
