@@ -258,7 +258,12 @@ const App = () => {
         setKind={setKind}
       />
       <main className={ui('main-content')}>
-        <Topbar view={view} connected={!!drive.account} />
+        <Topbar
+          view={view}
+          connected={!!drive.account}
+          dueCount={counts.review}
+          onNavigate={setView}
+        />
         <div className={ui('workspace')}>
           {dbError && (
             <div className={ui('error')} role="alert">
