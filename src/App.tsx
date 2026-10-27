@@ -2,6 +2,7 @@ import BackupPage from '@/pages/BackupPage';
 import DashboardPage from '@/pages/DashboardPage';
 import LibraryPage from '@/pages/LibraryPage';
 import ProfilePage from '@/pages/ProfilePage';
+import UpdatesPage from '@/pages/UpdatesPage';
 import ReviewPage from '@/pages/ReviewPage';
 import type { AppView } from '@/navigation';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
@@ -13,7 +14,14 @@ import {
   type ReviewMode,
 } from '@/review-schedule';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowUpFromLine, Check, LoaderCircle, Trash2 } from 'lucide-react';
+import {
+  ArrowUpFromLine,
+  Check,
+  Cloud,
+  LoaderCircle,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import LessonForm from '@/components/LessonForm';
 import LessonDetailModal from '@/components/LessonDetailModal';
@@ -33,6 +41,7 @@ import {
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import { useLanguage } from '@/language';
 import { logActivity } from '@/services/activity-log';
+import { ADMIN_EMAIL, isAdminAccount } from '@/services/admin-auth';
 
 const App = () => {
   const { t } = useLanguage();
@@ -41,6 +50,7 @@ const App = () => {
   }
 
   const drive = useGoogleDrive();
+  const isAdmin = isAdminAccount(drive.account);
   const [dbError, setDbError] = useState('');
   const lessons = useLiveQuery(
     () =>
@@ -286,6 +296,7 @@ const App = () => {
           view={view}
           connected={!!drive.account}
           dueCount={counts.review}
+          isAdmin={isAdmin}
           onNavigate={setView}
         />
         <div className={ui('workspace')}>
@@ -402,6 +413,44 @@ const App = () => {
               onBack={() => nav('dashboard')}
               onBackup={() => nav('backup')}
             />
+          )}
+          {view === 'updates' && (
+            isAdmin ? (
+              <UpdatesPage notify={notify} />
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center animate-in fade-in duration-200">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-4 border border-amber-500/25 shadow-xs">
+                  <ShieldAlert size={32} />
+                </div>
+                <h2 className="text-xl font-bold text-text">
+                  Khu vực Quản trị viên
+                </h2>
+                <p className="mt-2 text-sm text-text-secondary max-w-md leading-relaxed">
+                  Mục cập nhật phần mềm được bảo vệ và chỉ hiển thị khi đăng nhập tài khoản Google Quản trị viên:
+                  <br />
+                  <span className="font-mono text-xs font-bold text-forest bg-forest-soft px-2.5 py-1 rounded-lg mt-2 inline-block border border-forest/20">
+                    {ADMIN_EMAIL}
+                  </span>
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={drive.connect}
+                    className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all"
+                  >
+                    <Cloud size={16} />
+                    <span>Đăng nhập Google Admin</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => nav('dashboard')}
+                    className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-xs sm:text-sm font-semibold text-text hover:bg-surface-soft transition-all"
+                  >
+                    <span>Về Bảng điều khiển</span>
+                  </button>
+                </div>
+              </div>
+            )
           )}
           {view === 'backup' && (
             <BackupPage

@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Bell,
   BookOpen,
-  CheckCircle2,
+  CheckCheck,
   ChevronRight,
   Clock,
   Cloud,
+  FileText,
   HardDrive,
   Pencil,
   Plus,
@@ -15,100 +16,62 @@ import {
 } from 'lucide-react';
 import type { AppView } from '@/navigation';
 import {
-  clearActivities,
   formatRelativeTime,
+  clearActivities,
   getActivities,
   type ActivityItem,
 } from '@/services/activity-log';
+import {
+  CURRENT_VERSION,
+  getAllReleases,
+  hasUnseenRelease,
+  markReleaseAsSeen,
+  type ReleaseNote,
+} from '@/data/changelog';
 
 type NotificationMenuProps = {
   dueCount?: number;
   connected?: boolean;
+  isAdmin?: boolean;
   onNavigate?: (view: AppView) => void;
 };
-
-// Dữ liệu tĩnh các bản cập nhật phần mềm (Release Notes / Changelog)
-const SOFTWARE_VERSION = 'v2.1';
-const SOFTWARE_UPDATES = [
-  {
-    version: 'v2.1',
-    date: 'Mới nhất',
-    title: 'Phiên bản v2.1 — Hệ thống thông báo mới',
-    isNew: true,
-    summary:
-      'Đã bổ sung Trung tâm thông báo 2 luồng, Toast nổi đếm ngược thông minh và tự động đóng băng khi rê chuột.',
-    highlights: [
-      'Phân tách 2 luồng thông báo: Hoạt động học tập cá nhân & Bản cập nhật phần mềm.',
-      'Toast thông báo nổi cao cấp với chế độ tạm dừng đếm ngược khi rê chuột (Hover-to-Pause).',
-      'Tự động phân loại màu sắc và biểu tượng trực quan: Thành công, Lỗi và Thông tin.',
-    ],
-  },
-  {
-    version: 'v2.0',
-    date: 'Tháng 10, 2026',
-    title: 'Phiên bản v2.0 — Đại tu giao diện',
-    isNew: false,
-    summary:
-      'Nâng cấp 3 chủ đề giao diện, phòng Flashcard 3D với phím tắt nhanh và Thư viện hiển thị Lưới/Danh sách.',
-    highlights: [
-      'Chuẩn hóa Style System & Design Tokens với 3 chủ đề: Sáng, Tối và Lễ Độc lập.',
-      'Phòng Flashcard 3D với bảng điểm trực tiếp, phím tắt nhanh và chúc mừng hoàn thành.',
-      'Thư viện 2 chế độ hiển thị: Dạng lưới (Grid) & Danh sách (List) kèm phát âm 1-chạm.',
-      'Hộp soạn thảo bài học với thanh công cụ tô sáng từ vựng động & xem trước trực tiếp.',
-      'Trang Sao lưu Google Drive & vùng kéo thả JSON an toàn.',
-    ],
-  },
-  {
-    version: 'v1.5',
-    date: 'Tháng 9, 2026',
-    title: 'Phiên bản v1.5 — Đám mây & Ngữ pháp',
-    isNew: false,
-    summary:
-      'Tích hợp sao lưu Google Drive AppData bảo mật và tự động nhận diện mẫu cấu trúc ngữ pháp khi soạn câu.',
-    highlights: [
-      'Tự động nhận diện cấu trúc câu đã lưu trong đoạn văn khi nhập liệu.',
-      'Sao lưu đa thiết bị qua Google Drive AppData Folder an toàn.',
-    ],
-  },
-];
 
 const NotificationMenu = ({
   dueCount = 0,
   connected = false,
+  isAdmin = false,
   onNavigate,
 }: NotificationMenuProps) => {
   const menuRef = useRef<HTMLDetailsElement>(null);
-  const [activeTab, setActiveTab] = useState<'activity' | 'updates'>(
-    'activity',
-  );
-  const [expandedVersion, setExpandedVersion] = useState<string | null>('v2.1');
+  const [activeTab, setActiveTab] = useState<'activity' | 'updates'>('activity');
+  const [expandedVersion, setExpandedVersion] = useState<string | null>('2.1.0');
   const [activities, setActivities] = useState<ActivityItem[]>(getActivities);
+  const [releasesList, setReleasesList] = useState<ReleaseNote[]>(getAllReleases);
 
-  // Lắng nghe sự kiện ghi nhận hoạt động mới theo thời gian thực
+  // Lắng nghe sự kiện ghi nhận hoạt động mới & cập nhật phiên bản theo thời gian thực
   useEffect(() => {
     const handleActivityUpdate = () => {
       setActivities(getActivities());
     };
+    const handleUpdatesChange = () => {
+      setReleasesList(getAllReleases());
+    };
     window.addEventListener('phrasebook_activity_logged', handleActivityUpdate);
+    window.addEventListener('phrasebook_updates_changed', handleUpdatesChange);
     return () => {
       window.removeEventListener(
         'phrasebook_activity_logged',
         handleActivityUpdate,
       );
+      window.removeEventListener(
+        'phrasebook_updates_changed',
+        handleUpdatesChange,
+      );
     };
   }, []);
 
   // Kiểm tra xem người dùng đã đọc bản cập nhật phần mềm mới nhất chưa
-  const [hasNewUpdate, setHasNewUpdate] = useState(() => {
-    try {
-      return (
-        localStorage.getItem('phrasebook_last_seen_version') !==
-        SOFTWARE_VERSION
-      );
-    } catch {
-      return true;
-    }
-  });
+  const [hasNewUpdate, setHasNewUpdate] = useState(hasUnseenRelease);
 
   const [hasUnreadActivity, setHasUnreadActivity] = useState(
     dueCount > 0 || activities.length > 0,
@@ -134,16 +97,13 @@ const NotificationMenu = ({
   const handleOpen = () => {
     setHasUnreadActivity(false);
     setActivities(getActivities());
+    setReleasesList(getAllReleases());
   };
 
   const handleSwitchToUpdates = () => {
     setActiveTab('updates');
-    try {
-      localStorage.setItem('phrasebook_last_seen_version', SOFTWARE_VERSION);
-      setHasNewUpdate(false);
-    } catch {
-      // ignore
-    }
+    markReleaseAsSeen();
+    setHasNewUpdate(false);
   };
 
   const handleAction = (view: AppView) => {
@@ -157,8 +117,11 @@ const NotificationMenu = ({
     setExpandedVersion((curr) => (curr === ver ? null : ver));
   };
 
+  // Cập nhật phần mềm chỉ thông báo cho admin
+  const effectiveHasNewUpdate = isAdmin && hasNewUpdate;
+
   // Tổng trạng thái thông báo chưa đọc
-  const hasUnread = (dueCount > 0 && hasUnreadActivity) || hasNewUpdate;
+  const hasUnread = (dueCount > 0 && hasUnreadActivity) || effectiveHasNewUpdate;
 
   // Icon theo từng loại hoạt động
   const getActivityIcon = (type: ActivityItem['type']) => {
@@ -183,21 +146,26 @@ const NotificationMenu = ({
         );
       case 'review_completed':
         return (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-review-bg text-status-review border border-status-review/30 mt-0.5">
-            <Sparkles size={16} />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-soft text-forest border border-forest/30 mt-0.5">
+            <CheckCheck size={16} />
           </div>
         );
       case 'backup_exported':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-text border border-line mt-0.5">
+            {connected ? <Cloud size={16} /> : <HardDrive size={16} />}
+          </div>
+        );
       case 'backup_imported':
         return (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-soft text-forest border border-line mt-0.5">
-            <HardDrive size={16} />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-forest border border-line mt-0.5">
+            <BookOpen size={16} />
           </div>
         );
       default:
         return (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-text-secondary border border-line mt-0.5">
-            <BookOpen size={16} />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-muted border border-line mt-0.5">
+            <Clock size={16} />
           </div>
         );
     }
@@ -206,27 +174,32 @@ const NotificationMenu = ({
   return (
     <details ref={menuRef} className="relative inline-block text-left">
       <summary
-        className="list-none cursor-pointer inline-flex items-center justify-center relative h-9 w-9 rounded-xl border border-line bg-surface text-muted hover:text-text hover:bg-surface-soft hover:border-line-hover transition-all shadow-xs focus-visible:outline-2 focus-visible:outline-forest"
-        aria-label="Thông báo"
-        title="Thông báo hệ thống & Cập nhật"
         onClick={handleOpen}
+        aria-label="Thông báo & Hoạt động"
+        className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-line bg-surface text-text-secondary transition-colors hover:bg-surface-soft hover:text-text list-none [&::-webkit-details-marker]:hidden"
       >
         <Bell size={17} />
         {/* Unread indicator */}
         {hasUnread && (
           <span
-            className={`absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-xs animate-pulse ${
-              dueCount > 0 ? 'bg-status-danger px-1' : 'bg-forest px-1.5'
+            className={`absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-xs leading-none select-none ${
+              dueCount > 0 ? 'bg-status-danger px-1' : 'bg-forest px-1'
             }`}
           >
-            {dueCount > 0 ? (dueCount > 99 ? '99+' : dueCount) : '•'}
+            {dueCount > 0 ? (
+              <span className="inline-block translate-y-[0.5px] leading-none">
+                {dueCount > 99 ? '99+' : dueCount}
+              </span>
+            ) : (
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            )}
           </span>
         )}
       </summary>
 
       {/* Dropdown Menu Panel */}
-      <div className="absolute right-0 mt-2 w-84 sm:w-92 rounded-2xl border border-line bg-surface p-4 shadow-dropdown z-30 animate-in fade-in slide-in-from-top-2 duration-150 text-text">
-        {/* Header với 2 tab phân loại */}
+      <div className="absolute right-0 mt-2 w-88 sm:w-96 max-w-[calc(100vw-24px)] rounded-2xl border border-line bg-surface p-4 shadow-dropdown z-30 animate-in fade-in slide-in-from-top-2 duration-150 text-text">
+        {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-line mb-3">
           <div className="flex items-center gap-2">
             <Bell size={16} className="text-forest" />
@@ -234,49 +207,57 @@ const NotificationMenu = ({
           </div>
 
           <span className="text-[11px] font-medium text-muted">
-            Phrasebook {SOFTWARE_VERSION}
+            Phrasebook {CURRENT_VERSION}
           </span>
         </div>
 
-        {/* Bộ chuyển đổi 2 làn thông báo */}
-        <div className="flex rounded-xl bg-surface-soft p-1 border border-line mb-3">
-          <button
-            type="button"
-            onClick={() => setActiveTab('activity')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'activity'
-                ? 'bg-surface text-forest shadow-xs'
-                : 'text-muted hover:text-text'
-            }`}
-          >
-            <Clock size={13} />
-            <span>Hoạt động</span>
-            {dueCount > 0 && (
-              <span className="h-1.5 w-1.5 rounded-full bg-status-danger animate-pulse" />
-            )}
-          </button>
+        {/* Bộ chuyển đổi phân loại (Chỉ hiện khi là Admin) */}
+        {isAdmin ? (
+          <div className="flex rounded-xl bg-surface-soft p-1 border border-line mb-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab('activity')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+                activeTab === 'activity'
+                  ? 'bg-surface text-forest shadow-xs'
+                  : 'text-muted hover:text-text'
+              }`}
+            >
+              <Clock size={13} className="shrink-0" />
+              <span>Hoạt động</span>
+              {dueCount > 0 && (
+                <span className="h-1.5 w-1.5 rounded-full bg-status-danger animate-pulse shrink-0" />
+              )}
+            </button>
 
-          <button
-            type="button"
-            onClick={handleSwitchToUpdates}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'updates'
-                ? 'bg-surface text-forest shadow-xs'
-                : 'text-muted hover:text-text'
-            }`}
-          >
-            <Rocket size={13} />
-            <span>Cập nhật phần mềm</span>
-            {hasNewUpdate && (
-              <span className="rounded-full bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 leading-none">
-                Mới
-              </span>
-            )}
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={handleSwitchToUpdates}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+                activeTab === 'updates'
+                  ? 'bg-surface text-forest shadow-xs'
+                  : 'text-muted hover:text-text'
+              }`}
+            >
+              <Rocket size={13} className="shrink-0" />
+              <span>Cập nhật</span>
+              {effectiveHasNewUpdate && (
+                <span className="rounded-full bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 leading-none shrink-0">
+                  Mới
+                </span>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="pb-2 mb-2 border-b border-line/60">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
+              Nhật ký hoạt động & Nhắc nhở ôn tập
+            </span>
+          </div>
+        )}
 
         {/* Làn 1: Hoạt động học tập cá nhân & Lịch sử hoạt động thật */}
-        {activeTab === 'activity' && (
+        {(!isAdmin || activeTab === 'activity') && (
           <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
             {/* Nhắc nhở bài học đến hạn (Ghim lên đầu nếu có) */}
             {dueCount > 0 ? (
@@ -290,8 +271,7 @@ const NotificationMenu = ({
                       Bài học đến hạn ôn tập
                     </h4>
                     <p className="mt-0.5 text-xs text-text-secondary leading-snug">
-                      Hôm nay bạn có <strong>{dueCount}</strong> bài học cần ôn
-                      luyện để duy trì trí nhớ.
+                      Hôm nay bạn có <strong>{dueCount}</strong> bài học cần ôn luyện để duy trì trí nhớ.
                     </p>
                     <button
                       type="button"
@@ -338,14 +318,16 @@ const NotificationMenu = ({
                             {formatRelativeTime(act.timestamp)}
                           </span>
                         </div>
-                        <p className="mt-0.5 text-xs text-text-secondary leading-snug wrap-break-word">
-                          {act.description}
-                        </p>
+                        {act.description && (
+                          <p className="mt-0.5 text-xs text-text-secondary line-clamp-2 leading-relaxed">
+                            {act.description}
+                          </p>
+                        )}
                         {act.view && (
                           <button
                             type="button"
                             onClick={() => handleAction(act.view!)}
-                            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-forest hover:underline"
+                            className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-forest hover:underline"
                           >
                             <span>{act.linkText || 'Xem chi tiết'}</span>
                             <ChevronRight size={13} />
@@ -357,66 +339,21 @@ const NotificationMenu = ({
                 ))}
               </>
             ) : (
-              /* Trạng thái khi chưa có hoạt động nào được ghi nhận */
-              <div className="rounded-xl border border-line bg-surface-soft p-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-learned-bg text-status-learned border border-status-learned/30 mt-0.5">
-                    <CheckCircle2 size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-bold text-text">
-                      Hệ thống hoạt động bình thường
-                    </h4>
-                    <p className="mt-0.5 text-xs text-text-secondary leading-snug">
-                      Mỗi khi bạn thêm, sửa bài học, ôn tập hoặc sao lưu, các
-                      hoạt động sẽ tự động lưu lại tại đây.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => handleAction('lessons')}
-                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-forest hover:underline"
-                    >
-                      <span>Mở thư viện bài học</span>
-                      <ChevronRight size={13} />
-                    </button>
-                  </div>
-                </div>
+              <div className="rounded-xl border border-dashed border-line p-6 text-center text-muted">
+                <FileText size={24} className="mx-auto mb-2 opacity-50" />
+                <p className="text-xs font-medium">Chưa có hoạt động nào được ghi nhận.</p>
+                <p className="text-[11px] mt-0.5 opacity-80">
+                  Các thao tác thêm bài, sửa, ôn tập và sao lưu sẽ tự động ghi nhật ký tại đây.
+                </p>
               </div>
             )}
-
-            {/* Trạng thái sao lưu & an toàn dữ liệu */}
-            <div className="rounded-xl border border-line bg-surface p-3">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-soft text-forest border border-line mt-0.5">
-                  {connected ? <Cloud size={16} /> : <HardDrive size={16} />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-text">
-                    {connected ? 'Google Drive đã kết nối' : 'Lưu trữ cục bộ'}
-                  </h4>
-                  <p className="mt-0.5 text-xs text-text-secondary leading-snug">
-                    {connected
-                      ? 'Dữ liệu được sao lưu và đồng bộ lên tài khoản Google Drive cá nhân.'
-                      : 'Bài học đang lưu trên trình duyệt này. Nhớ xuất file JSON để lưu giữ an toàn.'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleAction('backup')}
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-forest hover:underline"
-                  >
-                    <span>Quản lý sao lưu</span>
-                    <ChevronRight size={13} />
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Làn 2: Thông báo cập nhật phần mềm (Định dạng chuẩn thẻ giống Hoạt động) */}
-        {activeTab === 'updates' && (
+        {/* Làn 2: Cập nhật phần mềm (Chỉ Admin mới truy cập được) */}
+        {isAdmin && activeTab === 'updates' && (
           <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
-            {SOFTWARE_UPDATES.map((update) => {
+            {releasesList.map((update) => {
               const isExpanded = expandedVersion === update.version;
 
               return (
@@ -429,7 +366,6 @@ const NotificationMenu = ({
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    {/* Icon container vuông bo tròn giống Hoạt động */}
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border mt-0.5 ${
                         update.isNew
@@ -439,14 +375,13 @@ const NotificationMenu = ({
                     >
                       {update.isNew ? (
                         <Rocket size={16} />
-                      ) : update.version === 'v2.0' ? (
+                      ) : update.displayVersion === 'v2.0' ? (
                         <Sparkles size={16} />
                       ) : (
                         <Cloud size={16} />
                       )}
                     </div>
 
-                    {/* Nội dung thông báo */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <h4 className="text-xs font-bold text-text">
@@ -457,30 +392,28 @@ const NotificationMenu = ({
                             Mới
                           </span>
                         )}
+                        {update.isCustom && (
+                          <span className="rounded-full bg-forest-soft text-forest px-2 py-0.5 text-[9px] font-bold border border-forest/20">
+                            Tự tạo
+                          </span>
+                        )}
                       </div>
 
                       <p className="mt-0.5 text-xs text-text-secondary leading-snug">
                         {update.summary}
                       </p>
 
-                      {/* Chi tiết khi mở rộng */}
                       {isExpanded && (
                         <ul className="mt-2 pt-2 border-t border-line/60 space-y-1.5 text-[11px] text-text-secondary animate-in fade-in duration-100">
                           {update.highlights.map((h, i) => (
-                            <li
-                              key={i}
-                              className="flex items-start gap-1.5 leading-snug"
-                            >
-                              <span className="text-forest font-bold mt-0.5">
-                                •
-                              </span>
+                            <li key={i} className="flex items-start gap-1.5 leading-snug">
+                              <span className="text-forest font-bold mt-0.5">•</span>
                               <span>{h}</span>
                             </li>
                           ))}
                         </ul>
                       )}
 
-                      {/* Nút hành động dạng link có mũi tên giống Hoạt động */}
                       <button
                         type="button"
                         onClick={() => toggleExpand(update.version)}
@@ -500,15 +433,16 @@ const NotificationMenu = ({
               );
             })}
 
-            {/* Thẻ ghi chú phiên bản cuối cùng giống Mẹo học tập */}
-            <div className="rounded-xl border border-line bg-surface p-3 flex items-start gap-2.5">
-              <Rocket size={15} className="shrink-0 text-forest mt-0.5" />
-              <p className="text-[11px] text-muted leading-relaxed">
-                <strong>Ghi chú:</strong> Phrasebook luôn lưu trữ dữ liệu ngoại
-                tuyến (offline) trên trình duyệt, đảm bảo quyền riêng tư và tốc
-                độ tối ưu.
-              </p>
-            </div>
+            {/* Thẻ chuyển đến Trang Cập nhật đầy đủ */}
+            <button
+              type="button"
+              onClick={() => handleAction('updates')}
+              className="w-full mt-2.5 py-2.5 px-3 rounded-xl border border-line bg-surface hover:bg-surface-soft hover:border-forest/40 text-xs font-bold text-forest flex items-center justify-center gap-1.5 transition-all shadow-xs"
+            >
+              <Rocket size={14} />
+              <span>Xem trang Cập nhật & Viết nội dung</span>
+              <ChevronRight size={13} />
+            </button>
           </div>
         )}
       </div>

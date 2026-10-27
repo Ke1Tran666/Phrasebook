@@ -11,17 +11,20 @@ const pageLabelKeys: Record<AppView, MessageKey> = {
   'exam-practice': 'nav.examPractice',
   backup: 'nav.backup',
   profile: 'nav.profile',
+  updates: 'nav.updates',
 };
 
 const Topbar = ({
   view,
   connected = false,
   dueCount = 0,
+  isAdmin = false,
   onNavigate,
 }: {
   view: AppView;
   connected?: boolean;
   dueCount?: number;
+  isAdmin?: boolean;
   onNavigate?: (view: AppView) => void;
 }) => {
   const { t } = useLanguage();
@@ -45,6 +48,7 @@ const Topbar = ({
         <NotificationMenu
           dueCount={dueCount}
           connected={connected}
+          isAdmin={isAdmin}
           onNavigate={onNavigate}
         />
         <HeaderPreferences />

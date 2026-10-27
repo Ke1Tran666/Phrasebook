@@ -11,6 +11,7 @@ import StatCard from '@/components/StatCard';
 import type { GoogleAccount } from '@/services/google-drive';
 import { ui } from '@/styles/ui';
 import { useLanguage } from '@/language';
+import { isAdminAccount } from '@/services/admin-auth';
 
 type ProfilePageProps = {
   account?: GoogleAccount;
@@ -30,6 +31,8 @@ const ProfilePage = ({
   onBackup,
 }: ProfilePageProps) => {
   const { language, t } = useLanguage();
+  const isAdmin = isAdminAccount(account);
+
   return (
     <section aria-labelledby="profile-title">
       <button type="button" className={ui('text-button')} onClick={onBack}>
@@ -37,7 +40,9 @@ const ProfilePage = ({
       </button>
       <div className={ui('page-heading')}>
         <div>
-          <span className={ui('eyebrow')}>{t('profile.eyebrow')}</span>
+          <span className={ui('eyebrow')}>
+            {isAdmin ? 'TÀI KHOẢN QUẢN TRỊ VIÊN' : t('profile.eyebrow')}
+          </span>
           <h1 id="profile-title">
             {t('profile.title')}
             <span>.</span>
@@ -59,10 +64,18 @@ const ProfilePage = ({
               : 'P'}
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl font-bold text-text break-words">
-            {account?.name || t('profile.notSignedIn')}
-          </h2>
-          <p className="mt-1 text-sm text-muted break-words">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-xl font-bold text-text wrap-break-word">
+              {account?.name || t('profile.notSignedIn')}
+            </h2>
+            {isAdmin && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-forest text-white text-[11px] font-bold px-2.5 py-0.5 shadow-xs">
+                <ShieldCheck size={13} />
+                <span>Quản trị viên</span>
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-muted wrap-break-word">
             {account?.email || t('profile.localDescription')}
           </p>
           <p className="mt-1 text-xs text-muted">
@@ -101,28 +114,24 @@ const ProfilePage = ({
           description={t('library.progressHint')}
         />
       </div>
-      <p className="mt-4 text-xs leading-relaxed text-muted">
-        {t('profile.statsHint')}
-      </p>
-      <a
-        href="/privacy"
-        className="mt-6 flex items-center gap-3.5 rounded-2xl border border-line bg-surface p-5 text-forest shadow-xs transition-all hover:bg-surface-soft hover:border-line-hover"
-      >
-        <ShieldCheck size={22} aria-hidden="true" className="shrink-0" />
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-text">
-            {t('profile.privacy')}
-          </span>
-          <span className="mt-0.5 block text-xs leading-relaxed text-muted">
-            {t('profile.privacyDescription')}
-          </span>
-        </span>
-        <ChevronRight
-          size={18}
-          aria-hidden="true"
-          className="shrink-0 text-muted"
-        />
-      </a>
+      <div className="mt-8 rounded-2xl border border-line bg-surface p-6 shadow-xs">
+        <h3 className="text-base font-bold text-text">
+          {t('profile.privacy')}
+        </h3>
+        <p className="mt-1 text-xs sm:text-sm text-muted">
+          {t('profile.privacyDescription')}
+        </p>
+        <p className="mt-2 text-xs text-muted">{t('profile.statsHint')}</p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            className={ui('button secondary')}
+            onClick={onBackup}
+          >
+            {t('profile.manageBackup')} <ChevronRight size={15} />
+          </button>
+        </div>
+      </div>
     </section>
   );
 };
