@@ -2,6 +2,7 @@ import BackupPage from '@/pages/BackupPage';
 import DashboardPage from '@/pages/DashboardPage';
 import LibraryPage from '@/pages/LibraryPage';
 import ProfilePage from '@/pages/ProfilePage';
+import UpdatesPage from '@/pages/UpdatesPage';
 import ReviewPage from '@/pages/ReviewPage';
 import type { AppView } from '@/navigation';
 import { useGoogleDrive } from '@/hooks/useGoogleDrive';
@@ -13,7 +14,14 @@ import {
   type ReviewMode,
 } from '@/review-schedule';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowUpFromLine, Check, LoaderCircle, Trash2 } from 'lucide-react';
+import {
+  ArrowUpFromLine,
+  Check,
+  Cloud,
+  LoaderCircle,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import LessonForm from '@/components/LessonForm';
 import LessonDetailModal from '@/components/LessonDetailModal';
@@ -32,6 +40,8 @@ import {
 } from '@/db';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import { useLanguage } from '@/language';
+import { logActivity } from '@/services/activity-log';
+import { ADMIN_EMAIL, isAdminAccount } from '@/services/admin-auth';
 
 const App = () => {
   const { t } = useLanguage();
@@ -40,6 +50,7 @@ const App = () => {
   }
 
   const drive = useGoogleDrive();
+  const isAdmin = isAdminAccount(drive.account);
   const [dbError, setDbError] = useState('');
   const lessons = useLiveQuery(
     () =>
@@ -165,6 +176,13 @@ const App = () => {
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 30000);
       notify('Đã tạo file sao lưu. Kiểm tra thư mục tải xuống.');
+      logActivity({
+        type: 'backup_exported',
+        title: 'Xuất file sao lưu',
+        description: `Đã xuất ${records.length} bài học ra file JSON.`,
+        view: 'backup',
+        linkText: 'Quản lý sao lưu',
+      });
     } catch {
       notify('Không thể xuất dữ liệu. Vui lòng thử lại.');
     }
@@ -192,6 +210,13 @@ const App = () => {
       const result = await importLessons(pendingImport);
       setImportResult(result);
       setPendingImport(null);
+      logActivity({
+        type: 'backup_imported',
+        title: 'Nhập dữ liệu bài học',
+        description: `Thêm ${result.added} bài học mới, bỏ qua ${result.skipped} bài trùng.`,
+        view: 'lessons',
+        linkText: 'Xem trong thư viện',
+      });
       notify(
         `Đã thêm ${result.added} bài học · Bỏ qua ${result.skipped} bài trùng.`,
       );
@@ -229,6 +254,15 @@ const App = () => {
       await db.lessons.update(current.id, {
         ...createReviewUpdate(next, current),
       });
+      if (reviewIds && reviewIndex + 1 >= reviewIds.length) {
+        logActivity({
+          type: 'review_completed',
+          title: 'Hoàn thành lượt ôn tập',
+          description: `Đã hoàn thành phiên luyện Flashcard (${reviewIds.length} bài học).`,
+          view: 'dashboard',
+          linkText: 'Xem tiến độ',
+        });
+      }
       setReviewIndex((i) => i + 1);
       setFlipped(false);
     } catch {
@@ -262,6 +296,7 @@ const App = () => {
           view={view}
           connected={!!drive.account}
           dueCount={counts.review}
+          isAdmin={isAdmin}
           onNavigate={setView}
         />
         <div className={ui('workspace')}>
@@ -379,6 +414,44 @@ const App = () => {
               onBackup={() => nav('backup')}
             />
           )}
+          {view === 'updates' && (
+            isAdmin ? (
+              <UpdatesPage notify={notify} />
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center animate-in fade-in duration-200">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-4 border border-amber-500/25 shadow-xs">
+                  <ShieldAlert size={32} />
+                </div>
+                <h2 className="text-xl font-bold text-text">
+                  Khu vực Quản trị viên
+                </h2>
+                <p className="mt-2 text-sm text-text-secondary max-w-md leading-relaxed">
+                  Mục cập nhật phần mềm được bảo vệ và chỉ hiển thị khi đăng nhập tài khoản Google Quản trị viên:
+                  <br />
+                  <span className="font-mono text-xs font-bold text-forest bg-forest-soft px-2.5 py-1 rounded-lg mt-2 inline-block border border-forest/20">
+                    {ADMIN_EMAIL}
+                  </span>
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={drive.connect}
+                    className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all"
+                  >
+                    <Cloud size={16} />
+                    <span>Đăng nhập Google Admin</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => nav('dashboard')}
+                    className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-xs sm:text-sm font-semibold text-text hover:bg-surface-soft transition-all"
+                  >
+                    <span>Về Bảng điều khiển</span>
+                  </button>
+                </div>
+              </div>
+            )
+          )}
           {view === 'backup' && (
             <BackupPage
               drive={drive}
@@ -407,7 +480,17 @@ const App = () => {
       <LessonForm
         lesson={editing}
         onClose={() => setEditing(undefined)}
-        onSaved={() => setEditing(undefined)}
+        onSaved={(savedLesson) => {
+          const isEdit = !!editing;
+          logActivity({
+            type: isEdit ? 'lesson_updated' : 'lesson_added',
+            title: isEdit ? 'Cập nhật bài học' : 'Thêm bài học mới',
+            description: `"${savedLesson.english.slice(0, 50)}${savedLesson.english.length > 50 ? '...' : ''}"`,
+            view: 'lessons',
+            linkText: 'Xem trong thư viện',
+          });
+          setEditing(undefined);
+        }}
         notify={notify}
       />
 
@@ -449,7 +532,15 @@ const App = () => {
               className={ui('button danger-button')}
               onClick={() =>
                 act(async () => {
-                  if (deleting) await db.lessons.delete(deleting.id);
+                  if (deleting) {
+                    const deletedText = deleting.english;
+                    await db.lessons.delete(deleting.id);
+                    logActivity({
+                      type: 'lesson_deleted',
+                      title: 'Xóa bài học',
+                      description: `Đã xóa: "${deletedText.slice(0, 50)}${deletedText.length > 50 ? '...' : ''}"`,
+                    });
+                  }
                   setDeleting(null);
                 }, 'Đã xóa bài học.')
               }

@@ -14,10 +14,48 @@ import {
 
 type Session = GoogleToken & { account: GoogleAccount };
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? '';
+const SESSION_STORAGE_KEY = 'phrasebook_google_session';
+
+const loadSavedSession = (): Session | null => {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Session;
+    if (
+      parsed &&
+      parsed.accessToken &&
+      typeof parsed.expiresAt === 'number' &&
+      parsed.expiresAt > Date.now() + 15000 &&
+      parsed.account?.email
+    ) {
+      return parsed;
+    }
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
+const persistSession = (sess: Session | null) => {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+  try {
+    if (sess) {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sess));
+    } else {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+};
 
 export const useGoogleDrive = () => {
   const [ready, setReady] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(loadSavedSession);
   const [backups, setBackups] = useState<DriveBackup[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -54,6 +92,7 @@ export const useGoogleDrive = () => {
   const disconnect = () => {
     generation.current++;
     locked.current = false;
+    persistSession(null);
     setSession(null);
     setBackups([]);
     setBusy(false);
@@ -85,6 +124,7 @@ export const useGoogleDrive = () => {
     } catch (e) {
       if (generation.current !== id) return;
       if (e instanceof GoogleSessionExpired) {
+        persistSession(null);
         setSession(null);
         setBackups([]);
       }
@@ -114,6 +154,7 @@ export const useGoogleDrive = () => {
         return { session: { ...token, account }, files };
       },
       (result) => {
+        persistSession(result.session);
         setSession(result.session);
         setBackups(result.files);
       },
