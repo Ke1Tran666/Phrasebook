@@ -1,15 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Bell,
+  BookOpen,
   CheckCircle2,
   ChevronRight,
   Clock,
   Cloud,
   HardDrive,
+  Pencil,
+  Plus,
   Rocket,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import type { AppView } from '@/navigation';
+import {
+  clearActivities,
+  formatRelativeTime,
+  getActivities,
+  type ActivityItem,
+} from '@/services/activity-log';
 
 type NotificationMenuProps = {
   dueCount?: number;
@@ -68,8 +78,25 @@ const NotificationMenu = ({
   onNavigate,
 }: NotificationMenuProps) => {
   const menuRef = useRef<HTMLDetailsElement>(null);
-  const [activeTab, setActiveTab] = useState<'activity' | 'updates'>('activity');
+  const [activeTab, setActiveTab] = useState<'activity' | 'updates'>(
+    'activity',
+  );
   const [expandedVersion, setExpandedVersion] = useState<string | null>('v2.1');
+  const [activities, setActivities] = useState<ActivityItem[]>(getActivities);
+
+  // Lắng nghe sự kiện ghi nhận hoạt động mới theo thời gian thực
+  useEffect(() => {
+    const handleActivityUpdate = () => {
+      setActivities(getActivities());
+    };
+    window.addEventListener('phrasebook_activity_logged', handleActivityUpdate);
+    return () => {
+      window.removeEventListener(
+        'phrasebook_activity_logged',
+        handleActivityUpdate,
+      );
+    };
+  }, []);
 
   // Kiểm tra xem người dùng đã đọc bản cập nhật phần mềm mới nhất chưa
   const [hasNewUpdate, setHasNewUpdate] = useState(() => {
@@ -83,7 +110,9 @@ const NotificationMenu = ({
     }
   });
 
-  const [hasUnreadActivity, setHasUnreadActivity] = useState(dueCount > 0);
+  const [hasUnreadActivity, setHasUnreadActivity] = useState(
+    dueCount > 0 || activities.length > 0,
+  );
 
   useEffect(() => {
     if (dueCount > 0) setHasUnreadActivity(true);
@@ -104,6 +133,7 @@ const NotificationMenu = ({
 
   const handleOpen = () => {
     setHasUnreadActivity(false);
+    setActivities(getActivities());
   };
 
   const handleSwitchToUpdates = () => {
@@ -129,6 +159,49 @@ const NotificationMenu = ({
 
   // Tổng trạng thái thông báo chưa đọc
   const hasUnread = (dueCount > 0 && hasUnreadActivity) || hasNewUpdate;
+
+  // Icon theo từng loại hoạt động
+  const getActivityIcon = (type: ActivityItem['type']) => {
+    switch (type) {
+      case 'lesson_added':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-learned-bg text-status-learned border border-status-learned/30 mt-0.5">
+            <Plus size={16} />
+          </div>
+        );
+      case 'lesson_updated':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-info-bg text-status-info border border-status-info/30 mt-0.5">
+            <Pencil size={15} />
+          </div>
+        );
+      case 'lesson_deleted':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-danger-bg text-status-danger border border-status-danger/30 mt-0.5">
+            <Trash2 size={15} />
+          </div>
+        );
+      case 'review_completed':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-review-bg text-status-review border border-status-review/30 mt-0.5">
+            <Sparkles size={16} />
+          </div>
+        );
+      case 'backup_exported':
+      case 'backup_imported':
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-soft text-forest border border-line mt-0.5">
+            <HardDrive size={16} />
+          </div>
+        );
+      default:
+        return (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-text-secondary border border-line mt-0.5">
+            <BookOpen size={16} />
+          </div>
+        );
+    }
+  };
 
   return (
     <details ref={menuRef} className="relative inline-block text-left">
@@ -202,10 +275,10 @@ const NotificationMenu = ({
           </button>
         </div>
 
-        {/* Làn 1: Hoạt động học tập cá nhân */}
+        {/* Làn 1: Hoạt động học tập cá nhân & Lịch sử hoạt động thật */}
         {activeTab === 'activity' && (
-          <div className="space-y-2.5 animate-in fade-in duration-150">
-            {/* Nhắc nhở bài học đến hạn */}
+          <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
+            {/* Nhắc nhở bài học đến hạn (Ghim lên đầu nếu có) */}
             {dueCount > 0 ? (
               <div className="group rounded-xl border border-status-review/25 bg-status-review-bg/50 p-3 transition-colors">
                 <div className="flex items-start gap-3">
@@ -217,7 +290,8 @@ const NotificationMenu = ({
                       Bài học đến hạn ôn tập
                     </h4>
                     <p className="mt-0.5 text-xs text-text-secondary leading-snug">
-                      Hôm nay bạn có <strong>{dueCount}</strong> bài học cần ôn luyện để duy trì trí nhớ.
+                      Hôm nay bạn có <strong>{dueCount}</strong> bài học cần ôn
+                      luyện để duy trì trí nhớ.
                     </p>
                     <button
                       type="button"
@@ -230,7 +304,60 @@ const NotificationMenu = ({
                   </div>
                 </div>
               </div>
+            ) : null}
+
+            {/* Danh sách các hoạt động thực tế vừa diễn ra */}
+            {activities.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between pt-1 px-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                    Hoạt động gần đây ({activities.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearActivities}
+                    className="text-[11px] text-muted hover:text-status-danger transition-colors"
+                  >
+                    Xóa nhật ký
+                  </button>
+                </div>
+
+                {activities.map((act) => (
+                  <div
+                    key={act.id}
+                    className="rounded-xl border border-line bg-surface-soft/60 p-3 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      {getActivityIcon(act.type)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <h4 className="text-xs font-bold text-text">
+                            {act.title}
+                          </h4>
+                          <span className="text-[10px] text-muted shrink-0">
+                            {formatRelativeTime(act.timestamp)}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-text-secondary leading-snug wrap-break-word">
+                          {act.description}
+                        </p>
+                        {act.view && (
+                          <button
+                            type="button"
+                            onClick={() => handleAction(act.view!)}
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-forest hover:underline"
+                          >
+                            <span>{act.linkText || 'Xem chi tiết'}</span>
+                            <ChevronRight size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
             ) : (
+              /* Trạng thái khi chưa có hoạt động nào được ghi nhận */
               <div className="rounded-xl border border-line bg-surface-soft p-3">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-status-learned-bg text-status-learned border border-status-learned/30 mt-0.5">
@@ -238,17 +365,18 @@ const NotificationMenu = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-xs font-bold text-text">
-                      Đã hoàn thành ôn tập
+                      Hệ thống hoạt động bình thường
                     </h4>
                     <p className="mt-0.5 text-xs text-text-secondary leading-snug">
-                      Không có bài học nào đang đến hạn. Bạn có thể mở thư viện để thêm từ mới.
+                      Mỗi khi bạn thêm, sửa bài học, ôn tập hoặc sao lưu, các
+                      hoạt động sẽ tự động lưu lại tại đây.
                     </p>
                     <button
                       type="button"
                       onClick={() => handleAction('lessons')}
                       className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-forest hover:underline"
                     >
-                      <span>Xem thư viện bài học</span>
+                      <span>Mở thư viện bài học</span>
                       <ChevronRight size={13} />
                     </button>
                   </div>
@@ -257,7 +385,7 @@ const NotificationMenu = ({
             )}
 
             {/* Trạng thái sao lưu & an toàn dữ liệu */}
-            <div className="rounded-xl border border-line bg-surface-soft/60 p-3">
+            <div className="rounded-xl border border-line bg-surface p-3">
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-soft text-forest border border-line mt-0.5">
                   {connected ? <Cloud size={16} /> : <HardDrive size={16} />}
@@ -281,14 +409,6 @@ const NotificationMenu = ({
                   </button>
                 </div>
               </div>
-            </div>
-
-            {/* Mẹo học tập */}
-            <div className="rounded-xl border border-line bg-surface p-3 flex items-start gap-2.5">
-              <Sparkles size={15} className="shrink-0 text-forest mt-0.5" />
-              <p className="text-[11px] text-muted leading-relaxed">
-                <strong>Mẹo:</strong> Luyện ngắt quãng (Spaced Repetition) với Flashcard mỗi ngày giúp ghi nhớ dài hạn bền vững nhất.
-              </p>
             </div>
           </div>
         )}
@@ -347,8 +467,13 @@ const NotificationMenu = ({
                       {isExpanded && (
                         <ul className="mt-2 pt-2 border-t border-line/60 space-y-1.5 text-[11px] text-text-secondary animate-in fade-in duration-100">
                           {update.highlights.map((h, i) => (
-                            <li key={i} className="flex items-start gap-1.5 leading-snug">
-                              <span className="text-forest font-bold mt-0.5">•</span>
+                            <li
+                              key={i}
+                              className="flex items-start gap-1.5 leading-snug"
+                            >
+                              <span className="text-forest font-bold mt-0.5">
+                                •
+                              </span>
                               <span>{h}</span>
                             </li>
                           ))}
@@ -379,7 +504,9 @@ const NotificationMenu = ({
             <div className="rounded-xl border border-line bg-surface p-3 flex items-start gap-2.5">
               <Rocket size={15} className="shrink-0 text-forest mt-0.5" />
               <p className="text-[11px] text-muted leading-relaxed">
-                <strong>Ghi chú:</strong> Phrasebook luôn lưu trữ dữ liệu ngoại tuyến (offline) trên trình duyệt, đảm bảo quyền riêng tư và tốc độ tối ưu.
+                <strong>Ghi chú:</strong> Phrasebook luôn lưu trữ dữ liệu ngoại
+                tuyến (offline) trên trình duyệt, đảm bảo quyền riêng tư và tốc
+                độ tối ưu.
               </p>
             </div>
           </div>

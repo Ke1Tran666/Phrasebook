@@ -32,6 +32,7 @@ import {
 } from '@/db';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import { useLanguage } from '@/language';
+import { logActivity } from '@/services/activity-log';
 
 const App = () => {
   const { t } = useLanguage();
@@ -165,6 +166,13 @@ const App = () => {
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 30000);
       notify('Đã tạo file sao lưu. Kiểm tra thư mục tải xuống.');
+      logActivity({
+        type: 'backup_exported',
+        title: 'Xuất file sao lưu',
+        description: `Đã xuất ${records.length} bài học ra file JSON.`,
+        view: 'backup',
+        linkText: 'Quản lý sao lưu',
+      });
     } catch {
       notify('Không thể xuất dữ liệu. Vui lòng thử lại.');
     }
@@ -192,6 +200,13 @@ const App = () => {
       const result = await importLessons(pendingImport);
       setImportResult(result);
       setPendingImport(null);
+      logActivity({
+        type: 'backup_imported',
+        title: 'Nhập dữ liệu bài học',
+        description: `Thêm ${result.added} bài học mới, bỏ qua ${result.skipped} bài trùng.`,
+        view: 'lessons',
+        linkText: 'Xem trong thư viện',
+      });
       notify(
         `Đã thêm ${result.added} bài học · Bỏ qua ${result.skipped} bài trùng.`,
       );
@@ -229,6 +244,15 @@ const App = () => {
       await db.lessons.update(current.id, {
         ...createReviewUpdate(next, current),
       });
+      if (reviewIds && reviewIndex + 1 >= reviewIds.length) {
+        logActivity({
+          type: 'review_completed',
+          title: 'Hoàn thành lượt ôn tập',
+          description: `Đã hoàn thành phiên luyện Flashcard (${reviewIds.length} bài học).`,
+          view: 'dashboard',
+          linkText: 'Xem tiến độ',
+        });
+      }
       setReviewIndex((i) => i + 1);
       setFlipped(false);
     } catch {
@@ -407,7 +431,17 @@ const App = () => {
       <LessonForm
         lesson={editing}
         onClose={() => setEditing(undefined)}
-        onSaved={() => setEditing(undefined)}
+        onSaved={(savedLesson) => {
+          const isEdit = !!editing;
+          logActivity({
+            type: isEdit ? 'lesson_updated' : 'lesson_added',
+            title: isEdit ? 'Cập nhật bài học' : 'Thêm bài học mới',
+            description: `"${savedLesson.english.slice(0, 50)}${savedLesson.english.length > 50 ? '...' : ''}"`,
+            view: 'lessons',
+            linkText: 'Xem trong thư viện',
+          });
+          setEditing(undefined);
+        }}
         notify={notify}
       />
 
@@ -449,7 +483,15 @@ const App = () => {
               className={ui('button danger-button')}
               onClick={() =>
                 act(async () => {
-                  if (deleting) await db.lessons.delete(deleting.id);
+                  if (deleting) {
+                    const deletedText = deleting.english;
+                    await db.lessons.delete(deleting.id);
+                    logActivity({
+                      type: 'lesson_deleted',
+                      title: 'Xóa bài học',
+                      description: `Đã xóa: "${deletedText.slice(0, 50)}${deletedText.length > 50 ? '...' : ''}"`,
+                    });
+                  }
                   setDeleting(null);
                 }, 'Đã xóa bài học.')
               }
