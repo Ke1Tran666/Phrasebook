@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Bell,
-  BookOpen,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -9,7 +8,6 @@ import {
   HardDrive,
   Rocket,
   Sparkles,
-  Tag,
 } from 'lucide-react';
 import type { AppView } from '@/navigation';
 
@@ -25,8 +23,10 @@ const SOFTWARE_UPDATES = [
   {
     version: 'v2.1',
     date: 'Mới nhất',
-    title: 'Hệ thống thông báo 2 làn & Toast thông minh',
+    title: 'Phiên bản v2.1 — Hệ thống thông báo mới',
     isNew: true,
+    summary:
+      'Đã bổ sung Trung tâm thông báo 2 luồng, Toast nổi đếm ngược thông minh và tự động đóng băng khi rê chuột.',
     highlights: [
       'Phân tách 2 luồng thông báo: Hoạt động học tập cá nhân & Bản cập nhật phần mềm.',
       'Toast thông báo nổi cao cấp với chế độ tạm dừng đếm ngược khi rê chuột (Hover-to-Pause).',
@@ -36,8 +36,10 @@ const SOFTWARE_UPDATES = [
   {
     version: 'v2.0',
     date: 'Tháng 10, 2026',
-    title: 'Đại tu giao diện & Trải nghiệm toàn diện',
+    title: 'Phiên bản v2.0 — Đại tu giao diện',
     isNew: false,
+    summary:
+      'Nâng cấp 3 chủ đề giao diện, phòng Flashcard 3D với phím tắt nhanh và Thư viện hiển thị Lưới/Danh sách.',
     highlights: [
       'Chuẩn hóa Style System & Design Tokens với 3 chủ đề: Sáng, Tối và Lễ Độc lập.',
       'Phòng Flashcard 3D với bảng điểm trực tiếp, phím tắt nhanh và chúc mừng hoàn thành.',
@@ -49,8 +51,10 @@ const SOFTWARE_UPDATES = [
   {
     version: 'v1.5',
     date: 'Tháng 9, 2026',
-    title: 'Gợi ý cấu trúc câu & Đám mây Google Drive',
+    title: 'Phiên bản v1.5 — Đám mây & Ngữ pháp',
     isNew: false,
+    summary:
+      'Tích hợp sao lưu Google Drive AppData bảo mật và tự động nhận diện mẫu cấu trúc ngữ pháp khi soạn câu.',
     highlights: [
       'Tự động nhận diện cấu trúc câu đã lưu trong đoạn văn khi nhập liệu.',
       'Sao lưu đa thiết bị qua Google Drive AppData Folder an toàn.',
@@ -65,6 +69,7 @@ const NotificationMenu = ({
 }: NotificationMenuProps) => {
   const menuRef = useRef<HTMLDetailsElement>(null);
   const [activeTab, setActiveTab] = useState<'activity' | 'updates'>('activity');
+  const [expandedVersion, setExpandedVersion] = useState<string | null>('v2.1');
 
   // Kiểm tra xem người dùng đã đọc bản cập nhật phần mềm mới nhất chưa
   const [hasNewUpdate, setHasNewUpdate] = useState(() => {
@@ -116,6 +121,10 @@ const NotificationMenu = ({
       menuRef.current.removeAttribute('open');
     }
     onNavigate?.(view);
+  };
+
+  const toggleExpand = (ver: string) => {
+    setExpandedVersion((curr) => (curr === ver ? null : ver));
   };
 
   // Tổng trạng thái thông báo chưa đọc
@@ -284,52 +293,95 @@ const NotificationMenu = ({
           </div>
         )}
 
-        {/* Làn 2: Thông báo cập nhật phần mềm (Tĩnh) */}
+        {/* Làn 2: Thông báo cập nhật phần mềm (Định dạng chuẩn thẻ giống Hoạt động) */}
         {activeTab === 'updates' && (
-          <div className="space-y-3 max-h-80 overflow-y-auto pr-1 animate-in fade-in duration-150">
-            {SOFTWARE_UPDATES.map((update) => (
-              <div
-                key={update.version}
-                className={`rounded-xl border p-3.5 transition-colors ${
-                  update.isNew
-                    ? 'border-forest/30 bg-forest-soft/30'
-                    : 'border-line bg-surface-soft/60'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`font-mono text-xs font-bold px-2 py-0.5 rounded-md ${
+          <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
+            {SOFTWARE_UPDATES.map((update) => {
+              const isExpanded = expandedVersion === update.version;
+
+              return (
+                <div
+                  key={update.version}
+                  className={`rounded-xl border p-3 transition-colors ${
+                    update.isNew
+                      ? 'border-forest/30 bg-forest-soft/40'
+                      : 'border-line bg-surface-soft/60'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Icon container vuông bo tròn giống Hoạt động */}
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border mt-0.5 ${
                         update.isNew
-                          ? 'bg-forest text-white shadow-xs'
-                          : 'bg-surface text-text-secondary border border-line'
+                          ? 'bg-forest text-white border-forest shadow-xs'
+                          : 'bg-forest-soft text-forest border-line'
                       }`}
                     >
-                      {update.version}
-                    </span>
-                    {update.isNew && (
-                      <span className="rounded-full bg-status-learned-bg px-2 py-0.5 text-[10px] font-bold text-status-learned border border-status-learned/25">
-                        Mới
-                      </span>
-                    )}
+                      {update.isNew ? (
+                        <Rocket size={16} />
+                      ) : update.version === 'v2.0' ? (
+                        <Sparkles size={16} />
+                      ) : (
+                        <Cloud size={16} />
+                      )}
+                    </div>
+
+                    {/* Nội dung thông báo */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-xs font-bold text-text">
+                          {update.title}
+                        </h4>
+                        {update.isNew && (
+                          <span className="rounded-full bg-status-learned-bg px-2 py-0.5 text-[9px] font-bold text-status-learned border border-status-learned/25">
+                            Mới
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-0.5 text-xs text-text-secondary leading-snug">
+                        {update.summary}
+                      </p>
+
+                      {/* Chi tiết khi mở rộng */}
+                      {isExpanded && (
+                        <ul className="mt-2 pt-2 border-t border-line/60 space-y-1.5 text-[11px] text-text-secondary animate-in fade-in duration-100">
+                          {update.highlights.map((h, i) => (
+                            <li key={i} className="flex items-start gap-1.5 leading-snug">
+                              <span className="text-forest font-bold mt-0.5">•</span>
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Nút hành động dạng link có mũi tên giống Hoạt động */}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(update.version)}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-forest hover:underline"
+                      >
+                        <span>{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                        <ChevronRight
+                          size={13}
+                          className={`transition-transform duration-150 ${
+                            isExpanded ? 'rotate-90' : ''
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-[11px] text-muted">{update.date}</span>
                 </div>
+              );
+            })}
 
-                <h4 className="mt-2 text-xs font-bold text-text">
-                  {update.title}
-                </h4>
-
-                <ul className="mt-2 space-y-1.5 text-[11px] text-text-secondary">
-                  {update.highlights.map((h, i) => (
-                    <li key={i} className="flex items-start gap-1.5 leading-snug">
-                      <span className="text-forest mt-0.5">•</span>
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {/* Thẻ ghi chú phiên bản cuối cùng giống Mẹo học tập */}
+            <div className="rounded-xl border border-line bg-surface p-3 flex items-start gap-2.5">
+              <Rocket size={15} className="shrink-0 text-forest mt-0.5" />
+              <p className="text-[11px] text-muted leading-relaxed">
+                <strong>Ghi chú:</strong> Phrasebook luôn lưu trữ dữ liệu ngoại tuyến (offline) trên trình duyệt, đảm bảo quyền riêng tư và tốc độ tối ưu.
+              </p>
+            </div>
           </div>
         )}
       </div>
