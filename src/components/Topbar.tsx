@@ -22,14 +22,18 @@ const Topbar = ({
   const { t } = useLanguage();
   return (
     <header className={ui('topbar')}>
-      <div className="min-w-0 max-[760px]:[&>span]:hidden max-[760px]:[&>svg]:hidden">
-        <span>{t('topbar.workspace')}</span>
-        <ChevronRight size={14} />
-        <strong>{t(pageLabelKeys[view])}</strong>
+      <div className="min-w-0 flex items-center gap-2 max-[760px]:[&>span]:hidden max-[760px]:[&>svg]:hidden">
+        <span className="text-muted text-xs sm:text-sm">
+          {t('topbar.workspace')}
+        </span>
+        <ChevronRight size={14} className="text-muted/60" />
+        <strong className="text-text font-semibold text-xs sm:text-sm truncate">
+          {t(pageLabelKeys[view])}
+        </strong>
       </div>
-      <div className="shrink-0">
+      <div className="shrink-0 flex items-center gap-3">
         <span className={`${ui('local-label')} max-[1100px]:hidden`}>
-          {connected ? <Cloud size={15} /> : <HardDrive size={15} />}
+          {connected ? <Cloud size={14} /> : <HardDrive size={14} />}
           {connected ? t('topbar.driveConnected') : t('topbar.local')}
         </span>
         <HeaderPreferences />

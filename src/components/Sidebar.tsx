@@ -49,7 +49,7 @@ const Sidebar = ({
           )}
           onClick={() => nav('dashboard')}
         >
-          <LayoutDashboard size={20} /> {t('nav.dashboard')}
+          <LayoutDashboard size={19} /> {t('nav.dashboard')}
         </button>
         <button
           className={ui(view === 'lessons' ? 'nav-item selected' : 'nav-item')}
@@ -58,7 +58,7 @@ const Sidebar = ({
             setTopic('all');
           }}
         >
-          <BookOpen size={20} /> {t('nav.lessons')} <span>{all.length}</span>
+          <BookOpen size={19} /> {t('nav.lessons')} <span>{all.length}</span>
         </button>
         <button
           className={ui(
@@ -66,14 +66,14 @@ const Sidebar = ({
           )}
           onClick={() => nav('exam-practice')}
         >
-          <ClipboardCheck size={20} /> {t('nav.examPractice')}{' '}
+          <ClipboardCheck size={19} /> {t('nav.examPractice')}{' '}
           {counts.review > 0 && <span>{counts.review}</span>}
         </button>
         <button
           className={ui(view === 'backup' ? 'nav-item selected' : 'nav-item')}
           onClick={() => nav('backup')}
         >
-          <HardDrive size={20} /> {t('nav.backup')}
+          <HardDrive size={19} /> {t('nav.backup')}
         </button>
       </nav>
       <div className={ui('sidebar-topics')}>
@@ -93,29 +93,31 @@ const Sidebar = ({
                 nav('lessons');
               }}
             >
-              <span className="size-2 shrink-0 rounded-full border border-[#a88ab9]" />
+              <span className="size-2 shrink-0 rounded-full border border-forest/60" />
 
               <span className="min-w-0 flex-1 truncate" title={t}>
                 {t}
               </span>
 
-              <span className="shrink-0 text-xs text-[#918895]">
+              <span className="shrink-0 text-xs text-muted">
                 {all.filter((lesson) => lesson.topic === t).length}
               </span>
             </button>
           ))
         ) : (
-          <p>{t('sidebar.noTopics')}</p>
+          <p className="text-muted text-xs px-3 py-2">
+            {t('sidebar.noTopics')}
+          </p>
         )}
       </div>
       <div className={ui('local-card')}>
         <span className={ui('local-icon')}>
-          <ShieldCheck size={21} />
+          <ShieldCheck size={20} />
         </span>
         <strong>{t('sidebar.privateTitle')}</strong>
         <p>{t('sidebar.privateDescription')}</p>
         <button onClick={() => nav('backup')}>
-          {t('sidebar.manageBackup')} <ChevronRight size={15} />
+          {t('sidebar.manageBackup')} <ChevronRight size={14} />
         </button>
       </div>
       <ProfileButton

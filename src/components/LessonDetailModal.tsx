@@ -27,7 +27,7 @@ export const LessonDetailModal = ({
 
   if (!detail) return null;
 
-  // Cấu hình hiển thị Badge trạng thái (Read-only)
+  // Cấu hình hiển thị Badge trạng thái (Read-only) bằng Design Tokens chuẩn
   const getStatusBadge = () => {
     switch (detail.status) {
       case 'learned':
@@ -35,21 +35,21 @@ export const LessonDetailModal = ({
           label: t('status.learned'),
           icon: Check,
           className:
-            'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+            'bg-status-learned-bg text-status-learned border-status-learned/25',
         };
       case 'review':
         return {
           label: t('status.review'),
           icon: Bookmark,
           className:
-            'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+            'bg-status-review-bg text-status-review border-status-review/25',
         };
       case 'new':
       default:
         return {
           label: t('status.new'),
           icon: CircleDot,
-          className: 'bg-surface-soft text-muted border-line',
+          className: 'bg-status-new-bg text-status-new border-line',
         };
     }
   };
@@ -86,7 +86,9 @@ export const LessonDetailModal = ({
           <English lesson={detail} />
         </h2>
 
-        <ListenButton key={detail.id} text={detail.english} />
+        <div className="my-3">
+          <ListenButton key={detail.id} text={detail.english} />
+        </div>
 
         {detail.type !== 'structure' && (
           <StructureSuggestions
@@ -125,7 +127,7 @@ export const LessonDetailModal = ({
         </div>
 
         {/* Trạng thái học: Hiển thị dạng Badge chỉ đọc */}
-        <div className="flex items-center justify-between pt-3 border-t border-line">
+        <div className="flex items-center justify-between pt-4 mt-6 border-t border-line">
           <span className="text-sm font-semibold text-muted">
             {t('detail.status')}
           </span>
@@ -143,10 +145,10 @@ export const LessonDetailModal = ({
           className={ui('text-button danger')}
           onClick={() => onDelete(detail)}
         >
-          <Trash2 size={17} /> {t('detail.deleteLesson')}
+          <Trash2 size={16} /> {t('detail.deleteLesson')}
         </button>
         <button className={ui('button primary')} onClick={() => onEdit(detail)}>
-          <Pencil size={16} /> {t('common.edit')}
+          <Pencil size={15} /> {t('common.edit')}
         </button>
       </footer>
     </Modal>

@@ -8,11 +8,13 @@ type StatCardProps = {
   description?: string;
   onClick?: () => void;
 };
+
 const iconColors = {
-  green: 'bg-[#f4eafa] text-[#8330b8]',
-  amber: 'bg-[#fbf2e3] text-[#b08137]',
-  blue: 'bg-[#eaf1fa] text-[#5c81a1]',
+  green: 'bg-status-learned-bg text-status-learned',
+  amber: 'bg-status-review-bg text-status-review',
+  blue: 'bg-status-info-bg text-status-info',
 };
+
 const StatCard = ({
   label,
   value,
@@ -26,22 +28,22 @@ const StatCard = ({
     <Container
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className="relative flex min-h-[130px] min-w-0 flex-col items-start gap-1.5 rounded-[10px] border border-line bg-surface px-2.5 py-3.5 text-left hover:border-[#a8beae] min-[761px]:min-h-[124px] min-[761px]:flex-row min-[761px]:items-center min-[761px]:gap-3 min-[761px]:px-[15px] min-[761px]:py-5 min-[1151px]:gap-4 min-[1151px]:px-[22px] min-[1151px]:py-6"
+      className="relative flex min-h-[110px] min-w-0 flex-col items-start gap-2 rounded-2xl border border-line bg-surface p-4 text-left shadow-xs transition-all duration-180 hover:border-line-hover hover:shadow-card hover:-translate-y-0.5 min-[761px]:flex-row min-[761px]:items-center min-[761px]:gap-3.5 min-[761px]:p-5 min-[1151px]:gap-4.5 min-[1151px]:p-6"
     >
       <span
-        className={`theme-fixed-color grid size-[34px] shrink-0 place-items-center rounded-[8px] min-[761px]:size-[43px] min-[761px]:rounded-[10px] ${iconColors[color]}`}
+        className={`grid size-10 shrink-0 place-items-center rounded-xl transition-colors min-[761px]:size-11 ${iconColors[color]}`}
       >
         <Icon
-          size={21}
-          className="size-[18px] min-[761px]:size-[21px]"
+          size={20}
+          className="size-5 min-[761px]:size-[22px]"
           aria-hidden="true"
         />
       </span>
       <div className="min-w-0">
-        <span className="block text-[11px] text-[#817785] min-[761px]:text-xs min-[1151px]:text-sm">
+        <span className="block text-xs font-medium text-muted min-[1151px]:text-sm truncate">
           {label}
         </span>
-        <strong className="text-[25px] leading-[1.4] font-medium tracking-[-1px] min-[761px]:text-[30px]">
+        <strong className="text-2xl font-bold tracking-tight text-text min-[761px]:text-3xl">
           {String(value).padStart(2, '0')}
         </strong>
       </div>
@@ -49,4 +51,5 @@ const StatCard = ({
     </Container>
   );
 };
+
 export default StatCard;
