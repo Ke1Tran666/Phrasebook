@@ -81,7 +81,7 @@ const Logo = ({ onClick, className = '' }: LogoProps) => (
     </div>
     <span className="font-extrabold tracking-tight text-text text-xl sm:text-2xl font-sans group-hover:text-forest transition-colors">
       phrasebook
-      <span className="ml-[-1px] text-forest group-hover:text-forest-hover transition-colors">
+      <span className="-ml-px text-forest group-hover:text-forest-hover transition-colors">
         .
       </span>
     </span>
