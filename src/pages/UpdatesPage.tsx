@@ -26,6 +26,7 @@ import { ADMIN_EMAIL } from '@/services/admin-auth';
 
 type UpdatesPageProps = {
   notify: (msg: string) => void;
+  isAdmin?: boolean;
 };
 
 type DetailCategoryForm = {
@@ -33,7 +34,7 @@ type DetailCategoryForm = {
   items: string[];
 };
 
-const UpdatesPage = ({ notify }: UpdatesPageProps) => {
+const UpdatesPage = ({ notify, isAdmin = false }: UpdatesPageProps) => {
   const { t } = useLanguage();
   const [releases, setReleases] = useState<ReleaseNote[]>(getAllReleases);
   const [search, setSearch] = useState('');
@@ -67,6 +68,7 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
   }, []);
 
   const openNewReleaseModal = () => {
+    if (!isAdmin) return;
     const now = new Date();
     const defaultDate = `Tháng ${now.getMonth() + 1}, ${now.getFullYear()}`;
     setFormVersion('');
@@ -81,6 +83,7 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
   };
 
   const openEditReleaseModal = (release: ReleaseNote) => {
+    if (!isAdmin) return;
     setFormVersion(release.version);
     setFormDisplayVersion(release.displayVersion);
     setFormDate(release.releaseDate);
@@ -103,6 +106,7 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
 
   const handleSaveRelease = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!formTitle.trim() || !formVersion.trim()) return;
 
     const displayVer =
@@ -139,6 +143,7 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
   };
 
   const handleDelete = (release: ReleaseNote) => {
+    if (!isAdmin) return;
     if (
       window.confirm(
         `Bạn có chắc chắn muốn xóa bản cập nhật ${release.displayVersion}?`,
@@ -281,14 +286,17 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
           <p>{t('updates.subtitle')}</p>
         </div>
 
-        <button
-          type="button"
-          onClick={openNewReleaseModal}
-          className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all ml-auto self-start mt-2 sm:mt-0"
-        >
-          <Plus size={16} />
-          <span>{t('updates.writeNew')}</span>
-        </button>
+        {/* Nút Viết cập nhật mới: Chỉ Admin mới thấy */}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={openNewReleaseModal}
+            className="inline-flex items-center gap-2 rounded-xl bg-forest px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all ml-auto self-start mt-2 sm:mt-0"
+          >
+            <Plus size={16} />
+            <span>{t('updates.writeNew')}</span>
+          </button>
+        )}
       </div>
 
       {/* Overview & Quick Search Bar */}
@@ -305,9 +313,11 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
               <span className="rounded-full bg-status-learned-bg px-2 py-0.5 text-[10px] font-bold text-status-learned border border-status-learned/20">
                 Đang chạy
               </span>
-              <span className="rounded-full bg-forest-soft px-2 py-0.5 text-[10px] font-bold text-forest border border-forest/20">
-                Admin: {ADMIN_EMAIL}
-              </span>
+              {isAdmin && (
+                <span className="rounded-full bg-forest-soft px-2 py-0.5 text-[10px] font-bold text-forest border border-forest/20">
+                  Admin: {ADMIN_EMAIL}
+                </span>
+              )}
             </div>
             <p className="text-xs text-muted mt-0.5">
               Tổng số {releases.length} bản phát hành đã được ghi nhận.
@@ -385,7 +395,8 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
                   </span>
                 </button>
 
-                {release.isCustom && (
+                {/* Nút sửa/xóa bản tự tạo: Chỉ Admin mới có quyền thao tác */}
+                {isAdmin && release.isCustom && (
                   <>
                     <button
                       type="button"
@@ -472,322 +483,324 @@ const UpdatesPage = ({ notify }: UpdatesPageProps) => {
         )}
       </div>
 
-      {/* Modal Soạn thảo bản cập nhật mới / Chỉnh sửa */}
-      <Modal
-        open={editingRelease !== null}
-        label="Soạn nội dung cập nhật"
-        onClose={() => setEditingRelease(null)}
-        wide
-      >
-        <form onSubmit={handleSaveRelease} className="flex flex-col">
-          {/* Header */}
-          <div className={ui('modal-heading')}>
-            <div>
-              <span className={ui('eyebrow')}>QUẢN LÝ PHIÊN BẢN</span>
-              <h2>
-                {editingRelease === 'new'
-                  ? 'Viết bản cập nhật mới'
-                  : 'Chỉnh sửa bản cập nhật'}
-              </h2>
+      {/* Modal Soạn thảo bản cập nhật mới / Chỉnh sửa (Chỉ Admin) */}
+      {isAdmin && (
+        <Modal
+          open={editingRelease !== null}
+          label="Soạn nội dung cập nhật"
+          onClose={() => setEditingRelease(null)}
+          wide
+        >
+          <form onSubmit={handleSaveRelease} className="flex flex-col">
+            {/* Header */}
+            <div className={ui('modal-heading')}>
+              <div>
+                <span className={ui('eyebrow')}>QUẢN LÝ PHIÊN BẢN</span>
+                <h2>
+                  {editingRelease === 'new'
+                    ? 'Viết bản cập nhật mới'
+                    : 'Chỉnh sửa bản cập nhật'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className={ui('icon-button')}
+                onClick={() => setEditingRelease(null)}
+                aria-label="Đóng"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <button
-              type="button"
-              className={ui('icon-button')}
-              onClick={() => setEditingRelease(null)}
-              aria-label="Đóng"
-            >
-              <X size={20} />
-            </button>
-          </div>
 
-          {/* Form Body */}
-          <div className="p-6 space-y-5 text-sm max-h-[75vh] overflow-y-auto">
-            {/* Version & Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Form Body */}
+            <div className="p-6 space-y-5 text-sm max-h-[75vh] overflow-y-auto">
+              {/* Version & Date */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-text mb-1 block">
+                    Số phiên bản <span className="text-status-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ví dụ: 2.2.0"
+                    value={formVersion}
+                    onChange={(e) => setFormVersion(e.target.value)}
+                    className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-text mb-1 block">
+                    Tên hiển thị
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: v2.2"
+                    value={formDisplayVersion}
+                    onChange={(e) => setFormDisplayVersion(e.target.value)}
+                    className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-text mb-1 block">
+                    Thời gian phát hành
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: Tháng 11, 2026"
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
+                  />
+                </div>
+              </div>
+
+              {/* Title */}
               <div>
                 <label className="text-xs font-bold text-text mb-1 block">
-                  Số phiên bản <span className="text-status-danger">*</span>
+                  Tiêu đề bản cập nhật <span className="text-status-danger">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: 2.2.0"
-                  value={formVersion}
-                  onChange={(e) => setFormVersion(e.target.value)}
+                  placeholder="Ví dụ: Nâng cấp luyện phát âm & Giao diện tối ưu"
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
                   className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
                 />
               </div>
 
+              {/* Summary */}
               <div>
                 <label className="text-xs font-bold text-text mb-1 block">
-                  Tên hiển thị
+                  Đoạn tóm tắt (1-2 câu ngắn gọn)
                 </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: v2.2"
-                  value={formDisplayVersion}
-                  onChange={(e) => setFormDisplayVersion(e.target.value)}
+                <textarea
+                  rows={2}
+                  placeholder="Tóm tắt những thay đổi quan trọng nhất của phiên bản này..."
+                  value={formSummary}
+                  onChange={(e) => setFormSummary(e.target.value)}
                   className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-text mb-1 block">
-                  Thời gian phát hành
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Tháng 11, 2026"
-                  value={formDate}
-                  onChange={(e) => setFormDate(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
-                />
-              </div>
-            </div>
-
-            {/* Title */}
-            <div>
-              <label className="text-xs font-bold text-text mb-1 block">
-                Tiêu đề bản cập nhật <span className="text-status-danger">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Ví dụ: Nâng cấp luyện phát âm & Giao diện tối ưu"
-                value={formTitle}
-                onChange={(e) => setFormTitle(e.target.value)}
-                className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
-              />
-            </div>
-
-            {/* Summary */}
-            <div>
-              <label className="text-xs font-bold text-text mb-1 block">
-                Đoạn tóm tắt (1-2 câu ngắn gọn)
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Tóm tắt những thay đổi quan trọng nhất của phiên bản này..."
-                value={formSummary}
-                onChange={(e) => setFormSummary(e.target.value)}
-                className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
-              />
-            </div>
-
-            {/* Highlights (Điểm nổi bật) */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-xs font-bold text-text flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-forest" />
-                    <span>Điểm nổi bật chính (Khung tím / Khung trên)</span>
-                  </label>
-                  <p className="text-[11px] text-muted">
-                    Các cải tiến cốt lõi sẽ hiển thị gạch đầu dòng trong khung tổng quan.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddHighlightLine}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-forest hover:underline"
-                >
-                  <Plus size={13} /> Thêm dòng
-                </button>
-              </div>
-
+              {/* Highlights (Điểm nổi bật) */}
               <div className="space-y-2">
-                {formHighlights.map((line, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted w-5 shrink-0 text-center">
-                      {idx + 1}.
-                    </span>
-                    <input
-                      type="text"
-                      placeholder={`Nội dung tính năng mới ${idx + 1}...`}
-                      value={line}
-                      onChange={(e) =>
-                        handleUpdateHighlightLine(idx, e.target.value)
-                      }
-                      className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveHighlightLine(idx)}
-                      className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
-                      title="Xóa dòng này"
-                    >
-                      <X size={15} />
-                    </button>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-bold text-text flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-forest" />
+                      <span>Điểm nổi bật chính (Khung tím / Khung trên)</span>
+                    </label>
+                    <p className="text-[11px] text-muted">
+                      Các cải tiến cốt lõi sẽ hiển thị gạch đầu dòng trong khung tổng quan.
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Details by category (Phân loại chuyên mục 2 cột) */}
-            <div className="space-y-3 pt-3 border-t border-line">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <label className="text-xs font-bold text-text flex items-center gap-1.5">
-                    <Tag size={13} className="text-forest" />
-                    <span>Phân loại chuyên mục chi tiết (Hiển thị lưới 2 cột)</span>
-                  </label>
-                  <p className="text-[11px] text-muted mt-0.5">
-                    Chia nhỏ cập nhật thành các thẻ danh mục như Tính năng mới, Trải nghiệm UX, Sửa lỗi...
-                  </p>
-                </div>
-
-                {/* Gợi ý thêm nhanh chuyên mục */}
-                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => handleAddDetailCategory('TÍNH NĂNG MỚI')}
-                    className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
+                    onClick={handleAddHighlightLine}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-forest hover:underline"
                   >
-                    + Tính năng mới
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddDetailCategory('TRẢI NGHIỆM NGƯỜI DÙNG (UX)')
-                    }
-                    className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
-                  >
-                    + Giao diện UX
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAddDetailCategory('SỬA LỖI & TỐI ƯU HIỆU NĂNG')
-                    }
-                    className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
-                  >
-                    + Sửa lỗi & Tối ưu
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddDetailCategory('')}
-                    className="inline-flex items-center gap-1 rounded-lg border border-forest/30 bg-forest-soft px-2.5 py-1 text-[11px] font-bold text-forest hover:bg-forest hover:text-white transition-colors shadow-2xs"
-                  >
-                    <Plus size={12} /> Nhóm mới
+                    <Plus size={13} /> Thêm dòng
                   </button>
                 </div>
-              </div>
 
-              {formDetails.length > 0 ? (
-                <div className="space-y-3">
-                  {formDetails.map((group, catIdx) => (
-                    <div
-                      key={catIdx}
-                      className="rounded-xl border border-line bg-surface-soft p-3.5 space-y-2.5"
-                    >
-                      {/* Tên chuyên mục & Nút xóa nhóm */}
-                      <div className="flex items-center gap-2">
-                        <Tag size={13} className="text-forest shrink-0" />
-                        <input
-                          type="text"
-                          placeholder="Tên nhóm (VD: TÍNH NĂNG MỚI, TRẢI NGHIỆM NGƯỜI DÙNG...)"
-                          value={group.category}
-                          onChange={(e) =>
-                            handleUpdateCategoryName(catIdx, e.target.value)
-                          }
-                          className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-text focus:border-forest uppercase"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDetailCategory(catIdx)}
-                          className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
-                          title="Xóa chuyên mục này"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-
-                      {/* Các dòng trong chuyên mục */}
-                      <div className="space-y-1.5 pl-2 sm:pl-3 border-l-2 border-forest/30">
-                        {group.items.map((item, itemIdx) => (
-                          <div key={itemIdx} className="flex items-center gap-1.5">
-                            <span className="text-forest font-bold text-xs shrink-0">•</span>
-                            <input
-                              type="text"
-                              placeholder={`Nội dung chi tiết ${itemIdx + 1}...`}
-                              value={item}
-                              onChange={(e) =>
-                                handleUpdateCategoryItem(
-                                  catIdx,
-                                  itemIdx,
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-text focus:border-forest"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveCategoryItem(catIdx, itemIdx)
-                              }
-                              className="h-6 w-6 shrink-0 flex items-center justify-center rounded text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
-                              title="Xóa dòng"
-                            >
-                              <X size={13} />
-                            </button>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={() => handleAddItemToCategory(catIdx)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest hover:underline pt-1"
-                        >
-                          <Plus size={12} /> Thêm gạch đầu dòng trong nhóm này
-                        </button>
-                      </div>
+                <div className="space-y-2">
+                  {formHighlights.map((line, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-muted w-5 shrink-0 text-center">
+                        {idx + 1}.
+                      </span>
+                      <input
+                        type="text"
+                        placeholder={`Nội dung tính năng mới ${idx + 1}...`}
+                        value={line}
+                        onChange={(e) =>
+                          handleUpdateHighlightLine(idx, e.target.value)
+                        }
+                        className="w-full rounded-xl border border-line bg-surface p-2.5 text-xs text-text focus:border-forest"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveHighlightLine(idx)}
+                        className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
+                        title="Xóa dòng này"
+                      >
+                        <X size={15} />
+                      </button>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-line p-3 text-center text-xs text-muted">
-                  Chưa có nhóm chuyên mục chi tiết. Bấm các nút gợi ý phía trên nếu bạn muốn chia 2 cột như bản v2.1.
+              </div>
+
+              {/* Details by category (Phân loại chuyên mục 2 cột) */}
+              <div className="space-y-3 pt-3 border-t border-line">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="text-xs font-bold text-text flex items-center gap-1.5">
+                      <Tag size={13} className="text-forest" />
+                      <span>Phân loại chuyên mục chi tiết (Hiển thị lưới 2 cột)</span>
+                    </label>
+                    <p className="text-[11px] text-muted mt-0.5">
+                      Chia nhỏ cập nhật thành các thẻ danh mục như Tính năng mới, Trải nghiệm UX, Sửa lỗi...
+                    </p>
+                  </div>
+
+                  {/* Gợi ý thêm nhanh chuyên mục */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => handleAddDetailCategory('TÍNH NĂNG MỚI')}
+                      className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
+                    >
+                      + Tính năng mới
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleAddDetailCategory('TRẢI NGHIỆM NGƯỜI DÙNG (UX)')
+                      }
+                      className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
+                    >
+                      + Giao diện UX
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleAddDetailCategory('SỬA LỖI & TỐI ƯU HIỆU NĂNG')
+                      }
+                      className="rounded-lg border border-line bg-surface-soft px-2 py-1 text-[11px] font-semibold text-text hover:border-forest hover:text-forest transition-colors shadow-2xs"
+                    >
+                      + Sửa lỗi & Tối ưu
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAddDetailCategory('')}
+                      className="inline-flex items-center gap-1 rounded-lg border border-forest/30 bg-forest-soft px-2.5 py-1 text-[11px] font-bold text-forest hover:bg-forest hover:text-white transition-colors shadow-2xs"
+                    >
+                      <Plus size={12} /> Nhóm mới
+                    </button>
+                  </div>
                 </div>
-              )}
+
+                {formDetails.length > 0 ? (
+                  <div className="space-y-3">
+                    {formDetails.map((group, catIdx) => (
+                      <div
+                        key={catIdx}
+                        className="rounded-xl border border-line bg-surface-soft p-3.5 space-y-2.5"
+                      >
+                        {/* Tên chuyên mục & Nút xóa nhóm */}
+                        <div className="flex items-center gap-2">
+                          <Tag size={13} className="text-forest shrink-0" />
+                          <input
+                            type="text"
+                            placeholder="Tên nhóm (VD: TÍNH NĂNG MỚI, TRẢI NGHIỆM NGƯỜI DÙNG...)"
+                            value={group.category}
+                            onChange={(e) =>
+                              handleUpdateCategoryName(catIdx, e.target.value)
+                            }
+                            className="w-full rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-text focus:border-forest uppercase"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDetailCategory(catIdx)}
+                            className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
+                            title="Xóa chuyên mục này"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+
+                        {/* Các dòng trong chuyên mục */}
+                        <div className="space-y-1.5 pl-2 sm:pl-3 border-l-2 border-forest/30">
+                          {group.items.map((item, itemIdx) => (
+                            <div key={itemIdx} className="flex items-center gap-1.5">
+                              <span className="text-forest font-bold text-xs shrink-0">•</span>
+                              <input
+                                type="text"
+                                placeholder={`Nội dung chi tiết ${itemIdx + 1}...`}
+                                value={item}
+                                onChange={(e) =>
+                                  handleUpdateCategoryItem(
+                                    catIdx,
+                                    itemIdx,
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-text focus:border-forest"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveCategoryItem(catIdx, itemIdx)
+                                }
+                                className="h-6 w-6 shrink-0 flex items-center justify-center rounded text-muted hover:text-status-danger hover:bg-status-danger-bg transition-colors"
+                                title="Xóa dòng"
+                              >
+                                <X size={13} />
+                              </button>
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => handleAddItemToCategory(catIdx)}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest hover:underline pt-1"
+                          >
+                            <Plus size={12} /> Thêm gạch đầu dòng trong nhóm này
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-line p-3 text-center text-xs text-muted">
+                    Chưa có nhóm chuyên mục chi tiết. Bấm các nút gợi ý phía trên nếu bạn muốn chia 2 cột như bản v2.1.
+                  </div>
+                )}
+              </div>
+
+              {/* Checkbox: isNew */}
+              <div className="flex items-center gap-2 pt-2 border-t border-line">
+                <input
+                  type="checkbox"
+                  id="isNewRelease"
+                  checked={formIsNew}
+                  onChange={(e) => setFormIsNew(e.target.checked)}
+                  className="size-4 accent-forest rounded"
+                />
+                <label
+                  htmlFor="isNewRelease"
+                  className="text-xs font-medium text-text cursor-pointer select-none"
+                >
+                  Đánh dấu là phiên bản mới nhất (Hiển thị huy hiệu "Mới" trên chuông)
+                </label>
+              </div>
             </div>
 
-            {/* Checkbox: isNew */}
-            <div className="flex items-center gap-2 pt-2 border-t border-line">
-              <input
-                type="checkbox"
-                id="isNewRelease"
-                checked={formIsNew}
-                onChange={(e) => setFormIsNew(e.target.checked)}
-                className="size-4 accent-forest rounded"
-              />
-              <label
-                htmlFor="isNewRelease"
-                className="text-xs font-medium text-text cursor-pointer select-none"
+            {/* Footer */}
+            <footer className={ui('modal-footer')}>
+              <button
+                type="button"
+                className={ui('button secondary')}
+                onClick={() => setEditingRelease(null)}
               >
-                Đánh dấu là phiên bản mới nhất (Hiển thị huy hiệu "Mới" trên chuông)
-              </label>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <footer className={ui('modal-footer')}>
-            <button
-              type="button"
-              className={ui('button secondary')}
-              onClick={() => setEditingRelease(null)}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all ml-auto"
-            >
-              <Check size={16} />
-              <span>Lưu & Xuất bản</span>
-            </button>
-          </footer>
-        </form>
-      </Modal>
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-xl bg-forest px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-forest-hover active:scale-[0.99] transition-all ml-auto"
+              >
+                <Check size={16} />
+                <span>Lưu & Xuất bản</span>
+              </button>
+            </footer>
+          </form>
+        </Modal>
+      )}
     </>
   );
 };

@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { type Lesson } from '@/db';
 import { useLanguage } from '@/language';
-import { isAdminAccount } from '@/services/admin-auth';
 
 const Sidebar = ({
   view,
@@ -40,7 +39,6 @@ const Sidebar = ({
   setKind: (value: string) => void;
 }) => {
   const { t } = useLanguage();
-  const isAdmin = isAdminAccount(account);
 
   return (
     <aside className={ui('sidebar')}>
@@ -79,14 +77,12 @@ const Sidebar = ({
         >
           <HardDrive size={19} /> {t('nav.backup')}
         </button>
-        {isAdmin && (
-          <button
-            className={ui(view === 'updates' ? 'nav-item selected' : 'nav-item')}
-            onClick={() => nav('updates')}
-          >
-            <Rocket size={19} /> {t('nav.updates')}
-          </button>
-        )}
+        <button
+          className={ui(view === 'updates' ? 'nav-item selected' : 'nav-item')}
+          onClick={() => nav('updates')}
+        >
+          <Rocket size={19} /> {t('nav.updates')}
+        </button>
       </nav>
       <div className={ui('sidebar-topics')}>
         <span className={ui('sidebar-caption')}>{t('sidebar.topics')}</span>

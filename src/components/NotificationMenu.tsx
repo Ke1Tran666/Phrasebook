@@ -117,11 +117,8 @@ const NotificationMenu = ({
     setExpandedVersion((curr) => (curr === ver ? null : ver));
   };
 
-  // Cập nhật phần mềm chỉ thông báo cho admin
-  const effectiveHasNewUpdate = isAdmin && hasNewUpdate;
-
   // Tổng trạng thái thông báo chưa đọc
-  const hasUnread = (dueCount > 0 && hasUnreadActivity) || effectiveHasNewUpdate;
+  const hasUnread = (dueCount > 0 && hasUnreadActivity) || hasNewUpdate;
 
   // Icon theo từng loại hoạt động
   const getActivityIcon = (type: ActivityItem['type']) => {
@@ -211,53 +208,45 @@ const NotificationMenu = ({
           </span>
         </div>
 
-        {/* Bộ chuyển đổi phân loại (Chỉ hiện khi là Admin) */}
-        {isAdmin ? (
-          <div className="flex rounded-xl bg-surface-soft p-1 border border-line mb-3">
-            <button
-              type="button"
-              onClick={() => setActiveTab('activity')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
-                activeTab === 'activity'
-                  ? 'bg-surface text-forest shadow-xs'
-                  : 'text-muted hover:text-text'
-              }`}
-            >
-              <Clock size={13} className="shrink-0" />
-              <span>Hoạt động</span>
-              {dueCount > 0 && (
-                <span className="h-1.5 w-1.5 rounded-full bg-status-danger animate-pulse shrink-0" />
-              )}
-            </button>
+        {/* Bộ chuyển đổi 2 làn thông báo (Hiển thị cho tất cả người dùng) */}
+        <div className="flex rounded-xl bg-surface-soft p-1 border border-line mb-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab('activity')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === 'activity'
+                ? 'bg-surface text-forest shadow-xs'
+                : 'text-muted hover:text-text'
+            }`}
+          >
+            <Clock size={13} className="shrink-0" />
+            <span>Hoạt động</span>
+            {dueCount > 0 && (
+              <span className="h-1.5 w-1.5 rounded-full bg-status-danger animate-pulse shrink-0" />
+            )}
+          </button>
 
-            <button
-              type="button"
-              onClick={handleSwitchToUpdates}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
-                activeTab === 'updates'
-                  ? 'bg-surface text-forest shadow-xs'
-                  : 'text-muted hover:text-text'
-              }`}
-            >
-              <Rocket size={13} className="shrink-0" />
-              <span>Cập nhật</span>
-              {effectiveHasNewUpdate && (
-                <span className="rounded-full bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 leading-none shrink-0">
-                  Mới
-                </span>
-              )}
-            </button>
-          </div>
-        ) : (
-          <div className="pb-2 mb-2 border-b border-line/60">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
-              Nhật ký hoạt động & Nhắc nhở ôn tập
-            </span>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={handleSwitchToUpdates}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === 'updates'
+                ? 'bg-surface text-forest shadow-xs'
+                : 'text-muted hover:text-text'
+            }`}
+          >
+            <Rocket size={13} className="shrink-0" />
+            <span>Cập nhật</span>
+            {hasNewUpdate && (
+              <span className="rounded-full bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 leading-none shrink-0">
+                Mới
+              </span>
+            )}
+          </button>
+        </div>
 
         {/* Làn 1: Hoạt động học tập cá nhân & Lịch sử hoạt động thật */}
-        {(!isAdmin || activeTab === 'activity') && (
+        {activeTab === 'activity' && (
           <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
             {/* Nhắc nhở bài học đến hạn (Ghim lên đầu nếu có) */}
             {dueCount > 0 ? (
@@ -350,8 +339,8 @@ const NotificationMenu = ({
           </div>
         )}
 
-        {/* Làn 2: Cập nhật phần mềm (Chỉ Admin mới truy cập được) */}
-        {isAdmin && activeTab === 'updates' && (
+        {/* Làn 2: Cập nhật phần mềm (Mọi người đều xem được nội dung phát hành) */}
+        {activeTab === 'updates' && (
           <div className="space-y-2.5 max-h-84 overflow-y-auto pr-0.5 animate-in fade-in duration-150">
             {releasesList.map((update) => {
               const isExpanded = expandedVersion === update.version;
@@ -433,14 +422,18 @@ const NotificationMenu = ({
               );
             })}
 
-            {/* Thẻ chuyển đến Trang Cập nhật đầy đủ */}
+            {/* Nút chuyển đến Trang Cập nhật */}
             <button
               type="button"
               onClick={() => handleAction('updates')}
               className="w-full mt-2.5 py-2.5 px-3 rounded-xl border border-line bg-surface hover:bg-surface-soft hover:border-forest/40 text-xs font-bold text-forest flex items-center justify-center gap-1.5 transition-all shadow-xs"
             >
               <Rocket size={14} />
-              <span>Xem trang Cập nhật & Viết nội dung</span>
+              <span>
+                {isAdmin
+                  ? 'Xem trang Cập nhật & Viết nội dung'
+                  : 'Xem tất cả bản cập nhật'}
+              </span>
               <ChevronRight size={13} />
             </button>
           </div>
